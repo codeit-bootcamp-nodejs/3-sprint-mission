@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductTag {
+  NEW_PRODUCT
+  UNOPENED
+  USED
+  A_GRADE
+  USED_FEELING
+  DAMAGED
+  LIMITED_EDITION
+  DISCONTINUED
+  FREE_SHIPPING
+  DIRECT_DEAL
+  PRICE_NEGOTIABLE
+  URGENT_SALE
+  ELECTRONICS
+  CLOTHING
+  BOOKS
+  FURNITURE
+  SPORTS_EQUIPMENT
+  RARE_ITEM
+  FILM_CAMERA
+  VINTAGE
+}
+
+model Users {
+  id               String             @id @default(uuid())
+  username         String
+  email            String             @unique
+  address          String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Products         Products[]
+  articles         Articles[]
+  product_comments Product_comments[]
+  article_comments Article_comments[]
+}
+
+model Products {
+  id               String             @id @default(uuid())
+  name             String
+  description      String?
+  price            Float
+  isSold           Boolean            @default(false)
+  tags             ProductTag[]
+  stock            Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             Users              @relation(fields: [usersId], references: [id], onDelete: Cascade)
+  usersId          String
+  product_comments Product_comments[]
+
+  @@index([name]) // 상품 이름으로 검색 시 성능 향상을 위한 인덱스
+  @@index([description]) // 상품 설명으로 검색 시 성능 향상을 위한 인덱스
+}
+
+model Articles {
+  id               String             @id @default(uuid())
+  title            String
+  content          String
+  imageUrl         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             Users              @relation(fields: [usersId], references: [id], onDelete: Cascade)
+  usersId          String
+  article_comments Article_comments[]
+
+  @@index([title]) // 게시글 제목으로 검색 시 성능 향상을 위한 인덱스
+  @@index([content]) // 게시글 내용으로 검색 시 성능 향상을 위한 인덱스
+}
+
+model Product_comments {
+  id         String   @id @default(uuid())
+  usersId    String?
+  productsId String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Products @relation(fields: [productsId], references: [id], onDelete: Cascade)
+  user       Users?   @relation(fields: [usersId], references: [id], onDelete: SetNull)
+
+  @@index([productsId]) // 특정 상품의 댓글을 빠르게 찾기 위한 인덱스
+  @@index([usersId]) // 특정 유저의 댓글을 빠르게 찾기 위한 인덱스
+}
+
+model Article_comments {
+  id         String   @id @default(uuid())
+  usersId    String?
+  articlesId String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       Users?    @relation(fields: [usersId], references: [id], onDelete: SetNull)
+  article    Articles @relation(fields: [articlesId], references: [id], onDelete: Cascade)
+
+  @@index([articlesId]) // 특정 게시글의 댓글을 빠르게 찾기 위한 인덱스
+  @@index([usersId]) // 특정 유저의 댓글을 빠르게 찾기 위한 인덱스
+}
