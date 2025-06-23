@@ -99,6 +99,7 @@ export const createArticleCommentSchema = s.object({
 
 export const updateArticleCommentSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
+  usersId: Uuid,
 });
 
 
