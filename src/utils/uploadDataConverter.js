@@ -5,7 +5,7 @@ export const convertProductUploadFields = (req, res, next) => {
 
     // price: Int (숫자로 변환)
     if (req.body.price !== undefined && typeof req.body.price === 'string') {
-        req.body.price = parseFloat(req.body.price);
+        req.body.price = parseInt(req.body.price);
     }
 
     // isSold: Boolean (불리언으로 변환)
