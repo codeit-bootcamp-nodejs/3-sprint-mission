@@ -15,9 +15,9 @@ import {
   updateUserSchema
 } from '../middlewares/validation.middleware.js';
 
-const userrouter = express.Router();
+const userRouter = express.Router();
 
-userrouter.route('/')
+userRouter.route('/')
   .post(
     validate(createUserSchema, 'body'),
     asyncHandler(async (req, res, next) => {
@@ -39,7 +39,7 @@ userrouter.route('/')
     })
   );
 
-userrouter.route('/:id')
+userRouter.route('/:id')
   .get(
     validate(getByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
@@ -75,4 +75,4 @@ userrouter.route('/:id')
     })
   );
 
-export default userrouter;
+export default userRouter;

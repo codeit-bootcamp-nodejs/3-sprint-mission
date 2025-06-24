@@ -59,7 +59,7 @@ async function main() {
           data: {
             name: '노드JS 마스터 가이드 북 (새상품)',
             description: 'Node.js의 비동기 처리, 스트림, 클러스터링 등 심화 내용을 다룹니다. 초보자부터 숙련자까지.',
-            price: 45000.00,
+            price: 45000,
             isSold: false,
             tags: ['NEW_PRODUCT', 'BOOKS', 'FREE_SHIPPING', 'IMAGE_UPLOADED'],
             stock: 3,
@@ -73,7 +73,7 @@ async function main() {
           data: {
             name: '중고 아이폰 13 프로 (A급)',
             description: '배터리 효율 90%, 생활 기스 약간. 케이스와 필름 부착하고 사용하여 깨끗합니다.',
-            price: 850000.00,
+            price: 850000,
             isSold: false,
             tags: ['A_GRADE', 'ELECTRONICS', 'PRICE_NEGOTIABLE', 'IMAGE_UPLOADED'],
             stock: 1,
@@ -87,7 +87,7 @@ async function main() {
           data: {
             name: '리미티드 에디션 스니커즈 (270mm)',
             description: '수집가들을 위한 한정판 스니커즈. 미개봉 상태입니다.',
-            price: 300000.00,
+            price: 300000,
             isSold: false,
             tags: ['LIMITED_EDITION', 'CLOTHING', 'DIRECT_DEAL', 'IMAGE_UPLOADED'],
             stock: 1,

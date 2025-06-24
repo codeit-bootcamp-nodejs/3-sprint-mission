@@ -1,8 +1,8 @@
 import express from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import productRouter from './routes/products.router.js';
-import userrouter from './routes/users.router.js';
-import articlerouter from './routes/articles.router.js';
+import userRouter from './routes/users.router.js';
+import articleRouter from './routes/articles.router.js';
 import productCommentRouter from './routes/productComments.router.js';
 import articleCommentsRouter from './routes/articleComments.router.js';
 import cors from 'cors';
@@ -17,11 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-
+app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
-app.use('/api/users', userrouter);
-app.use('/api/articles', articlerouter);
 app.use('/api/products/:productId/comments', productCommentRouter);
+app.use('/api/articles', articleRouter);
 app.use('/api/articles/:articleId/comments', articleCommentsRouter);
 
 app.use((err, req, res, next) => {

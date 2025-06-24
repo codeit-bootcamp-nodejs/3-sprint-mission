@@ -2,7 +2,7 @@ import * as s from 'superstruct';
 import isEmail from 'is-email';
 import isUuid from 'is-uuid';
 
-
+// --- 공통 타입 정의 ---
 export const Uuid = s.define('Uuid', (value) => isUuid.v4(value));
 
 export const Email = s.define('Email', (value) => {
@@ -36,7 +36,7 @@ export const ProductTagEnum = s.enums([
   'IMAGE_UPLOADED'
 ]);
 
-
+// --- User 관련 스키마 ---
 export const createUserSchema = s.object({
   username: s.size(s.string(), 2, 20),
   email: Email,
@@ -49,6 +49,7 @@ export const updateUserSchema = s.object({
   address: s.optional(s.size(s.string(), 5, 100)),
 });
 
+// --- Product 관련 스키마 ---
 export const createProductSchema = s.object({
   name: s.size(s.string(), 2, 50),
   description: s.optional(s.size(s.string(), 0, 500)),
@@ -75,6 +76,12 @@ export const deleteProductSchema = s.object({
   userId: Uuid,
 });
 
+export const getProductByIdSchema = s.object({ 
+  productId: Uuid,
+});
+
+
+// --- Article 관련 스키마 ---
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
@@ -93,46 +100,29 @@ export const deleteArticleSchema = s.object({
   userId: Uuid,
 });
 
+export const getArticleByIdSchema = s.object({
+  articleId: Uuid,
+});
 
-export const createProductCommentSchema = s.object({
+
+// --- Comment 관련 스키마 ---
+export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
   userId: Uuid,
 });
 
-export const updateProductCommentSchema = s.object({
+export const UpdateCommentBaseSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
   userId: Uuid,
 });
 
-export const deleteProductCommentSchema = s.object({
-  userId: Uuid,
-});
-
-export const createArticleCommentSchema = s.object({
-  content: s.size(s.string(), 1, 500),
-  userId: Uuid,
-});
-
-export const updateArticleCommentSchema = s.object({
-  content: s.optional(s.size(s.string(), 1, 500)),
-  userId: Uuid,
-});
-
-export const deleteArticleCommentSchema = s.object({
+export const DeleteCommentBaseSchema = s.object({
   userId: Uuid,
 });
 
 
 export const getByIdSchema = s.object({
   id: Uuid,
-});
-
-export const getProductByIdSchema = s.object({
-  productId: Uuid,
-});
-
-export const getArticleByIdSchema = s.object({
-  articleId: Uuid,
 });
 
 export const updateProductCommentParamsSchema = s.object({
@@ -146,6 +136,7 @@ export const updateArticleCommentParamsSchema = s.object({
 });
 
 
+// --- 유효성 검사 미들웨어 ---
 export const validate = (schema, type) => (req, res, next) => {
   try {
     s.assert(req[type], schema);

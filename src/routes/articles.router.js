@@ -11,9 +11,9 @@ import {
   deleteArticle
 } from '../services/articles.service.js';
 
-const articlerouter = express.Router();
+const articleRouter = express.Router();
 
-articlerouter.route('/')
+articleRouter.route('/')
   .get(
     asyncHandler(async (req, res, next) => {
       const { offset, limit, sort, search } = req.query;
@@ -38,7 +38,7 @@ articlerouter.route('/')
       });
     }));
 
-articlerouter.route('/:articleId')
+articleRouter.route('/:articleId')
   .get(
     validate(getArticleByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
@@ -75,4 +75,4 @@ articlerouter.route('/:articleId')
     })
   );
 
-export default articlerouter;
+export default articleRouter;

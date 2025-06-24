@@ -2,11 +2,11 @@ import express from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
 import {
   validate,
-  createProductCommentSchema,
-  updateProductCommentSchema,
-  deleteProductCommentSchema,
+  updateProductCommentParamsSchema,
+  DeleteCommentBaseSchema,
+  CommentBaseSchema,
   getProductByIdSchema,
-  updateProductCommentParamsSchema
+  UpdateCommentBaseSchema,
 } from '../middlewares/validation.middleware.js';
 import { createProductComment, findAllProductComments, updateProductComment, deleteProductComment } from '../services/productComments.service.js';
 
@@ -15,7 +15,7 @@ const productCommentRouter = express.Router({ mergeParams: true });
 productCommentRouter.route('/')
   .post(
     validate(getProductByIdSchema, 'params'),
-    validate(createProductCommentSchema, 'body'),
+    validate(CommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const { productId } = req.params;
       const { content, userId } = req.body;
@@ -45,7 +45,7 @@ productCommentRouter.route('/')
 productCommentRouter.route('/:id')
   .patch(
     validate(updateProductCommentParamsSchema, 'params'),
-    validate(updateProductCommentSchema, 'body'),
+    validate(UpdateCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const { id: commentId } = req.params;
       const { content, userId } = req.body;
@@ -60,7 +60,7 @@ productCommentRouter.route('/:id')
   )
   .delete(
     validate(updateProductCommentParamsSchema, 'params'),
-    validate(deleteProductCommentSchema, 'body'),
+    validate(DeleteCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const { id: commentId } = req.params;
       const { userId } = req.body;

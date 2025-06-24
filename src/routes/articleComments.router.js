@@ -2,11 +2,11 @@
 import express from 'express';
 import { validate } from '../middlewares/validation.middleware.js';
 import {
-  createArticleCommentSchema,
-  updateArticleCommentSchema,
+  CommentBaseSchema,
+  UpdateCommentBaseSchema,
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
-  deleteArticleCommentSchema
+  DeleteCommentBaseSchema
 } from '../middlewares/validation.middleware.js';
 import * as articleCommentsService from '../services/articleComments.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -23,7 +23,7 @@ router
   }))
   .post(
     validate(getArticleByIdSchema, 'params'),
-    validate(createArticleCommentSchema, 'body'),
+    validate(CommentBaseSchema, 'body'),
     asyncHandler(async (req, res) => {
       const { articleId } = req.params;
       const { content, userId } = req.body;
@@ -40,7 +40,7 @@ router
   .route('/:id')
   .patch(
     validate(updateArticleCommentParamsSchema, 'params'),
-    validate(updateArticleCommentSchema, 'body'),
+    validate(UpdateCommentBaseSchema, 'body'),
     asyncHandler(async (req, res) => {
       const { id } = req.params;
       const { content, userId } = req.body;
@@ -50,7 +50,7 @@ router
   )
   .delete(
     validate(updateArticleCommentParamsSchema, 'params'),
-    validate(deleteArticleCommentSchema, 'body'),
+    validate(DeleteCommentBaseSchema, 'body'),
     asyncHandler(async (req, res) => {
       const { id } = req.params;
       const { userId } = req.body;
