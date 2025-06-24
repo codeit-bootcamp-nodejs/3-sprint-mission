@@ -1,14 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { getPaginationParams, getSearchParams, getSortParams } from '../utils/queryHelpers.js';
-
-const prisma = global.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
-
-
+import {
+  getPaginationParams,
+  getSearchParams,
+  getSortParams,
+  prisma,
+  checkProductOwnership
+} from '../utils/queryHelpers.js';
 
 export const findAllProducts = async ({ offset, limit, sort, search }) => {
   const { skip, take } = getPaginationParams({ offset, limit });
@@ -16,7 +14,7 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
   const where = getSearchParams(search, ['name', 'description']);
 
   try {
-    const products = await prisma.products.findMany({
+    const products = await prisma.product.findMany({
       skip,
       take,
       orderBy,
@@ -37,9 +35,9 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
   }
 };
 
-export const createProduct = async ({ name, description, price, isSold, tags, stock, usersId }) => {
+export const createProduct = async ({ name, description, price, isSold, tags, stock, userId, imageUrl }) => {
   try {
-    const product = await prisma.products.create({
+    const product = await prisma.product.create({
       data: {
         name,
         description,
@@ -47,9 +45,10 @@ export const createProduct = async ({ name, description, price, isSold, tags, st
         isSold,
         tags,
         stock,
+        imageUrl,
         user: {
           connect: {
-            id: usersId
+            id: userId
           }
         }
       }
@@ -63,7 +62,7 @@ export const createProduct = async ({ name, description, price, isSold, tags, st
 
 export const findProductById = async (productId) => {
   try {
-    const product = await prisma.products.findUnique({
+    const product = await prisma.product.findUnique({
       where: {
         id: productId,
       },
@@ -75,6 +74,7 @@ export const findProductById = async (productId) => {
         isSold: true,
         tags: true,
         stock: true,
+        imageUrl: true,
         createdAt: true,
         updatedAt: true,
         user: {
@@ -99,11 +99,31 @@ export const findProductById = async (productId) => {
   }
 };
 
-export const updateProduct = async (productId, updateData) => {
+export const updateProduct = async (productId, userId, updateData) => {
   try {
-    const updatedProduct = await prisma.products.update({
+    await checkProductOwnership(productId, userId);
+
+    const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: updateData,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        isSold: true,
+        tags: true,
+        stock: true,
+        imageUrl: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            username: true
+          }
+        }
+      },
     });
     return updatedProduct;
 
@@ -113,10 +133,25 @@ export const updateProduct = async (productId, updateData) => {
   }
 };
 
-export const deleteProduct = async (productId) => {
+export const deleteProduct = async (productId, userId) => {
   try {
-    const deletedProduct = await prisma.products.delete({
-      where: { id: productId }
+    await checkProductOwnership(productId, userId);
+
+    const deletedProduct = await prisma.product.delete({
+      where: { id: productId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        isSold: true,
+        tags: true,
+        stock: true,
+        imageUrl: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return deletedProduct;
 

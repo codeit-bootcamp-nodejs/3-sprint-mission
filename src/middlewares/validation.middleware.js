@@ -32,7 +32,8 @@ export const ProductTagEnum = s.enums([
   'SPORTS_EQUIPMENT',
   'RARE_ITEM',
   'FILM_CAMERA',
-  'VINTAGE'
+  'VINTAGE',
+  'IMAGE_UPLOADED'
 ]);
 
 
@@ -55,7 +56,8 @@ export const createProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
-  usersId: Uuid,
+  userId: Uuid,
+  imageUrl: s.optional(s.string()),
 });
 
 export const updateProductSchema = s.object({
@@ -65,41 +67,59 @@ export const updateProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
+  userId: Uuid,
+  imageUrl: s.optional(s.string()),
+});
+
+export const deleteProductSchema = s.object({
+  userId: Uuid,
 });
 
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
-  usersId: Uuid,
+  userId: Uuid,
+  imageUrl: s.optional(s.string()),
 });
 
 export const updateArticleSchema = s.object({
   title: s.optional(s.size(s.string(), 5, 100)),
   content: s.optional(s.size(s.string(), 10, 5000)),
+  userId: Uuid,
+  imageUrl: s.optional(s.string()),
 });
+
+export const deleteArticleSchema = s.object({
+  userId: Uuid,
+});
+
 
 export const createProductCommentSchema = s.object({
   content: s.size(s.string(), 1, 500),
-  usersId: Uuid,
+  userId: Uuid,
 });
 
 export const updateProductCommentSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
-  usersId: Uuid,
+  userId: Uuid,
 });
 
 export const deleteProductCommentSchema = s.object({
-  usersId: Uuid,
+  userId: Uuid,
 });
 
 export const createArticleCommentSchema = s.object({
   content: s.size(s.string(), 1, 500),
-  usersId: Uuid,
-})
+  userId: Uuid,
+});
 
 export const updateArticleCommentSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
-  usersId: Uuid,
+  userId: Uuid,
+});
+
+export const deleteArticleCommentSchema = s.object({
+  userId: Uuid,
 });
 
 
@@ -108,20 +128,20 @@ export const getByIdSchema = s.object({
 });
 
 export const getProductByIdSchema = s.object({
-  productsId: Uuid,
+  productId: Uuid,
 });
 
 export const getArticleByIdSchema = s.object({
-  articlesId: Uuid,
+  articleId: Uuid,
 });
 
 export const updateProductCommentParamsSchema = s.object({
-  productsId: Uuid,
+  productId: Uuid,
   id: Uuid,
 });
 
 export const updateArticleCommentParamsSchema = s.object({
-  articlesId: Uuid,
+  articleId: Uuid,
   id: Uuid,
 });
 

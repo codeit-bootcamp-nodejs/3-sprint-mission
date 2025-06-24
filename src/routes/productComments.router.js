@@ -17,10 +17,10 @@ productCommentRouter.route('/')
     validate(getProductByIdSchema, 'params'),
     validate(createProductCommentSchema, 'body'),
     asyncHandler(async (req, res, next) => {
-      const { productsId } = req.params;
-      const { content, usersId } = req.body;
+      const { productId } = req.params;
+      const { content, userId } = req.body;
 
-      const newComment = await createProductComment({ productsId, usersId, content });
+      const newComment = await createProductComment({ productId, userId, content });
 
       res.status(201).json({
         message: '댓글이 저장되었습니다',
@@ -31,9 +31,9 @@ productCommentRouter.route('/')
   .get(
     validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
-      const { productsId } = req.params;
+      const { productId } = req.params;
       const { cursor, limit } = req.query;
-      const { comments, nextCursor } = await findAllProductComments({ productsId, cursor, limit });
+      const { comments, nextCursor } = await findAllProductComments({ productId, cursor, limit });
       res.status(200).json({
         message: '요청하신 상품 댓글목록 입니다',
         data: comments,
@@ -48,9 +48,9 @@ productCommentRouter.route('/:id')
     validate(updateProductCommentSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const { id: commentId } = req.params;
-      const { content, usersId } = req.body;
+      const { content, userId } = req.body;
 
-      const updatedComment = await updateProductComment(commentId, { content, usersId });
+      const updatedComment = await updateProductComment(commentId, { content, userId });
 
       res.status(200).json({
         message: '상품 댓글이 성공적으로 수정되었습니다.',
@@ -63,8 +63,8 @@ productCommentRouter.route('/:id')
     validate(deleteProductCommentSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const { id: commentId } = req.params;
-      const { usersId } = req.body;
-      const deletedComment = await deleteProductComment(commentId, usersId);
+      const { userId } = req.body;
+      const deletedComment = await deleteProductComment(commentId, userId);
       res.status(204).end();
     })
   );

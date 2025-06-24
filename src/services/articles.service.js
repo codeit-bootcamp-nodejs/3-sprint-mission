@@ -1,14 +1,12 @@
-// src/services/articles.service.js (파일 전체, 기존 코드 포함)
 
-import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { getPaginationParams, getSearchParams, getSortParams } from '../utils/queryHelpers.js';
-
-const prisma = global.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
+import {
+  getPaginationParams,
+  getSearchParams,
+  getSortParams,
+  prisma,
+  checkArticleOwnership
+} from '../utils/queryHelpers.js';
 
 export const findAllArticles = async ({ offset, limit, sort, search }) => {
   try {
@@ -16,7 +14,7 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
     const orderBy = getSortParams({ sort }, 'createdAt');
     const where = getSearchParams(search, ['title', 'content']);
 
-    const articles = await prisma.articles.findMany({
+    const articles = await prisma.article.findMany({
       skip,
       take,
       orderBy,
@@ -31,21 +29,21 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
     });
     return articles;
   } catch (error) {
-    console.error("Error in findAllarticles service:", error);
+    console.error("Error in findAllArticles service:", error);
     throw error;
   }
 };
 
-export const createArticle = async ({ title, content, usersId, imageUrl }) => {
+export const createArticle = async ({ title, content, userId, imageUrl }) => {
   try {
-    const newarticle = await prisma.articles.create({
+    const newArticle = await prisma.article.create({
       data: {
         title,
         content,
         imageUrl,
         user: {
           connect: {
-            id: usersId,
+            id: userId,
           },
         },
       },
@@ -57,16 +55,16 @@ export const createArticle = async ({ title, content, usersId, imageUrl }) => {
         },
       },
     });
-    return newarticle;
+    return newArticle;
   } catch (error) {
-      console.error("Error in createarticle service:", error);
+      console.error("Error in createArticle service:", error);
       throw error;
   }
 };
 
 export const findArticleById = async (articleId) => {
   try {
-    const article = await prisma.articles.findUnique({
+    const article = await prisma.article.findUnique({
       where: {
         id: articleId,
       },
@@ -76,7 +74,7 @@ export const findArticleById = async (articleId) => {
             username: true,
           },
         },
-        article_comments: {
+        articleComments: {
           select: {
             id: true,
             content: true,
@@ -94,25 +92,34 @@ export const findArticleById = async (articleId) => {
     if (!article) {
       throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
         code: 'P2025',
-        meta: { modelName: 'article', cause: 'record not found' },
+        meta: { modelName: 'Article', cause: 'record not found' },
       });
     }
 
     return article;
   } catch (error) {
-    console.error("Error in findarticleById service:", error);
+    console.error("Error in findArticleById service:", error);
     throw error;
   }
 };
 
-export const updateArticle = async (articleId, updateData) => {
+export const updateArticle = async (articleId, userId, updateData) => {
   try {
-    const updatedarticle = await prisma.articles.update({
+    await checkArticleOwnership(articleId, userId);
+
+    const updatedArticle = await prisma.article.update({
       where: {
         id: articleId,
       },
       data: updateData,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        imageUrl: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             username: true
@@ -120,23 +127,34 @@ export const updateArticle = async (articleId, updateData) => {
         }
       }
     });
-    return updatedarticle;
+    return updatedArticle;
   } catch (error) {
-      console.error("Error in updatearticle service:", error);
+      console.error("Error in updateArticle service:", error);
       throw error;
   }
 };
 
-export const deleteArticle = async (articleId) => {
+export const deleteArticle = async (articleId, userId) => {
   try {
-    const deletedarticle = await prisma.articles.delete({
+    await checkArticleOwnership(articleId, userId);
+
+    const deletedArticle = await prisma.article.delete({
       where: {
         id: articleId
-      }
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        imageUrl: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-    return deletedarticle;
+    return deletedArticle;
   } catch (error) {
-      console.error("Error in deletearticle service:", error);
+      console.error("Error in deleteArticle service:", error);
       throw error;
   }
 };

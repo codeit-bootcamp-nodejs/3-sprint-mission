@@ -1,3 +1,4 @@
+
 import express from "express";
 import {
   findAllProducts,
@@ -10,9 +11,13 @@ import asyncHandler from "../utils/asyncHandler.js";
 import {
   validate,
   createProductSchema,
-  getByIdSchema,
-  updateProductSchema
+  getProductByIdSchema,
+  updateProductSchema,
+  deleteProductSchema
 } from '../middlewares/validation.middleware.js';
+import uploadImage from '../middlewares/upload.middleware.js';
+import path from 'path';
+import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
 
 const productRouter = express.Router();
 
@@ -26,11 +31,18 @@ productRouter.route('/')
     });
   }))
   .post(
+    (req, res, next) => {
+      req.uploadPath = path.resolve(process.cwd(), 'uploads/products');
+      next();
+    },
+    uploadImage.single('image'),
+    convertProductUploadFields,
     validate(createProductSchema, 'body'),
     asyncHandler(async (req, res, next) => {
-      const { name, description, price, isSold, tags, stock, usersId } = req.body;
+      const imageUrl = req.file ? req.file.path : null;
+      const { name, description, price, isSold, tags, stock, userId } = req.body;
 
-      const newProduct = await createProduct({ name, description, price, isSold, tags, stock, usersId });
+      const newProduct = await createProduct({ name, description, price, isSold, tags, stock, userId, imageUrl });
 
       res.status(201).json({
         message: '상품 등록 완료',
@@ -39,13 +51,13 @@ productRouter.route('/')
     })
   );
 
-productRouter.route('/:id')
+productRouter.route('/:productId')
   .get(
-    validate(getByIdSchema, 'params'),
+    validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
-      const { id } = req.params;
+      const { productId } = req.params;
 
-      const product = await findProductById(id);
+      const product = await findProductById(productId);
 
       res.status(200).json({
         message: '상품 상세 조회',
@@ -54,13 +66,29 @@ productRouter.route('/:id')
     })
   )
   .patch(
-    validate(getByIdSchema, 'params'),
+    (req, res, next) => {
+      req.uploadPath = path.resolve(process.cwd(), 'uploads/products');
+      next();
+    },
+    uploadImage.single('image'),
+    convertProductUploadFields, 
+    validate(getProductByIdSchema, 'params'),
     validate(updateProductSchema, 'body'),
     asyncHandler(async (req, res, next) => {
-      const { id } = req.params;
-      const updateData = req.body;
+      const { productId } = req.params;
+      const imageUrl = req.file ? req.file.path : undefined;
 
-      const updatedProduct = await updateProduct(id, updateData);
+      const { userId, ...updateData } = req.body;
+
+      const finalUpdateData = { ...updateData };
+      if (imageUrl !== undefined) {
+          finalUpdateData.imageUrl = imageUrl;
+      } else if (req.body.imageUrl !== undefined) {
+          finalUpdateData.imageUrl = req.body.imageUrl;
+      }
+
+
+      const updatedProduct = await updateProduct(productId, userId, finalUpdateData);
 
       res.status(200).json({
         message: '상품 수정을 성공하였습니다',
@@ -69,10 +97,12 @@ productRouter.route('/:id')
     })
   )
   .delete(
-    validate(getByIdSchema, 'params'),
+    validate(getProductByIdSchema, 'params'),
+    validate(deleteProductSchema, 'body'),
     asyncHandler(async (req, res, next) => {
-      const { id } = req.params;
-      await deleteProduct(id);
+      const { productId } = req.params;
+      const { userId } = req.body;
+      await deleteProduct(productId, userId);
       res.status(204).end();
     })
   );

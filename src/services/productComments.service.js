@@ -1,46 +1,78 @@
-import { PrismaClient } from '@prisma/client';
+
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import {
   checkCommentOwnership,
   prepareCommentCreateData,
   getCommentIncludeOptions,
-  findCommentsCommon
+  findCommentsCommon,
+  prisma
 } from '../utils/queryHelpers.js';
 
-const prisma = global.prisma || new PrismaClient();
+export const createProductComment = async ({ productId, userId, content }) => {
+  try {
+    const data = prepareCommentCreateData({ parentId: productId, userId, content }, 'product');
 
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
-
-export const createProductComment = async ({ productsId, usersId, content }) => {
-  const data = prepareCommentCreateData({ parentId: productsId, usersId, content }, 'Product');
-
-  const newComment = await prisma.product_comments.create({
-    data: data,
-    include: getCommentIncludeOptions('name')
-  });
-  return newComment;
+    const newComment = await prisma.productComment.create({
+      data: data,
+      include: getCommentIncludeOptions('name')
+    });
+    return newComment;
+  } catch (error) {
+    console.error("Error in createProductComment service:", error);
+    throw error;
+  }
 };
 
-export const findAllProductComments = async ({ productsId, cursor, limit }) => {
-  return findCommentsCommon('product_comments', productsId, { cursor, limit }, 'name');
+export const findAllProductComments = async ({ productId, cursor, limit }) => {
+  try {
+    return findCommentsCommon('productComment', productId, { cursor, limit }, 'name');
+  } catch (error) {
+    console.error("Error in findAllProductComments service:", error);
+    throw error;
+  }
 };
 
-export const updateProductComment = async (commentId, { content, usersId }) => {
-  await checkCommentOwnership(commentId, usersId, 'product_comments');
+export const updateProductComment = async (commentId, { content, userId }) => {
+  try {
+    await checkCommentOwnership(commentId, userId, 'productComment');
 
-  const updatedComment = await prisma.product_comments.update({
-    where: { id: commentId },
-    data: { content },
-  });
-  return updatedComment;
+    const updatedComment = await prisma.productComment.update({
+      where: { id: commentId },
+      data: { content },
+      select: {
+        id: true,
+        content: true,
+        userId: true,
+        productId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return updatedComment;
+  } catch (error) {
+    console.error("Error in updateProductComment service:", error);
+    throw error;
+  }
 };
 
-export const deleteProductComment = async (commentId, usersId) => {
-  await checkCommentOwnership(commentId, usersId, 'product_comments');
+export const deleteProductComment = async (commentId, userId) => {
+  try {
+    await checkCommentOwnership(commentId, userId, 'productComment');
 
-  const deletedComment = await prisma.product_comments.delete({
-    where: { id: commentId }
-  });
-  return deletedComment;
+    const deletedComment = await prisma.productComment.delete({
+      where: { id: commentId },
+      select: {
+        id: true,
+        content: true,
+        userId: true,
+        productId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return deletedComment;
+  } catch (error) {
+    console.error("Error in deleteProductComment service:", error);
+    throw error;
+  }
 };

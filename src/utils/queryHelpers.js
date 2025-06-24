@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 
-const prisma = global.prisma || new PrismaClient();
+import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+
+export const prisma = global.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
@@ -66,12 +68,13 @@ export const checkCommentOwnership = async (commentId, usersId, modelName) => {
   const comment = await model.findUnique({ where: { id: commentId } });
 
   if (!comment) {
-    const error = new Error('댓글을 찾을 수 없습니다.');
-    error.statusCode = 404;
-    throw error;
+    throw new PrismaClientKnownRequestError('댓글을 찾을 수 없습니다.', {
+      code: 'P2025',
+      meta: { modelName: modelName, cause: 'record not found' },
+    });
   }
 
-  if (comment.usersId !== usersId) {
+  if (comment.userId !== usersId) { 
     const error = new Error('댓글을 수정/삭제할 권한이 없습니다.');
     error.statusCode = 403;
     throw error;
@@ -80,20 +83,60 @@ export const checkCommentOwnership = async (commentId, usersId, modelName) => {
   return comment;
 };
 
-export const prepareCommentCreateData = ({ parentId, usersId, content }, parentModelName) => {
+export const checkProductOwnership = async (productId, userId) => {
+  const product = await prisma.product.findUnique({ 
+    where: { id: productId },
+    select: { userId: true }, 
+  });
+
+  if (!product) {
+    throw new PrismaClientKnownRequestError('상품을 찾을 수 없습니다.', {
+      code: 'P2025',
+      meta: { modelName: 'Product', cause: 'record not found' },
+    });
+  }
+
+  if (product.userId !== userId) { 
+    const error = new Error('상품을 수정하거나 삭제할 권한이 없습니다.');
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
+export const checkArticleOwnership = async (articleId, userId) => {
+  const article = await prisma.article.findUnique({ 
+    where: { id: articleId },
+    select: { userId: true }, 
+  });
+
+  if (!article) {
+    throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
+      code: 'P2025',
+      meta: { modelName: 'Article', cause: 'record not found' },
+    });
+  }
+
+  if (article.userId !== userId) { 
+    const error = new Error('게시글을 수정하거나 삭제할 권한이 없습니다.');
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
+export const prepareCommentCreateData = ({ parentId, userId, content }, parentModelName) => { 
   const data = {
     content: content,
-    [parentModelName === 'Product' ? 'product' : 'article']: {
+    [parentModelName === 'product' ? 'product' : 'article']: { 
       connect: {
         id: parentId,
       },
     },
   };
 
-  if (usersId) {
+  if (userId) { 
     data.user = {
       connect: {
-        id: usersId,
+        id: userId, 
       },
     };
   }
@@ -119,7 +162,7 @@ export const findCommentsCommon = async (modelName, parentId, queryParams, paren
 
   const comments = await model.findMany({
     where: {
-      [parentSelectField === 'name' ? 'productsId' : 'articlesId']: parentId
+      [parentSelectField === 'name' ? 'productId' : 'articleId']: parentId 
     },
     ...findManyOptions,
     include: getCommentIncludeOptions(parentSelectField),
@@ -129,13 +172,3 @@ export const findCommentsCommon = async (modelName, parentId, queryParams, paren
   const nextCursor = calculateNextCursor(comments, parsedLimit);
   return { comments, nextCursor };
 };
-
-export function asyncHandler(handler) {
-  return async function (req, res, next) {
-    try {
-      await handler(req, res, next);
-    } catch (e) {
-      next(e);
-    }
-  };
-}

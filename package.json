@@ -1,6 +1,6 @@
 {
   "name": "sprint_mission_3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "중고마켓/자유게시판 API 서버",
   "main": "src/server.js",
   "type": "module",
@@ -12,9 +12,7 @@
     "prisma:generate": "npx prisma generate",
     "prisma:seed": "node prisma/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "김준철",
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",

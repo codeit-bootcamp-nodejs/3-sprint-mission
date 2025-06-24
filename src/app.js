@@ -7,6 +7,7 @@ import productCommentRouter from './routes/productComments.router.js';
 import articleCommentsRouter from './routes/articleComments.router.js';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
 
 const app = express();
 
@@ -14,11 +15,13 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 
 app.use('/api/products', productRouter);
 app.use('/api/users', userrouter);
 app.use('/api/articles', articlerouter);
-app.use('/api/products/:productsId/comments', productCommentRouter);
+app.use('/api/products/:productId/comments', productCommentRouter);
 app.use('/api/articles/:articleId/comments', articleCommentsRouter);
 
 app.use((err, req, res, next) => {

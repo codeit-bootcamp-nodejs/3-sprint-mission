@@ -1,17 +1,10 @@
-// src/services/users.service.js
 
-import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
-const prisma = global.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
+import { prisma } from '../utils/queryHelpers.js';
 
 export const createUser = async (username, email, address) => {
   try {
-    const newUser = await prisma.users.create({
+    const newUser = await prisma.user.create({
       data: {
         username,
         email,
@@ -36,7 +29,7 @@ export const createUser = async (username, email, address) => {
 
 export const findAllUsers = async () => {
   try {
-    const users = await prisma.users.findMany({
+    const users = await prisma.user.findMany({
       select: {
         id: true,
         username: true,
@@ -55,7 +48,7 @@ export const findAllUsers = async () => {
 
 export const findUserById = async (id) => {
   try {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -81,7 +74,7 @@ export const findUserById = async (id) => {
 
 export const updateUser = async (id, updateData) => {
   try {
-    const updatedUser = await prisma.users.update({
+    const updatedUser = await prisma.user.update({
       where: {
         id,
       },
@@ -104,7 +97,7 @@ export const updateUser = async (id, updateData) => {
 
 export const deleteUser = async (id) => {
   try {
-    const deletedUser = await prisma.users.delete({
+    const deletedUser = await prisma.user.delete({
       where: { id },
       select: {
         id: true,

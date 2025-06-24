@@ -1,47 +1,55 @@
-// src/services/articleComments.service.js
-import { PrismaClient } from '@prisma/client';
+
 import {
   checkCommentOwnership,
   prepareCommentCreateData,
   getCommentIncludeOptions,
-  findCommentsCommon
+  findCommentsCommon,
+  prisma
 } from '../utils/queryHelpers.js';
 
-const prisma = global.prisma || new PrismaClient();
+export const createArticleComment = async ({ articleId, userId, content }) => {
+  const data = prepareCommentCreateData({ parentId: articleId, userId, content }, 'article');
 
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
-
-export const createArticleComment = async ({ articlesId, usersId, content }) => {
-  const data = prepareCommentCreateData({ parentId: articlesId, usersId, content }, 'article');
-
-  const newComment = await prisma.article_comments.create({
+  const newComment = await prisma.articleComment.create({
     data: data,
     include: getCommentIncludeOptions('title')
   });
   return newComment;
 };
 
-export const findAllArticleComments = async ({ articlesId, cursor, limit }) => {
-  return findCommentsCommon('article_comments', articlesId, { cursor, limit }, 'title');
+export const findAllArticleComments = async ({ articleId, cursor, limit }) => {
+  return findCommentsCommon('articleComment', articleId, { cursor, limit }, 'title');
 };
 
-export const updateArticleComment = async (commentId, { content, usersId }) => {
-  await checkCommentOwnership(commentId, usersId, 'article_comments');
+export const updateArticleComment = async (commentId, { content, userId }) => {
+  await checkCommentOwnership(commentId, userId, 'articleComment');
 
-  const updatedComment = await prisma.article_comments.update({
+  const updatedComment = await prisma.articleComment.update({
     where: { id: commentId },
     data: { content },
+    select: {
+      id: true,
+      content: true,
+      userId: true,
+      articleId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
   return updatedComment;
 };
 
-export const deleteArticleComment = async (commentId, usersId) => {
-  await checkCommentOwnership(commentId, usersId, 'article_comments');
+export const deleteArticleComment = async (commentId, userId) => {
+  await checkCommentOwnership(commentId, userId, 'articleComment');
 
-  const deletedComment = await prisma.article_comments.delete({
-    where: { id: commentId }
+  const deletedComment = await prisma.articleComment.delete({
+    where: { id: commentId },
+    select: {
+      id: true,
+      content: true,
+      userId: true,
+      articleId: true,
+    },
   });
   return deletedComment;
 };
