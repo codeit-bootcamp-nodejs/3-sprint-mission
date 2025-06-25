@@ -23,7 +23,6 @@ export const getArticleList = async (req, res, next) => {
         select: {
           id: true,
           title: true,
-          price: true,
           createdAt: true
         },
         orderBy: { createdAt: 'desc' },
@@ -54,7 +53,6 @@ export const getArticle = async (req, res, next) => {
         id: true,
         title: true,
         content: true,
-        price: true,
         createdAt: true
       }
     });
