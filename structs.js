@@ -13,3 +13,7 @@ export const Article = s.object({
   title: s.size(s.string(),1,30),
   content: s.string(),
 })
+
+export const Comment = s.object({
+  content: s.size(s.string(), 1, 500)
+})
