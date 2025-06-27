@@ -1,0 +1,30 @@
+{
+  "name": "sprint3",
+  "version": "1.0.0",
+  "description": "codeit sprint mission3",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "migrate": "prisma migrate dev --schema=src/prisma/schema.prisma",
+    "generate": "prisma generate --schema=src/prisma/schema.prisma",
+    "studio": "prisma studio --schema=src/prisma/schema.prisma",
+    "seed": "node src/prisma/seed.js",
+    "postinstall": "prisma generate --schema=src/prisma/schema.prisma",
+    "start": "prisma migrate deploy --schema=src/prisma/schema.prisma && node src/prisma/seed.js && node src/app.js"
+  },
+  "author": "selentia",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.1",
+    "nodemon": "^3.1.10",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "prisma": "^6.10.0"
+  }
+}
