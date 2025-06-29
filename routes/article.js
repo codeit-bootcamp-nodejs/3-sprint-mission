@@ -1,6 +1,6 @@
 import express from 'express'
 import { deleteArticle, getArticle, getArticleList, patchArticle, postArticle } from '../controllers/article.controller.js'
-import { postProductComment } from '../controllers/comment.controller.js'
+import { deleteArticleComment, getArticleCommentList, patchArticleComment, postArticleComment } from '../controllers/comment.controller.js'
 
 const articleRouter = express.Router()
 
@@ -14,6 +14,11 @@ articleRouter.route('/:id')
   .delete(deleteArticle)
 
 articleRouter.route('/:id/comments')
-  .post(postProductComment)
+  .post(postArticleComment)
+  .get(getArticleCommentList)
+
+articleRouter.route('/:id/comments/:commentId')
+  .patch(patchArticleComment)
+  .delete(deleteArticleComment)
 
 export default articleRouter

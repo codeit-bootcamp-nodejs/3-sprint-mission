@@ -27,7 +27,7 @@ export const getProductCommentList = async (req, res, next) => {
       comments = await prisma.comment.findMany({
         where: { productId },
         select: { id: true, content: true, createdAt: true },
-        orderBy: { id: 'asc' },
+        orderBy: { id: 'desc' },
         take
       });
     }
@@ -38,6 +38,38 @@ export const getProductCommentList = async (req, res, next) => {
   }
 };
 
+export const getArticleCommentList = async (req, res, next) => {
+  try {
+    const { id: articleId } = req.params;
+    const { cursor, limit = 10 } = req.query;
+    const take = Number(limit);
+
+    let comments;
+    if (cursor) {
+      // cursor 있을 때
+      comments = await prisma.comment.findMany({
+        where: { articleId },
+        select: { id: true, content: true, createdAt: true },
+        orderBy: { id: 'asc' },
+        take,
+        cursor: { id: Number(cursor) },
+        skip: 1
+      });
+    } else {
+      // cursor 없을 때
+      comments = await prisma.comment.findMany({
+        where: { articleId },
+        select: { id: true, content: true, createdAt: true },
+        orderBy: { id: 'desc' },
+        take
+      });
+    }
+
+    res.status(200).json(comments);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const postProductComment = async (req, res, next) => {
   try {
@@ -85,16 +117,16 @@ export const postArticleComment = async (req, res, next) => {
   }
 }
 
-export const patchComment = async (req, res, next) => {
+export const patchProductComment = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
-    const { id } = req.params;
+    const { id: productId } = req.params;
     const { content } = req.body;
 
     const comment = await prisma.comment.update({
       where: {
-        id: id
+        id: productId
       },
       data: {
         content
@@ -110,14 +142,59 @@ export const patchComment = async (req, res, next) => {
   }
 }
 
-export const deleteComment = async (req, res, next) => {
+export const patchArticleComment = async (req, res, next) => {
+  try {
+    assert(req.body, Comment);
+
+    const { id: articleId } = req.params;
+    const { content } = req.body;
+
+    const comment = await prisma.comment.update({
+      where: {
+        id: articleId
+      },
+      data: {
+        content
+      }
+    });
+
+    res.status(200).json(comment);
+  } catch (error) {
+    if (error?.title === 'StructError') {
+      return res.status(400).json({ error: '해당 댓글을 수정할 수 없습니다.' });
+    }
+    next(error);
+  }
+}
+
+export const deleteProductComment = async (req, res, next) => {
   try {
 
-    const { id } = req.params;
+    const { id: productId } = req.params;
 
     const comment = await prisma.comment.delete({
       where: {
-        id: id
+        id: productId
+      }
+    });
+
+    res.status(204).json(comment);
+  } catch (error) {
+    if (error?.title === 'StructError') {
+      return res.status(400).json({ error: '해당 댓글을 삭제할 수 없습니다.' });
+    }
+    next(error);
+  }
+}
+
+export const deleteArticleComment = async (req, res, next) => {
+  try {
+
+    const { id: articleId } = req.params;
+
+    const comment = await prisma.comment.delete({
+      where: {
+        id: articleId
       }
     });
 
