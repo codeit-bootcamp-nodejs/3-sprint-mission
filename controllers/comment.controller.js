@@ -27,7 +27,7 @@ export const getProductCommentList = async (req, res, next) => {
       comments = await prisma.comment.findMany({
         where: { productId },
         select: { id: true, content: true, createdAt: true },
-        orderBy: { id: 'desc' },
+        orderBy: { id: 'asc' },
         take
       });
     }
@@ -60,7 +60,7 @@ export const getArticleCommentList = async (req, res, next) => {
       comments = await prisma.comment.findMany({
         where: { articleId },
         select: { id: true, content: true, createdAt: true },
-        orderBy: { id: 'desc' },
+        orderBy: { id: 'asc' },
         take
       });
     }
@@ -87,7 +87,7 @@ export const postProductComment = async (req, res, next) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 등록할 수 없습니다.' });
     }
     next(error);
@@ -110,7 +110,7 @@ export const postArticleComment = async (req, res, next) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 등록할 수 없습니다.' });
     }
     next(error);
@@ -121,12 +121,12 @@ export const patchProductComment = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
-    const { id: productId } = req.params;
+    const { commentId } = req.params;
     const { content } = req.body;
 
     const comment = await prisma.comment.update({
       where: {
-        id: productId
+        id: Number(commentId)
       },
       data: {
         content
@@ -135,7 +135,7 @@ export const patchProductComment = async (req, res, next) => {
 
     res.status(200).json(comment);
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 수정할 수 없습니다.' });
     }
     next(error);
@@ -146,12 +146,12 @@ export const patchArticleComment = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
-    const { id: articleId } = req.params;
+    const { commentId } = req.params;
     const { content } = req.body;
 
     const comment = await prisma.comment.update({
       where: {
-        id: articleId
+        id: Number(commentId)
       },
       data: {
         content
@@ -160,7 +160,7 @@ export const patchArticleComment = async (req, res, next) => {
 
     res.status(200).json(comment);
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 수정할 수 없습니다.' });
     }
     next(error);
@@ -170,17 +170,17 @@ export const patchArticleComment = async (req, res, next) => {
 export const deleteProductComment = async (req, res, next) => {
   try {
 
-    const { id: productId } = req.params;
+    const { commentId } = req.params;
 
     const comment = await prisma.comment.delete({
       where: {
-        id: productId
+        id: Number(commentId)
       }
     });
 
-    res.status(204).json(comment);
+    res.status(204).end();
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 삭제할 수 없습니다.' });
     }
     next(error);
@@ -190,17 +190,17 @@ export const deleteProductComment = async (req, res, next) => {
 export const deleteArticleComment = async (req, res, next) => {
   try {
 
-    const { id: articleId } = req.params;
+    const { commentId } = req.params;
 
     const comment = await prisma.comment.delete({
       where: {
-        id: articleId
+        id: Number(commentId)
       }
     });
 
-    res.status(204).json(comment);
+    res.status(204).end();
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 삭제할 수 없습니다.' });
     }
     next(error);
