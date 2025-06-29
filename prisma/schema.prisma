@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductTag {
+  NEW_PRODUCT
+  UNOPENED
+  USED
+  A_GRADE
+  USED_FEELING
+  DAMAGED
+  LIMITED_EDITION
+  DISCONTINUED
+  FREE_SHIPPING
+  DIRECT_DEAL
+  PRICE_NEGOTIABLE
+  URGENT_SALE
+  ELECTRONICS
+  CLOTHING
+  BOOKS
+  FURNITURE
+  SPORTS_EQUIPMENT
+  RARE_ITEM
+  FILM_CAMERA
+  VINTAGE
+  IMAGE_UPLOADED
+}
+
+model User {
+  id              String           @id @default(uuid())
+  username        String
+  email           String           @unique
+  address         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  products        Product[]
+  articles        Article[]
+  productComments ProductComment[]
+  articleComments ArticleComment[]
+}
+
+model Product {
+  id              String           @id @default(uuid())
+  name            String
+  price           Int
+  isSold          Boolean          @default(false)
+  tags            ProductTag[]     @default([])
+  stock           Int              @default(0)
+  description     String?
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  productComments ProductComment[]
+}
+
+model ProductComment {
+  id        String   @id @default(uuid())
+  userId    String?
+  productId String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([userId])
+}
+
+model Article {
+  id              String           @id @default(uuid())
+  title           String
+  content         String
+  userId          String
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleComments ArticleComment[]
+}
+
+model ArticleComment {
+  id        String   @id @default(uuid())
+  articleId String
+  content   String
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+}
