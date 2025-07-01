@@ -1,0 +1,56 @@
+GET http://localhost:3000/articles
+
+### 최신순 정렬, order을 다른 값으로 주면 오래된순 정렬
+GET http://localhost:3000/articles/?order=recen&limit=2&page=2
+
+###
+GET http://localhost:3000/articles/849c2109-ab70-480f-8c52-e6f0b7cae430
+
+###
+POST http://localhost:3000/articles
+Content-Type: application/json
+
+{
+    "title" : "api로 작성된 게시글입니다",
+    "content" : "api로 작성된 게시글의 내용"
+
+}
+###
+
+PATCH http://localhost:3000/articles/c0d896fd-927b-4fc0-a2a1-580ec6848e45
+Content-Type: application/json
+
+{
+    "title" : "api로 수정된 게시글",
+    "content" : "api로 수정 내용"
+
+}
+
+###
+DELETE http://localhost:3000/articles/3687fbf5-6678-41f2-af93-3b2385ee1752
+
+###
+GET http://localhost:3000/articles/comment
+
+###
+GET http://localhost:3000/articles/comment?limit=2&cursor=d8900e92-7354-490d-9eff-fb57d3a16e06
+
+###
+POST http://localhost:3000/articles/comment
+Content-Type: application/json
+
+{
+    "id" : "d660c4f5-9744-4aab-85f0-d8cd84ca5324",
+    "content" : "게시글 댓글 생성"
+}
+
+###
+PATCH  http://localhost:3000/articles/comment/5ba78525-dc58-47a2-b71d-be679c107d25
+Content-Type: application/json
+
+{
+    "content" : "게시글 댓글 수정2"
+}
+###
+DELETE http://localhost:3000/articles/comment/d13ffb0d-2065-4258-8a41-73d6b91e0192
+

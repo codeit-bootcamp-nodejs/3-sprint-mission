@@ -1,0 +1,69 @@
+GET http://localhost:3000/products/
+
+### 최신순 정렬, order을 다른 값으로 주면 오래된순 정렬
+GET http://localhost:3000/products/?order=recent
+
+###
+GET http://localhost:3000/products/a39a8fac-208d-4534-a841-35e2c33e9969
+
+###
+GET http://localhost:3000/products?keyword=최신형
+
+### 올바르지 않은 요청
+GET http://localhost:3000/products/a39agfac-208d-4534-a41-35e2c33e9969
+
+###
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name" : "리퀘스트 상품",
+    "description" : "api로 만들어진 상품입니다",
+    "price": 20000,
+    "tags": ["전자제품", "그래픽카드"]
+}
+
+###
+PATCH http://localhost:3000/products/646b0dbc-acaa-499b-982b-9bf035b102bb
+Content-Type: application/json
+
+{
+    "name" : "RTX4090",
+    "description" : "4090을 샀어야 했는데",
+    "price": 2000000
+}
+
+###
+DELETE http://localhost:3000/products/646b0dbc-acaa-499b-982b-9bf035b102bb
+
+
+### 
+GET http://localhost:3000/products/comment
+
+### 
+GET http://localhost:3000/products/comment?cursor=952f0e55-4e46-40c2-8f2f-654d6a5e36bd
+
+###
+POST http://localhost:3000/products/comment
+Content-Type: application/json
+
+{
+    "id" : "a39a8fac-208d-4534-a841-35e2c33e9969",
+    "content" : "댓글 생성"
+}
+
+
+###
+PATCH http://localhost:3000/products/comment/a31fda93-7d65-4832-ba9d-3e09078a185a
+Content-Type: application/json
+
+{
+    "content" : "댓글 수정"
+}
+
+###
+DELETE http://localhost:3000/products/comment/d6c4bb87-e95c-422b-a5bc-abf8063c00f5
+
+
+### 이미지 업로드 리퀘스트
+POST http://localhost:3000/images/upload
