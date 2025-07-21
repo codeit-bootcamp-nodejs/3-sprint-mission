@@ -41,15 +41,30 @@ export const createUserSchema = s.object({
   username: s.size(s.string(), 2, 20),
   email: Email,
   address: s.optional(s.size(s.string(), 5, 100)),
+  password: s.refine(s.string(), 'password', (value) => {
+    return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
+      '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
+  }),
+  imageUrl: s.optional(s.string()),
 });
 
 export const updateUserSchema = s.object({
   username: s.optional(s.size(s.string(), 2, 20)),
   email: s.optional(Email),
   address: s.optional(s.size(s.string(), 5, 100)),
+  password: s.optional(s.refine(s.string(), 'password', (value) => {
+    return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
+      '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
+  })),
+  imageUrl: s.optional(s.string()),
 });
 
-// --- Product 관련 스키마 ---
+export const loginSchema = s.object({
+  email: Email,
+  password: s.string(), // 로그인 시에는 문자열이기만 하면 됩니다.
+});
+
+// --- Product 관련 스키마 --- (변경 없음)
 export const createProductSchema = s.object({
   name: s.size(s.string(), 2, 50),
   description: s.optional(s.size(s.string(), 0, 500)),
@@ -76,12 +91,11 @@ export const deleteProductSchema = s.object({
   userId: Uuid,
 });
 
-export const getProductByIdSchema = s.object({ 
+export const getProductByIdSchema = s.object({
   productId: Uuid,
 });
 
-
-// --- Article 관련 스키마 ---
+// --- Article 관련 스키마 --- (변경 없음)
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
@@ -105,7 +119,7 @@ export const getArticleByIdSchema = s.object({
 });
 
 
-// --- Comment 관련 스키마 ---
+// --- Comment 관련 스키마 --- (변경 없음)
 export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
   userId: Uuid,
@@ -142,9 +156,18 @@ export const validate = (schema, type) => (req, res, next) => {
     s.assert(req[type], schema);
     next();
   } catch (error) {
-    res.status(400).json({
-      message: 'Validation Error',
-      details: error.failures ? Array.from(error.failures()) : error.message,
-    });
+    if (error instanceof s.StructError) { // Superstruct의 StructError 타입인지 확인
+      return res.status(400).json({
+        message: '유효성 검사 오류',
+        details: Array.from(error.failures()), // StructError의 failures() 메서드 사용
+      });
+    } else {
+      // 예상치 못한 다른 종류의 에러 처리
+      console.error('Unexpected error in validation middleware:', error);
+      return res.status(500).json({
+        message: '서버 내부 오류',
+        details: [{ message: error.message || '알 수 없는 오류가 발생했습니다.' }],
+      });
+    }
   }
 };
