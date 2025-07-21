@@ -82,7 +82,7 @@ export const postArticle = async (req, res, next) => {
 
     res.status(201).json(article);
   } catch (error) {
-    if (error?.title === 'StructError') {
+    if (error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 게시글을 등록할 수 없습니다.' });
     }
     next(error);

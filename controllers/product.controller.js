@@ -76,7 +76,7 @@ export const postProduct = async (req, res, next) => {
   try {
     assert(req.body, Product);
 
-    const { name, description, price, tags, quantity = [] } = req.body;
+    const { name, description, price, tags, quantity } = req.body;
 
     const product = await prisma.product.create({
       data: {
@@ -107,7 +107,7 @@ export const patchProduct = async (req, res, next) => {
     assert(req.body, Product);
 
     const { id } = req.params;
-    const { name, description, price, tags, quantity = [] } = req.body;
+    const { name, description, price, tags, quantity } = req.body;
 
     const product = await prisma.product.update({
       where: {
