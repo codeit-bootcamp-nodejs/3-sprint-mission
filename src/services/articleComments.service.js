@@ -1,4 +1,3 @@
-
 import {
   checkCommentOwnership,
   prepareCommentCreateData,

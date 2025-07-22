@@ -1,9 +1,9 @@
 import express from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
+import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   validate,
   updateProductCommentParamsSchema,
-  DeleteCommentBaseSchema,
   CommentBaseSchema,
   getProductByIdSchema,
   UpdateCommentBaseSchema,
@@ -14,11 +14,13 @@ const productCommentRouter = express.Router({ mergeParams: true });
 
 productCommentRouter.route('/')
   .post(
+    verifyAccessToken,
     validate(getProductByIdSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { productId } = req.params;
-      const { content, userId } = req.body;
+      const { content } = req.body;
 
       const newComment = await createProductComment({ productId, userId, content });
 
@@ -44,11 +46,13 @@ productCommentRouter.route('/')
 
 productCommentRouter.route('/:id')
   .patch(
+    verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
     validate(UpdateCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { id: commentId } = req.params;
-      const { content, userId } = req.body;
+      const { content } = req.body;
 
       const updatedComment = await updateProductComment(commentId, { content, userId });
 
@@ -59,11 +63,11 @@ productCommentRouter.route('/:id')
     })
   )
   .delete(
+    verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
-    validate(DeleteCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { id: commentId } = req.params;
-      const { userId } = req.body;
       const deletedComment = await deleteProductComment(commentId, userId);
       res.status(204).end();
     })

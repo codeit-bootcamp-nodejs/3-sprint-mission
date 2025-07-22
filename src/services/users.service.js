@@ -1,7 +1,7 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/queryHelpers.js';
-import hashUtils from '../utils/hash.js';
+import hash from '../utils/hash.js';
 
 // 토큰 생성 유틸리티 함수
 export const createToken = (user, type) => {
@@ -37,7 +37,7 @@ export const createUser = async (username, email, password, address, imageUrl) =
       }
     }
 
-    const hashedPassword = await hashUtils.hashingPassword(password);
+    const hashedPassword = await hash.hashingPassword(password);
 
     const newUser = await prisma.user.create({
       data: {
@@ -85,11 +85,13 @@ export const createUser = async (username, email, password, address, imageUrl) =
 //   }
 // };
 
-export const findUserById = async (id) => {
+export const findUserById = async (id, selectOptions = undefined) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: {
+      // selectOptions가 전달되면 그 값을 사용하고, 없으면 모든 필드를 가져옴
+      // 특정 필드만 필요한 경우 호출하는 곳에서 명시적으로 select 객체를 전달
+      select: selectOptions || {
         id: true,
         username: true,
         email: true,
@@ -118,38 +120,20 @@ export const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
     where: { email: email }
   });
-
   if (!user) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }
-
-  const isPasswordValid = await hashUtils.verifyPassword(password, user.password);
-
+  const isPasswordValid = await hash.verifyPassword(password, user.password);
   if (!isPasswordValid) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }
-
   // 엑세스 토큰과 리프레시 토큰 생성
   const accessToken = createToken(user, 'access');
-  const refreshToken = createToken(user, 'refresh'); // 이 값이 쿠키와 DB에 저장될 값입니다.
-
-  console.log('--- DEBUG: loginUser refresh token ---');
-  console.log('1. Generated refreshToken (in service, for cookie):', refreshToken); // 생성된 리프레시 토큰 값 확인
-  console.log('2. User ID for update (in service):', user.id); // 업데이트할 사용자 ID 확인
-
-  try {
-    // 생성된 refresh token을 사용자 모델에 저장 (업데이트)
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken: refreshToken } // 이 'refreshToken' 변수의 값을 DB에 저장 시도
-    });
-    console.log('3. DB update successful. updatedUser.refreshToken (from DB after update):', updatedUser.refreshToken); // DB 업데이트 후 Prisma가 반환한 refreshToken 값 확인
-  } catch (dbError) {
-    console.error('ERROR: Failed to update refreshToken in DB:', dbError); // DB 업데이트 실패 시 에러 메시지 확인
-    // 여기에서 실제 데이터베이스 오류가 발생할 경우를 대비하여 throw하거나 적절히 처리할 수 있습니다.
-    // 하지만 현재는 이 에러가 발생하지 않는 상황으로 보입니다.
-  }
-
+  const refreshToken = createToken(user, 'refresh');
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken: refreshToken }
+  });
   return {
     accessToken: accessToken,
     refreshToken: refreshToken, // 이 refreshToken이 라우터로 반환되어 쿠키에 설정됩니다.
@@ -166,7 +150,7 @@ export const loginUser = async (email, password) => {
 export const updateUser = async (id, updateData) => {
   try {
     if (updateData.password) {
-      updateData.password = await hashUtils.hashingPassword(updateData.password);
+      updateData.password = await hash.hashingPassword(updateData.password);
     }
 
     const updatedUser = await prisma.user.update({

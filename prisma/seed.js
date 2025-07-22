@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import hashUtils from '../src/utils/hash.js'; // 경로 확인 필요
+import hashUtils from '../src/utils/hash.js';
 
 const prisma = new PrismaClient();
 
@@ -45,7 +45,7 @@ async function main() {
         const hashedPasswordLee = await hashUtils.hashingPassword('passwordLee2!');
         const userLee = await tx.user.create({
           data: {
-            username: '디자이너이', // 👈 username을 닉네임 겸용으로 사용
+            username: '디자이너이',
             email: 'designer.lee@example.com',
             password: hashedPasswordLee,
             address: '경기도 성남시 분당구',
@@ -57,7 +57,7 @@ async function main() {
         const hashedPasswordPark = await hashUtils.hashingPassword('passwordPark3!');
         const userPark = await tx.user.create({
           data: {
-            username: '기획자박', // 👈 username을 닉네임 겸용으로 사용
+            username: '기획자박',
             email: 'planner.park@example.com',
             password: hashedPasswordPark,
             address: '부산시 해운대구',
@@ -201,8 +201,6 @@ async function main() {
           },
         });
         console.log(`Article like created by ${userKim.username} for ${articleExpress.title}`);
-        // --- 좋아요 시딩 끝 ---
-
       });
 
       seedingSuccessful = true;

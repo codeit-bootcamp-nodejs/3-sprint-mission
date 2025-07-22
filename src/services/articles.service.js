@@ -25,9 +25,19 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
             username: true,
           },
         },
+        _count: {
+          select: {
+            ArticleLike: true,
+          },
+        },
+
       },
     });
-    return articles;
+    return articles.map(article => ({
+      ...article,
+      likeCount: article._count.ArticleLike,
+      _count: undefined,
+    }));
   } catch (error) {
     console.error("Error in findAllArticles service:", error);
     throw error;
@@ -57,12 +67,12 @@ export const createArticle = async ({ title, content, userId, imageUrl }) => {
     });
     return newArticle;
   } catch (error) {
-      console.error("Error in createArticle service:", error);
-      throw error;
+    console.error("Error in createArticle service:", error);
+    throw error;
   }
 };
 
-export const findArticleById = async (articleId) => {
+export const findArticleById = async (articleId, currentUserId) => {
   try {
     const article = await prisma.article.findUnique({
       where: {
@@ -86,17 +96,28 @@ export const findArticleById = async (articleId) => {
             },
           },
         },
+        _count: {
+          select: {
+            ArticleLike: true,
+          },
+        },
+        ArticleLike: currentUserId ? {
+          where: { userId: currentUserId }, // 현재 유저가 누른 좋아요만 필터링
+          select: { id: true }, // 좋아요 존재 여부만 확인하므로 id 필드만 선택
+        }
+          : false,
       },
     });
-
     if (!article) {
       throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
         code: 'P2025',
         meta: { modelName: 'Article', cause: 'record not found' },
       });
     }
-
-    return article;
+    const isLiked = currentUserId ? article.ArticleLike?.length > 0 : false;
+    const likeCount = article._count.ArticleLike;
+    const { ArticleLike, _count, ...articleWithoutLikes } = article;
+    return { ...articleWithoutLikes, isLiked, likeCount };
   } catch (error) {
     console.error("Error in findArticleById service:", error);
     throw error;
@@ -129,8 +150,8 @@ export const updateArticle = async (articleId, userId, updateData) => {
     });
     return updatedArticle;
   } catch (error) {
-      console.error("Error in updateArticle service:", error);
-      throw error;
+    console.error("Error in updateArticle service:", error);
+    throw error;
   }
 };
 
@@ -154,7 +175,37 @@ export const deleteArticle = async (articleId, userId) => {
     });
     return deletedArticle;
   } catch (error) {
-      console.error("Error in deleteArticle service:", error);
-      throw error;
+    console.error("Error in deleteArticle service:", error);
+    throw error;
+  }
+};
+
+export const toggleArticleLike = async (currentUserId, articleId) => {
+  const existinglike = await prisma.articleLike.findUnique({
+    where: {
+      userId_articleId: {
+        userId: currentUserId,
+        articleId: articleId,
+      },
+    },
+  });
+  if (existinglike) {
+    await prisma.articleLike.delete({
+      where: {
+        userId_articleId: {
+          userId: currentUserId,
+          articleId: articleId,
+        },
+      },
+    });
+    return { message: '좋아요가 취소되엇습니다' };
+  } else {
+    await prisma.articleLike.create({
+      data: {
+        userId: currentUserId,
+        articleId: articleId,
+      },
+    });
+    return { message: '좋아요가 추가되었습니다' }
   }
 };

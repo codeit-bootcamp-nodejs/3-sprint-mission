@@ -72,7 +72,6 @@ export const createProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
 });
 
@@ -83,12 +82,7 @@ export const updateProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
-});
-
-export const deleteProductSchema = s.object({
-  userId: Uuid,
 });
 
 export const getProductByIdSchema = s.object({
@@ -99,19 +93,13 @@ export const getProductByIdSchema = s.object({
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
 });
 
 export const updateArticleSchema = s.object({
   title: s.optional(s.size(s.string(), 5, 100)),
   content: s.optional(s.size(s.string(), 10, 5000)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
-});
-
-export const deleteArticleSchema = s.object({
-  userId: Uuid,
 });
 
 export const getArticleByIdSchema = s.object({
@@ -122,33 +110,21 @@ export const getArticleByIdSchema = s.object({
 // --- Comment 관련 스키마 --- (변경 없음)
 export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
-  userId: Uuid,
 });
 
 export const UpdateCommentBaseSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
-  userId: Uuid,
-});
-
-export const DeleteCommentBaseSchema = s.object({
-  userId: Uuid,
-});
-
-
-export const getByIdSchema = s.object({
-  id: Uuid,
 });
 
 export const updateProductCommentParamsSchema = s.object({
-  productId: Uuid,
-  id: Uuid,
+  productId: Uuid, // 기존 상품 ID 유효성 검사
+  id: Uuid,         // <-- 이 줄을 추가해야 합니다! (댓글 ID 유효성 검사)
 });
 
 export const updateArticleCommentParamsSchema = s.object({
   articleId: Uuid,
-  id: Uuid,
+  id: Uuid, // <-- 이 줄도 추가해야 합니다! (게시글 댓글 ID 유효성 검사, 미리 해두는 것이 좋습니다)
 });
-
 
 // --- 유효성 검사 미들웨어 ---
 export const validate = (schema, type) => (req, res, next) => {
@@ -159,7 +135,11 @@ export const validate = (schema, type) => (req, res, next) => {
     if (error instanceof s.StructError) { // Superstruct의 StructError 타입인지 확인
       return res.status(400).json({
         message: '유효성 검사 오류',
-        details: Array.from(error.failures()), // StructError의 failures() 메서드 사용
+        details: Array.from(error.failures()).map(failure => ({
+          type: failure.type,
+          expected: failure.expected,
+          message: failure.message,
+        })),
       });
     } else {
       // 예상치 못한 다른 종류의 에러 처리

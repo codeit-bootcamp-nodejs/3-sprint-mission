@@ -1,4 +1,5 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UnauthorizedError } from 'express-jwt';
 
 const errorHandler = (err, req, res, next) => {
   console.error("전역 에러 발생:", err);
@@ -7,7 +8,22 @@ const errorHandler = (err, req, res, next) => {
   let message = '서버 내부 오류가 발생했습니다.';
   let details = undefined;
 
-  if (err instanceof PrismaClientKnownRequestError) {
+  // express-jwt에서 발생하는 UnauthorizedError 처리 로직 추가
+  if (err instanceof UnauthorizedError) {
+    if (err.code === 'credentials_required') {
+      // 토큰이 제공되지 않은 경우
+      statusCode = 401;
+      message = '액세스 토큰이 제공되지 않았습니다.';
+    } else if (err.code === 'invalid_token' && err.inner && err.inner.name === 'TokenExpiredError') {
+      statusCode = 401;
+      message = '액세스 토큰이 만료되었습니다. 리프레시 토큰으로 재발급해주세요.';
+    } else {
+      // 그 외 유효하지 않은 토큰 (변조, 서명 오류 등)
+      statusCode = 401;
+      message = '액세스 토큰이 유효하지 않습니다.';
+    }
+  }
+  else if (err instanceof PrismaClientKnownRequestError) {
     switch (err.code) {
       case 'P2002':
         statusCode = 409;
@@ -31,6 +47,7 @@ const errorHandler = (err, req, res, next) => {
     message = err.message;
     details = err.details;
   } else {
+    // 그 외 예측하지 못한 오류 또는 사용자 정의 오류
     statusCode = err.statusCode || 500;
     message = err.message || '서버 내부 오류가 발생했습니다.';
   }
