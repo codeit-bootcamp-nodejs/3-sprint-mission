@@ -1,6 +1,6 @@
 import express from 'express'
-import { deleteArticle, getArticle, getArticleList, patchArticle, postArticle } from '../controllers/article.controller.js'
-import { deleteArticleComment, getArticleCommentList, patchArticleComment, postArticleComment } from '../controllers/comment.controller.js'
+import { deleteArticle, getArticle, getArticleList, patchArticle, postArticle } from '../controllers/articleController.js'
+import { deleteArticleComment, getArticleCommentList, patchArticleComment, postArticleComment } from '../controllers/commentController.js'
 import { validateArticle } from '../middlewares/validation.js'
 
 const articleRouter = express.Router()

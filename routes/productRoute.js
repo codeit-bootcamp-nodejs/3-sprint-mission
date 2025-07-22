@@ -1,6 +1,6 @@
 import express from 'express'
-import { deleteProduct, getProduct, getProductList, patchProduct, postProduct } from '../controllers/product.controller.js'
-import { deleteProductComment, getProductCommentList, patchProductComment, postProductComment } from '../controllers/comment.controller.js'
+import { deleteProduct, getProduct, getProductList, patchProduct, postProduct } from '../controllers/productController.js'
+import { deleteProductComment, getProductCommentList, patchProductComment, postProductComment } from '../controllers/commentController.js'
 import { validateProduct } from '../middlewares/validation.js'
 
 const productRouter = express.Router()
