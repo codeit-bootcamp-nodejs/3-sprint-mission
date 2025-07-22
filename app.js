@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import productRouter from './routes/product.js';
-import articleRouter from './routes/article.js';
+import productRouter from './routes/productRoute.js';
+import articleRouter from './routes/articleRoute.js';
 import { upload } from './middlewares/upload.js';
 import { errorHandler } from './handler/errorHandler.js';
 
