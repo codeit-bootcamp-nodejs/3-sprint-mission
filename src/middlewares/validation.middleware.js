@@ -132,22 +132,19 @@ export const validate = (schema, type) => (req, res, next) => {
     s.assert(req[type], schema);
     next();
   } catch (error) {
-    if (error instanceof s.StructError) { // Superstruct의 StructError 타입인지 확인
-      return res.status(400).json({
-        message: '유효성 검사 오류',
-        details: Array.from(error.failures()).map(failure => ({
-          type: failure.type,
-          expected: failure.expected,
-          message: failure.message,
-        })),
-      });
+    if (error instanceof s.StructError) {
+      // Superstruct 에러를 캐치했을 때, 커스텀 에러 객체를 생성하여 next()로 전달합니다.
+      // 이 커스텀 에러 객체에 message와 details를 담아서 전달합니다.
+      const validationError = new Error('유효성 검사 오류');
+      validationError.statusCode = 400;
+      validationError.details = Array.from(error.failures()).map(failure => ({
+        type: failure.type,
+        expected: failure.expected,
+        message: failure.message,
+      }));
+      next(validationError);
     } else {
-      // 예상치 못한 다른 종류의 에러 처리
-      console.error('Unexpected error in validation middleware:', error);
-      return res.status(500).json({
-        message: '서버 내부 오류',
-        details: [{ message: error.message || '알 수 없는 오류가 발생했습니다.' }],
-      });
+      next(error); // 예상치 못한 에러도 전역 에러 핸들러로 전달
     }
   }
 };
