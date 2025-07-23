@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export const prisma = global.prisma || new PrismaClient();
+
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
@@ -58,6 +59,7 @@ export const calculateNextCursor = (items, parsedLimit) => {
 
 export const checkCommentOwnership = async (commentId, usersId, modelName) => {
   const model = prisma[modelName];
+
   if (!model) {
     const error = new Error(`Invalid model name provided: ${modelName}`);
     error.statusCode = 500;
