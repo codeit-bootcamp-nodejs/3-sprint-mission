@@ -1,4 +1,9 @@
 import express from "express";
+import uploadImage from '../middlewares/upload.middleware.js';
+import path from 'path';
+import asyncHandler from "../utils/asyncHandler.js";
+import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
+import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   findAllProducts,
   createProduct,
@@ -7,25 +12,18 @@ import {
   deleteProduct,
   toggleProductLike,
 } from "../services/products.service.js";
-import asyncHandler from "../utils/asyncHandler.js";
 import {
   validate,
   createProductSchema,
   getProductByIdSchema,
   updateProductSchema,
 } from '../middlewares/validation.middleware.js';
-import uploadImage from '../middlewares/upload.middleware.js';
-import path from 'path';
-import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
-import { verifyAccessToken } from '../middlewares/auth.js';
-import { prisma } from "../utils/queryHelpers.js";
 
 const productRouter = express.Router();
 
 productRouter.route('/')
   .get(asyncHandler(async (req, res, next) => {
     const products = await findAllProducts(req.query);
-
     res.status(200).json({
       message: '상품 목록 조회',
       data: products,
@@ -108,7 +106,6 @@ productRouter.route('/:productId')
       const { productId } = req.params;
       const imageUrl = req.file ? req.file.path : undefined;
       const loggedInUserId = req.user.userId;
-
       const updateData = req.body;
 
       if (imageUrl !== undefined) {

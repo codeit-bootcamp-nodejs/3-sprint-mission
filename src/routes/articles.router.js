@@ -1,8 +1,12 @@
 import express from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
-import { validate, createArticleSchema, updateArticleSchema, getArticleByIdSchema } from '../middlewares/validation.middleware.js';
 import uploadImage from '../middlewares/upload.middleware.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
+import {
+  validate, createArticleSchema,
+  updateArticleSchema,
+  getArticleByIdSchema
+} from '../middlewares/validation.middleware.js';
 import {
   findAllArticles,
   createArticle,
@@ -65,7 +69,6 @@ articleRouter.route('/:articleId')
           });
         }
       } catch (error) {
-        // 예상치 못한 검증 에러 발생 시 처리
         currentUserId = null; // 에러 발생 시 사용자 ID는 null
       }
       const article = await findArticleById(articleId, currentUserId);
@@ -83,6 +86,7 @@ articleRouter.route('/:articleId')
       const userId = req.user.userId
       const { articleId } = req.params;
       const updateData = req.body;
+
       if (req.file) {
         updateData.imageUrl = `/uploads/articles/${req.file.filename}`;
       }

@@ -11,7 +11,6 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
   const { skip, take } = getPaginationParams({ offset, limit });
   const orderBy = getSortParams({ sort }, 'createdAt');
   const where = getSearchParams(search, ['name', 'description']);
-
   try {
     const products = await prisma.product.findMany({
       skip,
@@ -31,14 +30,12 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
         },
       },
     });
-
     return products.map(product => ({
       ...product,
       likeCount: product._count.ProductLike,
       _count: undefined,
     }));
   } catch (error) {
-    console.error("Error in findAllProducts:", error);
     throw error;
   }
 };
@@ -72,7 +69,6 @@ export const createProduct = async ({
     });
     return product;
   } catch (error) {
-    console.error("Error in createProduct service:", error);
     throw error;
   }
 };
@@ -114,11 +110,9 @@ export const findProductById = async (productId, currentUserId = null) => {
     const likeCount = product._count.ProductLike;
     // 반환 객체에서 ProductLike 속성 제거 후 isLiked 추가
     const { ProductLike, _count, ...productWithoutLikes } = product;
-
     return { ...productWithoutLikes, isLiked, likeCount };
     // --- 여기까지 추가/수정 ---
   } catch (error) {
-    console.error("Error in findProductById:", error);
     throw error;
   }
 };
@@ -126,7 +120,6 @@ export const findProductById = async (productId, currentUserId = null) => {
 export const updateProduct = async (productId, userId, updateData) => {
   try {
     await checkProductOwnership(productId, userId);
-
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: updateData,
@@ -150,9 +143,7 @@ export const updateProduct = async (productId, userId, updateData) => {
       },
     });
     return updatedProduct;
-
   } catch (error) {
-    console.error("Error in updateProduct service:", error);
     throw error;
   }
 };
@@ -160,7 +151,6 @@ export const updateProduct = async (productId, userId, updateData) => {
 export const deleteProduct = async (productId, userId) => {
   try {
     await checkProductOwnership(productId, userId);
-
     const deletedProduct = await prisma.product.delete({
       where: { id: productId },
       select: {
@@ -178,9 +168,7 @@ export const deleteProduct = async (productId, userId) => {
       },
     });
     return deletedProduct;
-
   } catch (error) {
-    console.error("Error in deleteProduct service:", error);
     throw error;
   }
 };
@@ -195,6 +183,7 @@ export const toggleProductLike = async (userId, productId) => {
         },
       },
     });
+
     if (existinglike) {
       await prisma.productLike.delete({
         where: {
@@ -212,7 +201,6 @@ export const toggleProductLike = async (userId, productId) => {
       return { liked: true, message: "좋아요가 추가되었습니다" };
     }
   } catch (error) {
-    console.error("Error in toggleProductLike service:", error);
     throw error
   }
 };

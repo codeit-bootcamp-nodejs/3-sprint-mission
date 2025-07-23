@@ -8,7 +8,12 @@ import {
   getProductByIdSchema,
   UpdateCommentBaseSchema,
 } from '../middlewares/validation.middleware.js';
-import { createProductComment, findAllProductComments, updateProductComment, deleteProductComment } from '../services/productComments.service.js';
+import {
+  createProductComment,
+  findAllProductComments,
+  updateProductComment,
+  deleteProductComment
+} from '../services/productComments.service.js';
 
 const productCommentRouter = express.Router({ mergeParams: true });
 
@@ -21,9 +26,7 @@ productCommentRouter.route('/')
       const userId = req.user.userId
       const { productId } = req.params;
       const { content } = req.body;
-
       const newComment = await createProductComment({ productId, userId, content });
-
       res.status(201).json({
         message: '댓글이 저장되었습니다',
         data: newComment
@@ -53,9 +56,7 @@ productCommentRouter.route('/:id')
       const userId = req.user.userId
       const { id: commentId } = req.params;
       const { content } = req.body;
-
       const updatedComment = await updateProductComment(commentId, { content, userId });
-
       res.status(200).json({
         message: '상품 댓글이 성공적으로 수정되었습니다.',
         data: updatedComment
