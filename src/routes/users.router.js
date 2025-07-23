@@ -71,6 +71,25 @@ userRouter.post('/login',
     });
   })
 );
+
+userRouter.post(
+  '/logout',
+  verifyAccessToken,
+  asyncHandler(async (req, res, next) => {
+    const userId = req.user.userId;
+    await logoutUser(userId);
+    // 클라이언트 측 쿠키에서 리프레시 토큰을 제거하도록 지시
+    res.clearCookie('refreshToken', {
+      httpOnly: true, // HTTP Only 쿠키
+      secure: true,
+      path: '/api/users/refresh-token',
+    });
+    res.status(200).json({
+      message: '로그아웃이 성공적으로 완료되었습니다.',
+    });
+  })
+);
+
 // --- 토큰 갱신 라우트 (Refresh Token Rotation 적용) ---
 userRouter.post('/refresh-token',
   verifyRefreshToken,
