@@ -1,4 +1,4 @@
-import { createUser, findUserByEmail, verifyPassword, saveRefreshToken, getUserByRefreshToken, clearRefreshToken } from './authService.js';
+import { createUser, findUserByEmail, findUserByNickname, verifyPassword, saveRefreshToken, getUserByRefreshToken, clearRefreshToken } from './authService.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from './tokenUtils.js';
 
 export const signup = async (req, res) => {
