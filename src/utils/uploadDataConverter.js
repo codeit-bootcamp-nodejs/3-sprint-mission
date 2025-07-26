@@ -1,4 +1,3 @@
-
 export const convertProductUploadFields = (req, res, next) => {
     // price: Int (숫자로 변환)
     if (req.body.price !== undefined && typeof req.body.price === 'string') {

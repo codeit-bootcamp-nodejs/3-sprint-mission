@@ -6,10 +6,22 @@ import hash from '../utils/hash.js';
 // 토큰 생성 유틸리티 함수
 export const createToken = (user, type) => {
   const payload = { userId: user.id };
+  let secret;
+  let expiresIn;
+
+  if (type === 'access') {
+    secret = process.env.ACCESS_TOKEN_SECRET;
+    expiresIn = '1h';
+  } else if (type === 'refresh') {
+    secret = process.env.REFRESH_TOKEN_SECRET;
+    expiresIn = '2w';
+  } else {
+    throw new Error('유효하지 않은 토큰 타입입니다.');
+  }
   const options = {
-    expiresIn: type === 'refresh' ? '2w' : '1h',
+    expiresIn: expiresIn,
   };
-  return jwt.sign(payload, process.env.JWT_SECRET, options);
+  return jwt.sign(payload, secret, options);
 };
 
 
@@ -30,6 +42,7 @@ export const createUser = async (username, email, password, address, imageUrl) =
           code: 'P2002'
         });
       }
+
       if (existingUser.email === email) {
         throw new PrismaClientKnownRequestError('이미 사용 중인 이메일입니다.', {
           code: 'P2002'
@@ -42,22 +55,21 @@ export const createUser = async (username, email, password, address, imageUrl) =
         username,
         email,
         password: hashedPassword,
-        address,
         imageUrl,
+        address,
       },
       select: {
         id: true,
         username: true,
         email: true,
-        address: true,
         imageUrl: true,
+        address: true,
         createdAt: true,
         updatedAt: true,
       },
     });
     return newUser;
   } catch (error) {
-    console.error("Error in createUser service:", error);
     throw error;
   }
 };
@@ -100,16 +112,15 @@ export const findUserById = async (id, selectOptions = undefined) => {
       },
     });
 
+
     if (!user) {
       throw new PrismaClientKnownRequestError('사용자를 찾을 수 없습니다.', {
         code: 'P2025',
-        clientVersion: process.env.PRISMA_CLIENT_VERSION || 'unknown',
         meta: { modelName: 'User', cause: 'record not found' }
       });
     }
     return user;
   } catch (error) {
-    console.error("Error in findUserById service:", error);
     throw error;
   }
 };
@@ -118,6 +129,7 @@ export const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
     where: { email: email }
   });
+
 
   if (!user) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
@@ -147,6 +159,29 @@ export const loginUser = async (email, password) => {
   };
 };
 
+export const logoutUser = async (userId) => {
+  try {
+    // 해당 사용자의 refreshToken 필드를 null로 업데이트하여 무효화
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+      select: { id: true, username: true }
+    });
+
+    if (!updatedUser) {
+      // 사용자를 찾을 수 없거나 업데이트에 실패한 경우
+      throw new PrismaClientKnownRequestError('로그아웃할 사용자를 찾을 수 없습니다.', {
+        code: 'P2025',
+        meta: { modelName: 'User', cause: 'user not found for logout' }
+      });
+    }
+    return { message: '로그아웃 성공', userId: updatedUser.id };
+
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const updateUser = async (id, updateData) => {
   try {
     if (updateData.password) {
@@ -170,7 +205,6 @@ export const updateUser = async (id, updateData) => {
     });
     return updatedUser;
   } catch (error) {
-    console.error("Error in updateUser service:", error);
     throw error;
   }
 };
@@ -191,7 +225,6 @@ export const deleteUser = async (id) => {
     });
     return deletedUser;
   } catch (error) {
-    console.error("Error in deleteUser service:", error);
     throw error;
   }
 };

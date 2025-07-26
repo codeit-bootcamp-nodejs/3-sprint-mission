@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export const prisma = global.prisma || new PrismaClient();
+
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
@@ -15,7 +16,6 @@ export const getPaginationParams = (query) => {
 export const getSortParams = (query, defaultSortField = 'createdAt') => {
   const { sort } = query;
   const order = sort === 'recent' ? 'desc' : 'asc';
-
   return {
     [defaultSortField]: order,
   };
@@ -40,6 +40,7 @@ export const getCursorPaginationOptions = ({ cursor, limit }) => {
   const options = {
     take: parsedLimit,
   };
+
   if (cursor) {
     options.cursor = {
       id: cursor,
@@ -58,6 +59,7 @@ export const calculateNextCursor = (items, parsedLimit) => {
 
 export const checkCommentOwnership = async (commentId, usersId, modelName) => {
   const model = prisma[modelName];
+
   if (!model) {
     const error = new Error(`Invalid model name provided: ${modelName}`);
     error.statusCode = 500;
@@ -78,7 +80,6 @@ export const checkCommentOwnership = async (commentId, usersId, modelName) => {
     error.statusCode = 403;
     throw error;
   }
-
   return comment;
 };
 
@@ -158,7 +159,6 @@ export const getCommentIncludeOptions = (parentSelectField) => ({
 export const findCommentsCommon = async (modelName, parentId, queryParams, parentSelectField) => {
   const model = prisma[modelName];
   const { parsedLimit, ...findManyOptions } = getCursorPaginationOptions(queryParams);
-
   const comments = await model.findMany({
     where: {
       [parentSelectField === 'name' ? 'productId' : 'articleId']: parentId
@@ -167,7 +167,6 @@ export const findCommentsCommon = async (modelName, parentId, queryParams, paren
     include: getCommentIncludeOptions(parentSelectField),
     orderBy: { createdAt: 'desc' },
   });
-
   const nextCursor = calculateNextCursor(comments, parsedLimit);
   return { comments, nextCursor };
 };

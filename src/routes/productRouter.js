@@ -1,4 +1,9 @@
 import express from "express";
+import uploadImage from '../middlewares/upload.middleware.js';
+import path from 'path';
+import asyncHandler from "../utils/asyncHandler.js";
+import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
+import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   findAllProducts,
   createProduct,

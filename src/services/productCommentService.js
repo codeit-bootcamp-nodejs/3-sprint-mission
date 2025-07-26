@@ -1,5 +1,3 @@
-
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import {
   checkCommentOwnership,
   prepareCommentCreateData,
@@ -18,7 +16,6 @@ export const createProductComment = async ({ productId, userId, content }) => {
     });
     return newComment;
   } catch (error) {
-    console.error("Error in createProductComment service:", error);
     throw error;
   }
 };
@@ -27,7 +24,6 @@ export const findAllProductComments = async ({ productId, cursor, limit }) => {
   try {
     return findCommentsCommon('productComment', productId, { cursor, limit }, 'name');
   } catch (error) {
-    console.error("Error in findAllProductComments service:", error);
     throw error;
   }
 };
@@ -49,7 +45,6 @@ export const updateProductComment = async (commentId, { content, userId }) => {
     });
     return updatedComment;
   } catch (error) {
-    console.error("Error in updateProductComment service:", error);
     throw error;
   }
 };
@@ -70,7 +65,6 @@ export const deleteProductComment = async (commentId, userId) => {
     });
     return deletedComment;
   } catch (error) {
-    console.error("Error in deleteProductComment service:", error);
     throw error;
   }
 };

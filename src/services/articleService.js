@@ -29,7 +29,6 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
             ArticleLike: true,
           },
         },
-
       },
     });
     return articles.map(article => ({
@@ -38,7 +37,6 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
       _count: undefined,
     }));
   } catch (error) {
-    console.error("Error in findAllArticles service:", error);
     throw error;
   }
 };
@@ -66,7 +64,6 @@ export const createArticle = async ({ title, content, userId, imageUrl }) => {
     });
     return newArticle;
   } catch (error) {
-    console.error("Error in createArticle service:", error);
     throw error;
   }
 };
@@ -108,6 +105,7 @@ export const findArticleById = async (articleId, currentUserId) => {
       },
     });
 
+
     if (!article) {
       throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
         code: 'P2025',
@@ -119,7 +117,6 @@ export const findArticleById = async (articleId, currentUserId) => {
     const { ArticleLike, _count, ...articleWithoutLikes } = article;
     return { ...articleWithoutLikes, isLiked, likeCount };
   } catch (error) {
-    console.error("Error in findArticleById service:", error);
     throw error;
   }
 };
@@ -149,7 +146,6 @@ export const updateArticle = async (articleId, userId, updateData) => {
     });
     return updatedArticle;
   } catch (error) {
-    console.error("Error in updateArticle service:", error);
     throw error;
   }
 };
@@ -173,7 +169,6 @@ export const deleteArticle = async (articleId, userId) => {
     });
     return deletedArticle;
   } catch (error) {
-    console.error("Error in deleteArticle service:", error);
     throw error;
   }
 };

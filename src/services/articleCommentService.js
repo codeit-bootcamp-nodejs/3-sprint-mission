@@ -8,7 +8,6 @@ import {
 
 export const createArticleComment = async ({ articleId, userId, content }) => {
   const data = prepareCommentCreateData({ parentId: articleId, userId, content }, 'article');
-
   const newComment = await prisma.articleComment.create({
     data: data,
     include: getCommentIncludeOptions('title')
