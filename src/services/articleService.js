@@ -12,8 +12,7 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
   try {
     const { skip, take } = getPaginationParams({ offset, limit });
     const orderBy = getSortParams({ sort }, 'createdAt');
-    const where = getSearchParams(search, ['title', 'content']);
-
+    const where = getSearchParams(search, ['title', 'content']);s
     const articles = await prisma.article.findMany({
       skip,
       take,
@@ -108,6 +107,7 @@ export const findArticleById = async (articleId, currentUserId) => {
           : false,
       },
     });
+
     if (!article) {
       throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
         code: 'P2025',
@@ -127,7 +127,6 @@ export const findArticleById = async (articleId, currentUserId) => {
 export const updateArticle = async (articleId, userId, updateData) => {
   try {
     await checkArticleOwnership(articleId, userId);
-
     const updatedArticle = await prisma.article.update({
       where: {
         id: articleId,
@@ -158,7 +157,6 @@ export const updateArticle = async (articleId, userId, updateData) => {
 export const deleteArticle = async (articleId, userId) => {
   try {
     await checkArticleOwnership(articleId, userId);
-
     const deletedArticle = await prisma.article.delete({
       where: {
         id: articleId
@@ -189,6 +187,7 @@ export const toggleArticleLike = async (currentUserId, articleId) => {
       },
     },
   });
+  
   if (existinglike) {
     await prisma.articleLike.delete({
       where: {

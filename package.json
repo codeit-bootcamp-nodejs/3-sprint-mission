@@ -1,6 +1,6 @@
 {
   "name": "sprint_mission_3",
-  "version": "2.0.1",
+  "version": "3.0.1",
   "description": "중고마켓/자유게시판 API 서버",
   "main": "src/server.js",
   "type": "module",

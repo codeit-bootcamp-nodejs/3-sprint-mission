@@ -2,12 +2,9 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UnauthorizedError } from 'express-jwt';
 
 const errorHandler = (err, req, res, next) => {
-  console.error("전역 에러 발생:", err);
-
   let statusCode = 500;
   let message = '서버 내부 오류가 발생했습니다.';
   let details = undefined;
-
   // express-jwt에서 발생하는 UnauthorizedError 처리 로직 추가
   if (err instanceof UnauthorizedError) {
     if (err.code === 'credentials_required') {
@@ -28,6 +25,7 @@ const errorHandler = (err, req, res, next) => {
       case 'P2002':
         statusCode = 409;
         message = err.message || '요청하신 데이터가 이미 존재합니다.';
+        
         if (err.meta && Array.isArray(err.meta.target)) {
           details = `중복된 필드: ${err.meta.target.join(', ')}`;
         }

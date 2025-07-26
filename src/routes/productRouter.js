@@ -6,31 +6,30 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductLike,
-} from "../services/products.service.js";
+} from "../services/productService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   validate,
   createProductSchema,
   getProductByIdSchema,
   updateProductSchema,
-} from '../middlewares/validation.middleware.js';
-import uploadImage from '../middlewares/upload.middleware.js';
+} from '../middlewares/validationMiddleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import path from 'path';
 import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
-import { prisma } from "../utils/queryHelpers.js";
 
 const productRouter = express.Router();
 
 productRouter.route('/')
   .get(asyncHandler(async (req, res, next) => {
     const products = await findAllProducts(req.query);
-
     res.status(200).json({
       message: '상품 목록 조회',
       data: products,
     });
   }))
+
   .post(
     verifyAccessToken,
     (req, res, next) => {
@@ -44,7 +43,6 @@ productRouter.route('/')
       const imageUrl = req.file ? req.file.path : null;
       const { name, description, price, isSold, tags, stock } = req.body;
       const userId = req.user.userId;
-
       const newProduct = await createProduct({
         name,
         description,
@@ -87,13 +85,13 @@ productRouter.route('/:productId')
         currentUserId = null;
       }
       const product = await findProductById(productId, currentUserId);
-
       res.status(200).json({
         message: '상품 상세 조회',
         data: product,
       });
     })
   )
+
   .patch(
     verifyAccessToken,
     (req, res, next) => {
@@ -108,7 +106,6 @@ productRouter.route('/:productId')
       const { productId } = req.params;
       const imageUrl = req.file ? req.file.path : undefined;
       const loggedInUserId = req.user.userId;
-
       const updateData = req.body;
 
       if (imageUrl !== undefined) {
@@ -116,15 +113,14 @@ productRouter.route('/:productId')
       } else if (req.body.imageUrl !== undefined) {
         updateData.imageUrl = req.body.imageUrl;
       }
-
       const updatedProduct = await updateProduct(productId, loggedInUserId, updateData);
-
       res.status(200).json({
         message: '상품 수정을 성공하였습니다',
         data: updatedProduct,
       });
     })
   )
+
   .delete(
     verifyAccessToken,
     validate(getProductByIdSchema, 'params'),

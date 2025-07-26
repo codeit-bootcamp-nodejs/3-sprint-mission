@@ -22,7 +22,6 @@ export const findAllArticleComments = async ({ articleId, cursor, limit }) => {
 
 export const updateArticleComment = async (commentId, { content, userId }) => {
   await checkCommentOwnership(commentId, userId, 'articleComment');
-
   const updatedComment = await prisma.articleComment.update({
     where: { id: commentId },
     data: { content },
@@ -40,7 +39,6 @@ export const updateArticleComment = async (commentId, { content, userId }) => {
 
 export const deleteArticleComment = async (commentId, userId) => {
   await checkCommentOwnership(commentId, userId, 'articleComment');
-
   const deletedComment = await prisma.articleComment.delete({
     where: { id: commentId },
     select: {

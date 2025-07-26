@@ -36,9 +36,7 @@ export const createUser = async (username, email, password, address, imageUrl) =
         });
       }
     }
-
     const hashedPassword = await hash.hashingPassword(password);
-
     const newUser = await prisma.user.create({
       data: {
         username,
@@ -57,7 +55,6 @@ export const createUser = async (username, email, password, address, imageUrl) =
         updatedAt: true,
       },
     });
-
     return newUser;
   } catch (error) {
     console.error("Error in createUser service:", error);
@@ -102,6 +99,7 @@ export const findUserById = async (id, selectOptions = undefined) => {
         updatedAt: true,
       },
     });
+
     if (!user) {
       throw new PrismaClientKnownRequestError('사용자를 찾을 수 없습니다.', {
         code: 'P2025',
@@ -120,10 +118,12 @@ export const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
     where: { email: email }
   });
+
   if (!user) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }
   const isPasswordValid = await hash.verifyPassword(password, user.password);
+  
   if (!isPasswordValid) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }

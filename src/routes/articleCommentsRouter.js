@@ -7,8 +7,8 @@ import {
   UpdateCommentBaseSchema,
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
-} from '../middlewares/validation.middleware.js';
-import * as articleCommentsService from '../services/articleComments.service.js';
+} from '../middlewares/validationMiddleware.js';
+import * as articleCommentsService from '../services/articleCommentService.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router({ mergeParams: true });
@@ -22,6 +22,7 @@ router
       const { comments, nextCursor } = await articleCommentsService.findAllArticleComments({ articleId, cursor, limit });
       res.status(200).json({ comments, nextCursor });
     }))
+
   .post(
     verifyAccessToken,
     validate(getArticleByIdSchema, 'params'),
@@ -52,6 +53,7 @@ router.route('/:id')
       res.status(200).json(updatedComment);
     })
   )
+  
   .delete(
     verifyAccessToken,
     validate(updateArticleCommentParamsSchema, 'params'),

@@ -5,6 +5,7 @@ import fs from 'fs';
 
 // 기본 업로드 디렉토리 (최상위 uploads 폴더)
 const baseUploadDir = path.resolve(process.cwd(), 'uploads');
+
 if (!fs.existsSync(baseUploadDir)) {
   fs.mkdirSync(baseUploadDir, { recursive: true });
 }
@@ -13,6 +14,7 @@ if (!fs.existsSync(baseUploadDir)) {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const targetUploadDir = req.uploadPath || baseUploadDir;
+
     if (!fs.existsSync(targetUploadDir)) {
       fs.mkdirSync(targetUploadDir, { recursive: true });
     }
@@ -26,13 +28,13 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
+
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error('Only images (jpeg, png, gif) are allowed!'), false);
   }
 };
-
 const uploadImage = multer({
   storage: storage,
   fileFilter: fileFilter,

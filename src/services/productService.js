@@ -11,7 +11,6 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
   const { skip, take } = getPaginationParams({ offset, limit });
   const orderBy = getSortParams({ sort }, 'createdAt');
   const where = getSearchParams(search, ['name', 'description']);
-
   try {
     const products = await prisma.product.findMany({
       skip,
@@ -31,7 +30,6 @@ export const findAllProducts = async ({ offset, limit, sort, search }) => {
         },
       },
     });
-
     return products.map(product => ({
       ...product,
       likeCount: product._count.ProductLike,
@@ -160,7 +158,6 @@ export const updateProduct = async (productId, userId, updateData) => {
 export const deleteProduct = async (productId, userId) => {
   try {
     await checkProductOwnership(productId, userId);
-
     const deletedProduct = await prisma.product.delete({
       where: { id: productId },
       select: {
@@ -178,7 +175,6 @@ export const deleteProduct = async (productId, userId) => {
       },
     });
     return deletedProduct;
-
   } catch (error) {
     console.error("Error in deleteProduct service:", error);
     throw error;
@@ -195,6 +191,7 @@ export const toggleProductLike = async (userId, productId) => {
         },
       },
     });
+    
     if (existinglike) {
       await prisma.productLike.delete({
         where: {

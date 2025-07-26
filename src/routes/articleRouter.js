@@ -1,7 +1,10 @@
 import express from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
-import { validate, createArticleSchema, updateArticleSchema, getArticleByIdSchema } from '../middlewares/validation.middleware.js';
-import uploadImage from '../middlewares/upload.middleware.js';
+import { validate, 
+  createArticleSchema, 
+  updateArticleSchema, 
+  getArticleByIdSchema } from '../middlewares/validationMiddleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   findAllArticles,
@@ -10,7 +13,7 @@ import {
   updateArticle,
   toggleArticleLike,
   deleteArticle,
-} from '../services/articles.service.js';
+} from '../services/articlesService.js';
 
 const articleRouter = express.Router();
 
@@ -24,6 +27,7 @@ articleRouter.route('/')
         data: articles
       });
     }))
+
   .post(
     verifyAccessToken,
     uploadImage.single('image'),
@@ -74,6 +78,7 @@ articleRouter.route('/:articleId')
         data: article,
       });
     }))
+
   .patch(
     verifyAccessToken,
     uploadImage.single('image'),
@@ -92,6 +97,7 @@ articleRouter.route('/:articleId')
         data: patchArticle,
       });
     }))
+    
   .delete(
     verifyAccessToken,
     validate(getArticleByIdSchema, 'params'),

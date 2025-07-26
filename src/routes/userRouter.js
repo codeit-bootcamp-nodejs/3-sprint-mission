@@ -7,16 +7,16 @@ import {
   deleteUser,
   loginUser,
   createToken
-} from '../services/users.service.js';
+} from '../services/userService.js';
 import { verifyAccessToken, verifyRefreshToken } from '../middlewares/auth.js';
 import {
   validate,
   createUserSchema,
   updateUserSchema,
   loginSchema
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import uploadImage from '../middlewares/upload.middleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import path from 'path';
 
 const userRouter = express.Router();
@@ -39,6 +39,7 @@ userRouter.route('/')
         user: newUser,
       });
     }))
+
 // .get( // GET /api/users (모든 사용자 조회) 라우트
 //   asyncHandler(async (req, res, next) => {
 //     // 이 라우트를 활성화하려면 verifyAccessToken 또는 관리자 권한 미들웨어를 추가하는 것이 좋습니다.
@@ -80,9 +81,11 @@ userRouter.post('/refresh-token',
       id: true,
       refreshToken: true,
     });
+
     if (!user) {
       return res.status(401).json({ message: '인증 정보와 일치하는 사용자가 없습니다.' });
     }
+
     if (user.refreshToken !== oldRefreshToken) {
       await updateUser(user.id, { refreshToken: null });
       return res.status(401).json({ message: '유효하지 않거나 이미 사용된 리프레시 토큰입니다. 다시 로그인 해주세요.' });
@@ -96,7 +99,6 @@ userRouter.post('/refresh-token',
       secure: true,
       maxAge: 1000 * 60 * 60 * 24 * 7 * 2 // 2주 (2 weeks)
     });
-
     res.status(200).json({
       message: '새로운 액세스 토큰이 발급되었습니다.',
       accessToken: newAccessToken,
@@ -126,6 +128,7 @@ userRouter.route('/me')
       });
     })
   )
+
   .patch(
     verifyAccessToken,
     (req, res, next) => {
@@ -137,6 +140,7 @@ userRouter.route('/me')
     asyncHandler(async (req, res, next) => {
       const userId = req.user.userId;
       const updateData = req.body;
+      
       if (req.file) {
         updateData.imageUrl = `/uploads/users/${req.file.filename}`;
       }
@@ -147,14 +151,13 @@ userRouter.route('/me')
       });
     })
   )
+
   .delete(
     verifyAccessToken,
     asyncHandler(async (req, res, next) => {
       const userId = req.user.userId;
-
       await updateUser(userId, { refreshToken: null });
       await deleteUser(userId);
-
       res.status(204).end();
     })
   );
