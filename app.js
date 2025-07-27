@@ -5,6 +5,7 @@ import productRouter from './routes/productRoute.js';
 import articleRouter from './routes/articleRoute.js';
 import { upload } from './middlewares/upload.js';
 import { errorHandler } from './handler/errorHandler.js';
+import userController from './controllers/userController.js';
 
 dotenv.config() //env 파일에 정의된 환경변수를 불러와 사용할 수 있게 해주는 명령어
 
@@ -14,6 +15,9 @@ app.use(cors()) // 모든 출처(origin)에서 오는 요청 허용
 app.use(express.json())
 app.use('/products', productRouter)
 app.use('/articles', articleRouter)
+app.use('/', userController)
+app.use('/login', userController)
+app.use('/user')
 
 app.use('/uploads', express.static('uploads'));
 

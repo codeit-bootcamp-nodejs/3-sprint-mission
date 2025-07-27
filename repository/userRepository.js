@@ -12,8 +12,8 @@ const save = (user) => {
   return prisma.user.create({
     data: {
       email: user.email,
-      nickname: user.name,
-      password: user.password, //해싱 추가
+      nickname: user.nickname,
+      password: user.password,
       image: user.image,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

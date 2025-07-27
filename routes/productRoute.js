@@ -2,12 +2,13 @@ import express from 'express'
 import { deleteProduct, getProduct, getProductList, patchProduct, postProduct } from '../controllers/productController.js'
 import { deleteProductComment, getProductCommentList, patchProductComment, postProductComment } from '../controllers/commentController.js'
 import { validateProduct } from '../middlewares/validation.js'
+import auth from '../middlewares/auth.js'
 
 const productRouter = express.Router()
 
 productRouter.route('/')
   .get(getProductList)
-  .post(validateProduct, postProduct)
+  .post(auth.verifyAccessToken, validateProduct, postProduct)
 
 productRouter.route('/:id')
   .get(getProduct)
@@ -15,7 +16,7 @@ productRouter.route('/:id')
   .delete(deleteProduct)
 
 productRouter.route('/:id/comments')
-  .post(postProductComment)
+  .post(auth.verifyAccessToken, postProductComment)
   .get(getProductCommentList)
 
 productRouter.route('/:id/comments/:commentId')

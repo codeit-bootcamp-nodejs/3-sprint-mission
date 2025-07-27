@@ -2,12 +2,13 @@ import express from 'express'
 import { deleteArticle, getArticle, getArticleList, patchArticle, postArticle } from '../controllers/articleController.js'
 import { deleteArticleComment, getArticleCommentList, patchArticleComment, postArticleComment } from '../controllers/commentController.js'
 import { validateArticle } from '../middlewares/validation.js'
+import auth from '../middlewares/auth.js'
 
 const articleRouter = express.Router()
 
 articleRouter.route('/')
   .get(getArticleList)
-  .post(validateArticle, postArticle)
+  .post(auth.verifyAccessToken, validateArticle, postArticle)
 
 articleRouter.route('/:id')
   .get(getArticle)
@@ -15,7 +16,7 @@ articleRouter.route('/:id')
   .delete(deleteArticle)
 
 articleRouter.route('/:id/comments')
-  .post(postArticleComment)
+  .post(auth.verifyAccessToken, postArticleComment)
   .get(getArticleCommentList)
 
 articleRouter.route('/:id/comments/:commentId')
