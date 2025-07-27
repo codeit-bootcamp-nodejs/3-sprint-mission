@@ -99,7 +99,7 @@
 ## 멘토에게
 - 3-sprint-mission\repository\userRepository.js에 있는
 
-const save = (user) => {
+- const save = (user) => {
   return prisma.user.create({
     data: {
       email: user.email,
@@ -111,5 +111,5 @@ const save = (user) => {
     }
   })
 }
-에서 nickname: user.nickname이 user.name으로 쓰이면 오류가 난다는 것까진 알겠는데 왜 그런지 이유를 모르겠습니다.
+- 에서 nickname: user.nickname이 user.name으로 쓰이면 오류가 난다는 것까진 알겠는데 왜 그런지 이유를 모르겠습니다.
 
