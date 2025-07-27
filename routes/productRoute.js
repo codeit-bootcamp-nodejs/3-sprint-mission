@@ -8,18 +8,18 @@ const productRouter = express.Router()
 
 productRouter.route('/')
   .get(getProductList)
-  .post(auth.verifyAccessToken, validateProduct, postProduct)
+  .post(verifyAccessToken, auth.verifyAccessToken, validateProduct, postProduct)
 
 productRouter.route('/:id')
   .get(getProduct)
-  .patch(validateProduct, patchProduct)
-  .delete(deleteProduct)
+  .patch(verifyAccessToken, auth.verifyProductAuthorid, validateProduct, patchProduct)
+  .delete(verifyAccessToken, auth.verifyProductAuthorid, deleteProduct)
 
 productRouter.route('/:id/comments')
-  .post(auth.verifyAccessToken, postProductComment)
+  .post(verifyAccessToken, auth.verifyAccessToken, postProductComment)
   .get(getProductCommentList)
 
 productRouter.route('/:id/comments/:commentId')
-  .patch(patchProductComment)
-  .delete(deleteProductComment)
+  .patch(verifyAccessToken, patchProductComment)
+  .delete(verifyAccessToken, deleteProductComment)
 export default productRouter
