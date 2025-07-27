@@ -19,6 +19,12 @@ const verifyProductAuthorid = async (req, res, next) => {
       error.code = 404;
       throw error;
     }
+
+    if (product.userId !== req.user.userId) {
+      const error = new Error(`Forbidden`);
+      error.code = 403;
+      throw error;
+    }
     return next();
   } catch (error) {
     return next(error)
@@ -33,6 +39,12 @@ const verifyArticleAuthorid = async (req, res, next) => {
     if (!article) {
       const error = new Error('Article not found')
       error.code = 404;
+      throw error;
+    }
+    
+    if (article.userId !== req.user.userId) {
+      const error = new Error(`Forbidden`);
+      error.code = 403;
       throw error;
     }
     return next();
@@ -55,7 +67,7 @@ const verifyProductCommentAuthorid = async (req, res, next) => {
   } catch (error) {
     return next(error)
   }
-}
+} // getProductComment 기능이 없어서 아직 export에 등록 안함
 
 export default {
   verifyAccessToken,

@@ -17,7 +17,7 @@ app.use('/products', productRouter)
 app.use('/articles', articleRouter)
 app.use('/', userController)
 app.use('/login', userController)
-app.use('/user')
+app.use('/user', userController)
 
 app.use('/uploads', express.static('uploads'));
 

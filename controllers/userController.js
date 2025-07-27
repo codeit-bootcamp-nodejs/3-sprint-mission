@@ -21,10 +21,14 @@ userController.post("/login", async (req, res, next) => {
   }
 })
 
-userController.get("/user-profile", (req, res, next) => {
+userController.get("/user", (req, res, next) => {
   const password = req.body //패스워드 재입력
   //토큰 인증 진행
   const user = userService.getUser(password)
+})
+
+userController.get("/user/productList", (req, res, next) => {
+  
 })
 
 export default userController
