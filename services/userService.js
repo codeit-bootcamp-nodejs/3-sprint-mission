@@ -44,6 +44,7 @@ const createToken = async (user) => {
   const payload = { userId: user.id }
   const options = { expiresIn: '1h' }
 
+  // refresh 토큰은 나중에
   // if (type = "refresh") {
   //   options.expiresIn = '1m'
   // }

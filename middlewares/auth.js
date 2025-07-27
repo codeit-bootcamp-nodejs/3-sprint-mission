@@ -41,7 +41,7 @@ const verifyArticleAuthorid = async (req, res, next) => {
       error.code = 404;
       throw error;
     }
-    
+
     if (article.userId !== req.user.userId) {
       const error = new Error(`Forbidden`);
       error.code = 403;
@@ -56,18 +56,24 @@ const verifyArticleAuthorid = async (req, res, next) => {
 const verifyProductCommentAuthorid = async (req, res, next) => {
   const { id: commentId } = req.params;
   try {
-    const comment = await getArticle(commentId);
+    const comment = await getProdcutComment(commentId);
 
     if (!comment) {
       const error = new Error('Comment not found')
       error.code = 404;
       throw error;
     }
+
+    if (comment.userId !== req.user.userId) {
+      const error = new Error(`Forbidden`);
+      error.code = 403;
+      throw error;
+    }
     return next();
   } catch (error) {
     return next(error)
   }
-} // getProductComment 기능이 없어서 아직 export에 등록 안함
+} // getProductComment api가 없어서 아직 export에 등록 안함(에러)
 
 export default {
   verifyAccessToken,

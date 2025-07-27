@@ -1,5 +1,7 @@
 import express from 'express'
 import userService from '../services/userService.js'
+import auth from '../middlewares/auth.js'
+import userRepository from '../repository/userRepository.js'
 
 const userController = express.Router()
 
@@ -21,14 +23,26 @@ userController.post("/login", async (req, res, next) => {
   }
 })
 
-userController.get("/user", (req, res, next) => {
-  const password = req.body //패스워드 재입력
-  //토큰 인증 진행
-  const user = userService.getUser(password)
-})
+// userController.get("/user/:userId", (req, res, next) => {
+//   const { email, password } = req.body
+//   const user = auth.verifyAccessToken(req.headers.authorization)
+//   const dbUser = userRepository.findByEmail(id)
+//   if (!user || user.email !== dbUser.email) {
+//     const error = new Error(`Forbidden`);
+//     error.code = 403;
+//     throw error;
+//   }
+//   if (email === req.user.email && user) {
+//     let id = req.user.id
+//     const profile = userRepository.getUserProfile(id)
+//     return res.json(profile)
+//   } else {
+//     next(error)
+//   }
+// })
 
-userController.get("/user/productList", (req, res, next) => {
-  
-})
+// userController.get("/user/productList/:userId", (req, res, next) => {
+
+// })
 
 export default userController

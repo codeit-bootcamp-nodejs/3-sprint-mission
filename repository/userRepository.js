@@ -1,15 +1,15 @@
 import prisma from '../config/prisma.js';
 
-const findByEmail = (email) => {
-  return prisma.user.findUnique({
+const findByEmail = async (email) => {
+  return await prisma.user.findUnique({
     where: {
       email: email
     }
   })
 }
 
-const save = (user) => {
-  return prisma.user.create({
+const save = async (user) => {
+  return await prisma.user.create({
     data: {
       email: user.email,
       nickname: user.nickname,
@@ -26,8 +26,24 @@ const filterSensitiveUserData = (user) => {
   return insensitiveData
 }
 
+const getUserProfile = async (userId) => {
+  return await prisma.user.findMany({
+    where: {
+      id: userId
+    },
+    select: {
+      email,
+      nickname,
+      image,
+      createdAt,
+      updatedAt,
+    }
+  })
+}
+
 export default {
   findByEmail,
   save,
+  getUserProfile,
   filterSensitiveUserData,
 }
