@@ -6,11 +6,11 @@ export const getArticleList = async (offset = 0, limit = 10, search = '') => {
   return await prisma.article.findMany({
     where: search
       ? {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' } },
-            { content: { contains: search, mode: 'insensitive' } },
-          ],
-        }
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } },
+        ],
+      }
       : {},
     orderBy: {
       createdAt: 'desc',
@@ -23,8 +23,8 @@ export const getArticleList = async (offset = 0, limit = 10, search = '') => {
       content: true,
       createdAt: true,
     },
-  })
-}
+  });
+};
 
 export const getArticleById = async (id) => {
   return await prisma.article.findUnique({
@@ -35,35 +35,32 @@ export const getArticleById = async (id) => {
       content: true,
       createdAt: true,
     },
-  })
-}
+  });
+};
 
-export const createArticle = async (data) => {
+export const createArticle = async ({ userId, ...rest }) => {
   return await prisma.article.create({
+    data: {
+      ...rest,
+      user: { connect: { id: userId } },
+    },
+  });
+};
+
+export const updateArticle = async (id, userId, data) => {
+  const article = await prisma.article.findUnique({ where: { id } });
+  if (!article || article.userId !== userId) return null;
+
+  return await prisma.article.update({
+    where: { id },
     data,
   });
 };
 
-export const updateArticle = async (id, data) => {
-  try {
-    return await prisma.article.update({
-      where: { id },
-      data,
-    });
-  } catch (err) {
-    if (err.code === 'P2025') return null;
-    throw err;
-  }
-}
+export const deleteArticle = async (id, userId) => {
+  const article = await prisma.article.findUnique({ where: { id } });
+  if (!article || article.userId !== userId) return false;
 
-export const deleteArticle = async (id) => {
-  try {
-    await prisma.article.delete({
-      where: { id },
-    });
-    return true;
-  } catch (err) {
-    if (err.code === 'P2025') return false;
-    throw err;
-  }
-}
+  await prisma.article.delete({ where: { id } });
+  return true;
+};

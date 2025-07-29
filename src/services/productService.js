@@ -6,11 +6,11 @@ export const getProductList = async (offset = 0, limit = 10, search = '', sort =
   return await prisma.product.findMany({
     where: search
       ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-          ],
-        }
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      }
       : {},
     orderBy: {
       createdAt: sort === 'asc' ? 'asc' : 'desc',
@@ -24,7 +24,7 @@ export const getProductList = async (offset = 0, limit = 10, search = '', sort =
       createdAt: true,
     },
   })
-}
+};
 
 export const getProductById = async (id) => {
   return await prisma.product.findUnique({
@@ -38,34 +38,33 @@ export const getProductById = async (id) => {
       createdAt: true,
     },
   })
-}
+};
 
-export const createProduct = async (data) => {
+export const createProduct = async ({ userId, ...rest }) => {
   return await prisma.product.create({
+    data: {
+      ...rest,
+      user: { connect: { id: userId } }
+    }
+  });
+};
+
+export const updateProduct = async (id, userId, data) => {
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product || product.userId !== userId) return null;
+
+  return await prisma.product.update({
+    where: { id },
     data,
   });
-}
+};
 
-export const updateProduct = async (id, data) => {
-  try {
-    return await prisma.product.update({
-      where: { id },
-      data,
-    });
-  } catch (err) {
-    if (err.code === 'P2025') return null;
-    throw err;
-  }
-}
+export const deleteProduct = async (id, userId) => {
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product || product.userId !== userId) return false;
 
-export const deleteProduct = async (id) => {
-  try {
-    await prisma.product.delete({
-      where: { id },
-    });
-    return true;
-  } catch (err) {
-    if (err.code === 'P2025') return false;
-    throw err;
-  }
-}
+  await prisma.product.delete({
+    where: { id },
+  });
+  return true;
+};

@@ -6,10 +6,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { errorHandler } from './middlewares/errorHandler.js';
 
+import authRoutes from './auth/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import articleRoutes from './routes/articleRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,10 +28,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+app.use('/auth', authRoutes);
+app.use('/me', userRoutes);
 app.use('/products', productRoutes);
 app.use('/articles', articleRoutes);
 app.use('/upload', uploadRoutes);
-app.use('/comments/', commentRoutes);
+app.use('/comments', commentRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API running' });

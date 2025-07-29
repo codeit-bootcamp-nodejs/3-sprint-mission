@@ -1,24 +1,32 @@
 import express from 'express';
+
 import * as productController from '../controllers/productController.js';
 import * as commentController from '../controllers/commentController.js';
-import { validateProduct } from '../middlewares/productValidator.js';
+import { validateProductCreate, validateProductUpdate } from '../middlewares/productValidator.js';
 import { validateComment } from '../middlewares/commentValidator.js';
+import { authMiddleware } from '../auth/authMiddleware.js';
+import { authorize } from '../auth/authorizeMiddleware.js';
+import { deleteProductLike, postProductLike } from '../controllers/likeController.js';
 
 const router = express.Router();
 
 // Product CRUD
 router.route('/')
-  .post(validateProduct, productController.createProducts)
+  .post(authMiddleware, validateProductCreate, productController.createProducts)
   .get(productController.listProducts);
 
 router.route('/:id')
   .get(productController.getProductById)
-  .patch(validateProduct, productController.updateProduct)
-  .delete(productController.deleteProduct);
+  .patch(authMiddleware, authorize('product'), validateProductUpdate, productController.updateProduct)
+  .delete(authMiddleware, authorize('product'), productController.deleteProduct);
 
 // Product comment
 router.route('/:productId/comments')
-  .post(validateComment, commentController.createProductComment)
+  .post(authMiddleware, validateComment, commentController.createProductComment)
   .get(commentController.getProductComments);
+
+router.route('/:id/like')
+  .post(authMiddleware, postProductLike)
+  .delete(authMiddleware, deleteProductLike);
 
 export default router;

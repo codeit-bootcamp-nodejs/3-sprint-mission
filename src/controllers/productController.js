@@ -1,13 +1,17 @@
 import * as productService from '../services/productService.js';
+import { isTargetLiked } from '../services/likeService.js';
 
 export const createProducts = async (req, res, next) => {
   try {
-    const product = await productService.createProduct(req.body);
-    res.status(201).json(product);
+    const product = await productService.createProduct({
+      ...req.body,
+      userId: req.user.id,
+    });
+    return res.status(201).json(product);
   } catch (err) {
     next(err);
   }
-}
+};
 
 export const listProducts = async (req, res, next) => {
   try {
@@ -16,38 +20,50 @@ export const listProducts = async (req, res, next) => {
     const search = req.query.search || '';
 
     const products = await productService.getProductList(offset, limit, search);
-    res.status(200).json(products);
+    return res.status(200).json(products);
   } catch (err) {
     next(err);
   }
-}
+};
 
 export const getProductById = async (req, res, next) => {
   try {
     const product = await productService.getProductById(Number(req.params.id));
     if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json(product);
+
+    const userId = req.user?.id;
+    const isLiked = userId ? await isTargetLiked(userId, product.id, 'product') : false;
+
+    return res.status(200).json({ ...product, isLiked });
   } catch (err) {
     next(err);
   }
-}
+};
 
 export const updateProduct = async (req, res, next) => {
   try {
-    const updated = await productService.updateProduct(Number(req.params.id), req.body);
+    const id = Number(req.params.id);
+    const userId = req.user.id;
+
+    const updated = await productService.updateProduct(id, userId, req.body);
     if (!updated) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json(updated);
+    
+    return res.status(200).json(updated);
   } catch (err) {
     next(err);
   }
-}
+};
 
 export const deleteProduct = async (req, res, next) => {
   try {
-    const deleted = await productService.deleteProduct(Number(req.params.id));
+    const id = Number(req.params.id);
+    const userId = req.user.id;
+
+    const deleted = await productService.deleteProduct(id, userId);
     if (!deleted) return res.status(404).json({ message: 'Product not found' });
-    res.status(204).end();
+    
+    return res.status(204).end();
   } catch (err) {
     next(err);
   }
-}
+};

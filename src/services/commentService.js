@@ -2,16 +2,15 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const createProductComment = async (productId, content) => {
+export const createProductComment = async (productId, userId, content) => {
   return await prisma.comment.create({
     data: {
       content,
-      product: {
-        connect: { id: productId },
-      },
+      user: { connect: { id: userId } },
+      product: { connect: { id: productId } },
     },
-  })
-}
+  });
+};
 
 export const getProductComments = async (productId, { cursor, limit = 10 }) => {
   return await prisma.comment.findMany({
@@ -25,19 +24,18 @@ export const getProductComments = async (productId, { cursor, limit = 10 }) => {
       content: true,
       createdAt: true,
     },
-  })
-}
+  });
+};
 
-export const createArticleComment = async (articleId, content) => {
+export const createArticleComment = async (articleId, userId, content) => {
   return await prisma.comment.create({
     data: {
       content,
-      article: {
-        connect: { id: articleId },
-      },
+      user: { connect: { id: userId } },
+      article: { connect: { id: articleId } },
     },
-  })
-}
+  });
+};
 
 export const getArticleComments = async (articleId, { cursor, limit = 10 }) => {
   return await prisma.comment.findMany({
@@ -51,29 +49,23 @@ export const getArticleComments = async (articleId, { cursor, limit = 10 }) => {
       content: true,
       createdAt: true,
     },
-  })
-}
+  });
+};
 
-export const updateComment = async (id, content) => {
-  try {
-    return await prisma.comment.update({
-      where: { id },
-      data: { content },
-    });
-  } catch (err) {
-    if (err.code === 'P2025') return null;
-    throw err;
-  }
-}
+export const updateComment = async (id, userId, content) => {
+  const comment = await prisma.comment.findUnique({ where: { id } });
+  if (!comment || comment.userId !== userId) return null;
 
-export const deleteComment = async (id) => {
-  try {
-    await prisma.comment.delete({
-      where: { id },
-    });
-    return true;
-  } catch (err) {
-    if (err.code === 'P2025') return false;
-    throw err;
-  }
-}
+  return await prisma.comment.update({
+    where: { id },
+    data: { content },
+  });
+};
+
+export const deleteComment = async (id, userId) => {
+  const comment = await prisma.comment.findUnique({ where: { id } });
+  if (!comment || comment.userId !== userId) return false;
+
+  await prisma.comment.delete({ where: { id } });
+  return true;
+};
