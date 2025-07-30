@@ -2,7 +2,8 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build": "tsc"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
