@@ -2,6 +2,7 @@ import { expressjwt } from "express-jwt"
 import userRepository from "../repository/userRepository.js"
 import { getProduct } from "../controllers/productController.js";
 import { getArticle } from "../controllers/articleController.js";
+import { getProductComment, getArticleComment } from "../controllers/commentController.js"
 
 const verifyAccessToken = expressjwt({
   secret: process.env.Jwt_SECRET,
@@ -25,9 +26,9 @@ const verifyProductAuthorid = async (req, res, next) => {
       error.code = 403;
       throw error;
     }
-    return next();
+    next();
   } catch (error) {
-    return next(error)
+    next(error)
   }
 }
 
@@ -47,16 +48,38 @@ const verifyArticleAuthorid = async (req, res, next) => {
       error.code = 403;
       throw error;
     }
-    return next();
+    next();
   } catch (error) {
-    return next(error)
+    next(error)
   }
 }
 
-const verifyProductCommentAuthorid = async (req, res, next) => {
+const verifyProductCommentAuthorid = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
   const { id: commentId } = req.params;
   try {
-    const comment = await getProdcutComment(commentId);
+    const comment = await getProductComment(commentId);
+
+    if (!comment) {
+      const error = new Error('Comment not found')
+      error.code = 404;
+      throw error;
+    }
+
+    if (comment.userId !== req.user.userId) {
+      const error = new Error(`Forbidden`);
+      error.code = 403;
+      throw error;
+    }
+    next();
+  } catch (error) {
+    next(error)
+  }
+}
+
+const verifyArticleCommentAuthorid = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
+  const { id: commentId } = req.params;
+  try {
+    const comment = await getArticleComment(commentId);
 
     if (!comment) {
       const error = new Error('Comment not found')
@@ -73,10 +96,13 @@ const verifyProductCommentAuthorid = async (req, res, next) => {
   } catch (error) {
     return next(error)
   }
-} // getProductComment api가 없어서 아직 export에 등록 안함(에러)
+}
+
 
 export default {
   verifyAccessToken,
   verifyProductAuthorid,
   verifyArticleAuthorid,
+  verifyProductCommentAuthorid,
+  verifyArticleCommentAuthorid,
 }

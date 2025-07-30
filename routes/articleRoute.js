@@ -20,7 +20,7 @@ articleRouter.route('/:id/comments')
   .get(getArticleCommentList)
 
 articleRouter.route('/:id/comments/:commentId')
-  .patch(patchArticleComment)
-  .delete(deleteArticleComment)
+  .patch(auth.verifyAccessToken, auth.verifyArticleCommentAuthorid, patchArticleComment)
+  .delete(auth.verifyAccessToken, auth.verifyArticleCommentAuthorid, deleteArticleComment)
 
 export default articleRouter

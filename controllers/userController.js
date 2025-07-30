@@ -16,7 +16,7 @@ userController.post("/user", async (req, res, next) => { //회원가입
     const user = await userService.createUser({ email, nickname, password })
     return res.status(200).json(user)
   } catch (error) {
-    next (error);
+    next(error);
   }
 })
 
@@ -45,7 +45,7 @@ userController.get("/my", auth.verifyAccessToken, async (req, res, next) => {
 
 userController.patch("/my", auth.verifyAccessToken, async (req, res, next) => { //회원 정보 수정
   try {
-    const update = {...req.body}
+    const update = { ...req.body }
     if (update.user) {
       update.password = await hash.hashPassword(update.password)
     }
@@ -64,8 +64,12 @@ userController.patch("/my", auth.verifyAccessToken, async (req, res, next) => { 
 }
 )
 
-userController.get("/user/productList/:userId", (req, res, next) => {
-
+userController.get("/my/productList", async (req, res, next) => {
+  try {
+    const user = await userService.checkUser(req.user)
+  } catch (error) {
+    next(error)
+  }
 })
 
 export default userController
