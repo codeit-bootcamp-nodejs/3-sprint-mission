@@ -1,13 +1,12 @@
 {
   "name": "sprint_mission_3",
-  "version": "2.0.1",
+  "version": "3.0.1",
   "description": "중고마켓/자유게시판 API 서버",
-  "main": "src/server.js",
-  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch src --exec ts-node src/server.ts",
+    "build": "tsc",
     "prisma:push": "npx prisma db push",
     "prisma:generate": "npx prisma generate",
     "prisma:seed": "node prisma/seed.js"
@@ -15,7 +14,6 @@
   "license": "김준철",
   "dependencies": {
     "axios": "^1.9.0",
-    "@prisma/client": "^5.22.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -31,8 +29,22 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/is-email": "^1.0.0",
+    "@types/is-uuid": "^1.0.2",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/express-jwt": "^6.0.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.1.0",
     "nodemon": "^3.1.10",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

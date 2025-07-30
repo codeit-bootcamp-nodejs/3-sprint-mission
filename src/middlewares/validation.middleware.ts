@@ -137,7 +137,7 @@ export const validate = (schema, type) => (req, res, next) => {
       // 이 커스텀 에러 객체에 message와 details를 담아서 전달합니다.
       const validationError = new Error('유효성 검사 오류');
       validationError.statusCode = 400;
-      validationError.details = Array.from(error.failures()).map(failure => ({
+      validationError.details = Array.from(error.failures()).map((failure) => ({
         type: failure.type,
         expected: failure.expected,
         message: failure.message,

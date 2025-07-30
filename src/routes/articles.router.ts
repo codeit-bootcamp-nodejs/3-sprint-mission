@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
 import uploadImage from '../middlewares/upload.middleware.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
@@ -16,7 +16,7 @@ import {
   deleteArticle,
 } from '../services/articles.service.js';
 
-const articleRouter = express.Router();
+const articleRouter: Router = express.Router();
 
 articleRouter.route('/')
   .get(
