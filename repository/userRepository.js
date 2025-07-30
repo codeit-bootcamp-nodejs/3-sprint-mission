@@ -8,6 +8,17 @@ const findByEmail = async (email) => {
   })
 }
 
+const findById = async (id) => {
+  if (!id) {
+    throw new Error('findById 호출 시 id를 입력해야 합니다.')
+  }
+  return await prisma.user.findUnique({
+    where: {
+      id: id
+    }
+  })
+}
+
 const save = async (user) => {
   return await prisma.user.create({
     data: {
@@ -21,29 +32,24 @@ const save = async (user) => {
   })
 }
 
-const filterSensitiveUserData = (user) => {
-  const { password, ...insensitiveData } = user
-  return insensitiveData
-}
-
 const getUserProfile = async (userId) => {
-  return await prisma.user.findMany({
+  return await prisma.user.findUnique({
     where: {
       id: userId
     },
     select: {
-      email,
-      nickname,
-      image,
-      createdAt,
-      updatedAt,
+      email: true,
+      nickname: true,
+      image: true,
+      createdAt: true,
+      updatedAt: true,
     }
   })
 }
 
 export default {
   findByEmail,
+  findById,
   save,
   getUserProfile,
-  filterSensitiveUserData,
 }

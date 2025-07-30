@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import productRouter from './routes/productRoute.js';
 import articleRouter from './routes/articleRoute.js';
 import { upload } from './middlewares/upload.js';
@@ -11,13 +12,12 @@ dotenv.config() //env 파일에 정의된 환경변수를 불러와 사용할 �
 
 const app = express()
 
-app.use(cors()) // 모든 출처(origin)에서 오는 요청 허용
-app.use(express.json())
+app.use(cors()); // 모든 출처(origin)에서 오는 요청 허용
+app.use(express.json());
+app.use(cookieParser());
 app.use('/products', productRouter)
 app.use('/articles', articleRouter)
-app.use('/', userController)
-app.use('/login', userController)
-app.use('/user', userController)
+app.use('/users', userController)
 
 app.use('/uploads', express.static('uploads'));
 

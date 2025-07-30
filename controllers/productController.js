@@ -95,9 +95,9 @@ export const postProduct = async (req, res, next) => {
 
     res.status(201).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -129,9 +129,9 @@ export const patchProduct = async (req, res, next) => {
 
     res.status(200).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -149,9 +149,9 @@ export const deleteProduct = async (req, res, next) => {
 
     res.status(204).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: error.message });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: error.message });
+    // }
     next(error);
   }
 }

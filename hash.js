@@ -12,14 +12,12 @@ const hashPassword = async (password) => {
   return hashedPassword
 }
 
-const verifyPassword = async (inputPassword, savedPassword) => {
-  const isMatch = await bcrypt.compare(inputPassword, savedPassword)
-  if (!isMatch) {
+const verifyPassword = async (inputPassword, password) => {
+  const isValid = await bcrypt.compare(inputPassword, password)
+  if (!isValid) {
     const error = new Error('Unauthorized');
     error.code = 401;
     throw error;
-  } else {
-    return isMatch
   }
 }
 

@@ -12,5 +12,6 @@ export function errorHandler(err, req, res, next) {
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ error: err.message });
   }
-  res.status(500).json({ error: '서버 내부 오류' });
+  if (err.message.includes(`Forbidden`))
+  res.status(403).json({ error: err.message });
 }

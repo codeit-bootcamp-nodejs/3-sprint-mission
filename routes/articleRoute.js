@@ -8,15 +8,15 @@ const articleRouter = express.Router()
 
 articleRouter.route('/')
   .get(getArticleList)
-  .post(verifyAccessToken, auth.verifyAccessToken, validateArticle, postArticle)
+  .post(auth.verifyAccessToken, validateArticle, postArticle)
 
 articleRouter.route('/:id')
   .get(getArticle)
-  .patch(verifyAccessToken, auth.verifyArticleAuthorid, validateArticle, patchArticle)
-  .delete(verifyAccessToken, auth.verifyArticleAuthorid, deleteArticle)
+  .patch(auth.verifyAccessToken, auth.verifyArticleAuthorid, validateArticle, patchArticle)
+  .delete(auth.verifyAccessToken, auth.verifyArticleAuthorid, deleteArticle)
 
 articleRouter.route('/:id/comments')
-  .post(verifyAccessToken, auth.verifyAccessToken, postArticleComment)
+  .post(auth.verifyAccessToken, postArticleComment)
   .get(getArticleCommentList)
 
 articleRouter.route('/:id/comments/:commentId')
