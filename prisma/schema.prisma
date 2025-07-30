@@ -23,6 +23,9 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   productComment ProductComment[]
+  uploadUser     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int?
+  likedUser      User[]           @relation("UserLikeProduct")
 }
 
 model Article {
@@ -32,23 +35,46 @@ model Article {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   articleComment ArticleComment[]
+  uploadUser     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int?
+  likedUser       User[]           @relation("UserLikeArticle")
 }
 
 model ArticleComment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  articleId String
+  id         String   @id @default(uuid())
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId  String
+  uploadUser User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int?
 }
 
 model ProductComment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  uploadUser User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int?
+}
 
-  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  nickname       String? // OIDC로 가입시 이름을 가져오므로 optional
+  image          String[] // 이미지 여러장 들어올 수 있도록 설계
+  password       String? // 해시값 저장됨, 추후 OIDC로 가입시 비밀번호는 사용하지 않을 수 있으므로 optional
+  refreshToken   String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Product        Product[]
+  ProductComment ProductComment[]
+  Article        Article[]
+  ArticleComment ArticleComment[]
+  likeProduct    Product[]        @relation("UserLikeProduct")
+  likeArticle    Article[]        @relation("UserLikeArticle")
 }

@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/prismaClient.js';
+import articleRepository from '../repositories/articleRepository.js';
 
 async function findComments(limit, cursor) {
     return await prisma.articleComment.findMany({
@@ -69,16 +68,22 @@ async function createArticle(req) {
     })
 }
 
-async function findArticleById(id) {
-    return await prisma.article.findUniqueOrThrow({
+async function findArticleById(id, userId) {
+    const article = await prisma.article.findUniqueOrThrow({
         where: { id },
         select: {
             id: true,
             title: true,
             content: true,
             createdAt: true,
+            likedUser: {
+                where: { id: userId }
+            }
         },
     })
+    const { likedUser, ...articleDetails } = article
+    const isLiked = likedUser.length > 0;
+    return { ...articleDetails, isLiked };
 }
 
 async function updatdArticle(req, id) {
@@ -90,7 +95,21 @@ async function updatdArticle(req, id) {
 
 async function deleteArticle(id) {
     await prisma.article.delete({
-            where: { id },
+        where: { id },
     })
 }
-export { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle };
+
+async function updateLikeArticle(id, userId) {
+    const isLiked = await articleRepository.checkLikeArticle(id, userId)
+    let article;
+    if (!isLiked) {
+        article = await articleRepository.likeArticle(id, userId);
+    }
+    else {
+        article = await articleRepository.unlikeArticle(id, userId);
+    }
+    article.isLiked = !isLiked; // 선택되어 있는지 체크해서 필드 추가, 반전시키는건 isLiked가 반영되기 전에 값이기 때문
+    return article;
+}
+
+export { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle, updateLikeArticle };

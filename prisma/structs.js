@@ -1,5 +1,6 @@
 import * as struct from 'superstruct'
 import isUuid from 'is-uuid'
+import isEmail from 'is-email'
 
 export const CreateProductStruct = struct.object({
     name: struct.size(struct.string(), 1, 50),
@@ -25,3 +26,13 @@ export const CreateCommentStruct = struct.object({
 
 export const PatchCommentStruct = struct.partial(CreateCommentStruct)
 
+export const CreateUserStruct = struct.object({
+    email: struct.define('Email', isEmail),
+    nickname: struct.size(struct.string(), 3, 50),
+    password: struct.size(struct.string(), 8, 50), //8자 이상 50자 미만
+})
+
+export const GetUserStruct = struct.object({
+    email: struct.define('Email', isEmail),
+    password: struct.size(struct.string(), 8, 50), //8자 이상 50자 미만
+})

@@ -1,4 +1,4 @@
-import { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle } from '../services/articleServices.js';
+import { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle, updateLikeArticle } from '../services/articleServices.js';
 
 const articleController = {
     
@@ -17,7 +17,8 @@ const articleController = {
     postComment : async (req, res) => { 
         const commentBody = {
             content: req.body.content,
-            articleId: req.body.id
+            articleId: req.body.id,
+            userId: req.user.userId
         }
         const comment = await createComment(commentBody)
 
@@ -47,13 +48,15 @@ const articleController = {
     },
 
     postArticle : async (req, res) => {
+        req.body.userId = req.user.userId;
         const article = await createArticle(req);
         res.status(201).json(article)
     },
 
     getArticleById : async (req, res) => {
         const { id } = req.params
-        const article = await findArticleById(id);
+        const userId = req.user.userId
+        const article = await findArticleById(id, userId);
         res.send(article)
     },
 
@@ -70,6 +73,12 @@ const articleController = {
         res.sendStatus(204)
     },
 
+    likeArticle : async (req, res) => {
+        const id = req.params.id;
+        const userId = req.user.userId;
+        const article = await updateLikeArticle(id, userId)
+        res.json(article)
+    },
 }
 
 export default articleController
