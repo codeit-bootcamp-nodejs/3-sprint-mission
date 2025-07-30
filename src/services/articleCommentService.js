@@ -1,4 +1,3 @@
-
 import {
   checkCommentOwnership,
   prepareCommentCreateData,
@@ -9,7 +8,6 @@ import {
 
 export const createArticleComment = async ({ articleId, userId, content }) => {
   const data = prepareCommentCreateData({ parentId: articleId, userId, content }, 'article');
-
   const newComment = await prisma.articleComment.create({
     data: data,
     include: getCommentIncludeOptions('title')
@@ -23,7 +21,6 @@ export const findAllArticleComments = async ({ articleId, cursor, limit }) => {
 
 export const updateArticleComment = async (commentId, { content, userId }) => {
   await checkCommentOwnership(commentId, userId, 'articleComment');
-
   const updatedComment = await prisma.articleComment.update({
     where: { id: commentId },
     data: { content },
@@ -41,7 +38,6 @@ export const updateArticleComment = async (commentId, { content, userId }) => {
 
 export const deleteArticleComment = async (commentId, userId) => {
   await checkCommentOwnership(commentId, userId, 'articleComment');
-
   const deletedComment = await prisma.articleComment.delete({
     where: { id: commentId },
     select: {

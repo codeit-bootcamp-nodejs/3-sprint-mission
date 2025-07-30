@@ -1,33 +1,34 @@
 import express from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
+import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   validate,
   updateProductCommentParamsSchema,
-  DeleteCommentBaseSchema,
   CommentBaseSchema,
   getProductByIdSchema,
   UpdateCommentBaseSchema,
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 import { createProductComment, findAllProductComments, updateProductComment, deleteProductComment } from '../services/productComments.service.js';
 
 const productCommentRouter = express.Router({ mergeParams: true });
 
 productCommentRouter.route('/')
   .post(
+    verifyAccessToken,
     validate(getProductByIdSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { productId } = req.params;
-      const { content, userId } = req.body;
-
+      const { content } = req.body;
       const newComment = await createProductComment({ productId, userId, content });
-
       res.status(201).json({
         message: '댓글이 저장되었습니다',
         data: newComment
       });
     })
   )
+
   .get(
     validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
@@ -44,27 +45,28 @@ productCommentRouter.route('/')
 
 productCommentRouter.route('/:id')
   .patch(
+    verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
     validate(UpdateCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { id: commentId } = req.params;
-      const { content, userId } = req.body;
-
+      const { content } = req.body;
       const updatedComment = await updateProductComment(commentId, { content, userId });
-
       res.status(200).json({
         message: '상품 댓글이 성공적으로 수정되었습니다.',
         data: updatedComment
       });
     })
   )
+
   .delete(
+    verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
-    validate(DeleteCommentBaseSchema, 'body'),
     asyncHandler(async (req, res, next) => {
+      const userId = req.user.userId
       const { id: commentId } = req.params;
-      const { userId } = req.body;
-      const deletedComment = await deleteProductComment(commentId, userId);
+      await deleteProductComment(commentId, userId);
       res.status(204).end();
     })
   );

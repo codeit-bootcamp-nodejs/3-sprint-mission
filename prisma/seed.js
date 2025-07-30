@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import hashUtils from '../src/utils/hash.js';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,8 @@ async function main() {
       await prisma.$transaction(async (tx) => {
         console.log('Clearing existing data...');
         await Promise.all([
+          tx.productLike.deleteMany({}),
+          tx.articleLike.deleteMany({}),
           tx.articleComment.deleteMany({}),
           tx.productComment.deleteMany({}),
           tx.product.deleteMany({}),
@@ -27,32 +30,42 @@ async function main() {
         console.log('Existing data cleared successfully.');
 
         console.log('Creating users...');
+        const hashedPasswordKim = await hashUtils.hashingPassword('passwordKim1!');
         const userKim = await tx.user.create({
           data: {
-            username: '개발자김',
+            username: '개발자김', // 👈 username을 닉네임 겸용으로 사용
             email: 'dev.kim@example.com',
+            password: hashedPasswordKim,
             address: '서울시 강남구 테헤란로',
+            imageUrl: 'https://picsum.photos/seed/userkim/200/200',
           },
         });
         console.log(`User created: ${userKim.username} (ID: ${userKim.id})`);
 
+        const hashedPasswordLee = await hashUtils.hashingPassword('passwordLee2!');
         const userLee = await tx.user.create({
           data: {
             username: '디자이너이',
             email: 'designer.lee@example.com',
+            password: hashedPasswordLee,
             address: '경기도 성남시 분당구',
+            imageUrl: 'https://picsum.photos/seed/userlee/200/200',
           },
         });
         console.log(`User created: ${userLee.username} (ID: ${userLee.id})`);
 
+        const hashedPasswordPark = await hashUtils.hashingPassword('passwordPark3!');
         const userPark = await tx.user.create({
           data: {
             username: '기획자박',
             email: 'planner.park@example.com',
+            password: hashedPasswordPark,
             address: '부산시 해운대구',
+            imageUrl: 'https://picsum.photos/seed/userpark/200/200',
           },
         });
         console.log(`User created: ${userPark.username} (ID: ${userPark.id})`);
+
 
         console.log('Creating products...');
         const productNodejs = await tx.product.create({
@@ -154,6 +167,40 @@ async function main() {
           },
         });
         console.log(`Article comment created for article: ${articleExpress.title}`);
+
+        // --- 좋아요 시딩 ---
+        console.log('Creating likes...');
+        await tx.productLike.create({
+          data: {
+            userId: userLee.id,
+            productId: productNodejs.id,
+          },
+        });
+        console.log(`Product like created by ${userLee.username} for ${productNodejs.name}`);
+
+        await tx.productLike.create({
+          data: {
+            userId: userPark.id,
+            productId: productIphone.id,
+          },
+        });
+        console.log(`Product like created by ${userPark.username} for ${productIphone.name}`);
+
+        await tx.articleLike.create({
+          data: {
+            userId: userLee.id,
+            articleId: articlePrisma.id,
+          },
+        });
+        console.log(`Article like created by ${userLee.username} for ${articlePrisma.title}`);
+
+        await tx.articleLike.create({
+          data: {
+            userId: userKim.id,
+            articleId: articleExpress.id,
+          },
+        });
+        console.log(`Article like created by ${userKim.username} for ${articleExpress.title}`);
       });
 
       seedingSuccessful = true;

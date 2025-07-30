@@ -41,15 +41,30 @@ export const createUserSchema = s.object({
   username: s.size(s.string(), 2, 20),
   email: Email,
   address: s.optional(s.size(s.string(), 5, 100)),
+  password: s.refine(s.string(), 'password', (value) => {
+    return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
+      '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
+  }),
+  imageUrl: s.optional(s.string()),
 });
 
 export const updateUserSchema = s.object({
   username: s.optional(s.size(s.string(), 2, 20)),
   email: s.optional(Email),
   address: s.optional(s.size(s.string(), 5, 100)),
+  password: s.optional(s.refine(s.string(), 'password', (value) => {
+    return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
+      '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
+  })),
+  imageUrl: s.optional(s.string()),
 });
 
-// --- Product 관련 스키마 ---
+export const loginSchema = s.object({
+  email: Email,
+  password: s.string(), // 로그인 시에는 문자열이기만 하면 됩니다.
+});
+
+// --- Product 관련 스키마 --- (변경 없음)
 export const createProductSchema = s.object({
   name: s.size(s.string(), 2, 50),
   description: s.optional(s.size(s.string(), 0, 500)),
@@ -57,7 +72,6 @@ export const createProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
 });
 
@@ -68,36 +82,24 @@ export const updateProductSchema = s.object({
   isSold: s.optional(s.boolean()),
   tags: s.optional(s.size(s.array(ProductTagEnum), 1, 5)),
   stock: s.optional(s.min(s.number(), 0)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
 });
 
-export const deleteProductSchema = s.object({
-  userId: Uuid,
-});
-
-export const getProductByIdSchema = s.object({ 
+export const getProductByIdSchema = s.object({
   productId: Uuid,
 });
 
-
-// --- Article 관련 스키마 ---
+// --- Article 관련 스키마 --- (변경 없음)
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
 });
 
 export const updateArticleSchema = s.object({
   title: s.optional(s.size(s.string(), 5, 100)),
   content: s.optional(s.size(s.string(), 10, 5000)),
-  userId: Uuid,
   imageUrl: s.optional(s.string()),
-});
-
-export const deleteArticleSchema = s.object({
-  userId: Uuid,
 });
 
 export const getArticleByIdSchema = s.object({
@@ -105,36 +107,24 @@ export const getArticleByIdSchema = s.object({
 });
 
 
-// --- Comment 관련 스키마 ---
+// --- Comment 관련 스키마 --- (변경 없음)
 export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
-  userId: Uuid,
 });
 
 export const UpdateCommentBaseSchema = s.object({
   content: s.optional(s.size(s.string(), 1, 500)),
-  userId: Uuid,
-});
-
-export const DeleteCommentBaseSchema = s.object({
-  userId: Uuid,
-});
-
-
-export const getByIdSchema = s.object({
-  id: Uuid,
 });
 
 export const updateProductCommentParamsSchema = s.object({
-  productId: Uuid,
-  id: Uuid,
+  productId: Uuid, // 기존 상품 ID 유효성 검사
+  id: Uuid,         // <-- 이 줄을 추가해야 합니다! (댓글 ID 유효성 검사)
 });
 
 export const updateArticleCommentParamsSchema = s.object({
   articleId: Uuid,
-  id: Uuid,
+  id: Uuid, // <-- 이 줄도 추가해야 합니다! (게시글 댓글 ID 유효성 검사, 미리 해두는 것이 좋습니다)
 });
-
 
 // --- 유효성 검사 미들웨어 ---
 export const validate = (schema, type) => (req, res, next) => {
@@ -142,9 +132,19 @@ export const validate = (schema, type) => (req, res, next) => {
     s.assert(req[type], schema);
     next();
   } catch (error) {
-    res.status(400).json({
-      message: 'Validation Error',
-      details: error.failures ? Array.from(error.failures()) : error.message,
-    });
+    if (error instanceof s.StructError) {
+      // Superstruct 에러를 캐치했을 때, 커스텀 에러 객체를 생성하여 next()로 전달합니다.
+      // 이 커스텀 에러 객체에 message와 details를 담아서 전달합니다.
+      const validationError = new Error('유효성 검사 오류');
+      validationError.statusCode = 400;
+      validationError.details = Array.from(error.failures()).map(failure => ({
+        type: failure.type,
+        expected: failure.expected,
+        message: failure.message,
+      }));
+      next(validationError);
+    } else {
+      next(error); // 예상치 못한 에러도 전역 에러 핸들러로 전달
+    }
   }
 };

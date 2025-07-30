@@ -1,8 +1,8 @@
-
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export const prisma = global.prisma || new PrismaClient();
+
 if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
@@ -16,7 +16,6 @@ export const getPaginationParams = (query) => {
 export const getSortParams = (query, defaultSortField = 'createdAt') => {
   const { sort } = query;
   const order = sort === 'recent' ? 'desc' : 'asc';
-
   return {
     [defaultSortField]: order,
   };
@@ -41,6 +40,7 @@ export const getCursorPaginationOptions = ({ cursor, limit }) => {
   const options = {
     take: parsedLimit,
   };
+
   if (cursor) {
     options.cursor = {
       id: cursor,
@@ -59,6 +59,7 @@ export const calculateNextCursor = (items, parsedLimit) => {
 
 export const checkCommentOwnership = async (commentId, usersId, modelName) => {
   const model = prisma[modelName];
+
   if (!model) {
     const error = new Error(`Invalid model name provided: ${modelName}`);
     error.statusCode = 500;
@@ -74,19 +75,18 @@ export const checkCommentOwnership = async (commentId, usersId, modelName) => {
     });
   }
 
-  if (comment.userId !== usersId) { 
+  if (comment.userId !== usersId) {
     const error = new Error('댓글을 수정/삭제할 권한이 없습니다.');
     error.statusCode = 403;
     throw error;
   }
-
   return comment;
 };
 
 export const checkProductOwnership = async (productId, userId) => {
-  const product = await prisma.product.findUnique({ 
+  const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { userId: true }, 
+    select: { userId: true },
   });
 
   if (!product) {
@@ -96,7 +96,7 @@ export const checkProductOwnership = async (productId, userId) => {
     });
   }
 
-  if (product.userId !== userId) { 
+  if (product.userId !== userId) {
     const error = new Error('상품을 수정하거나 삭제할 권한이 없습니다.');
     error.statusCode = 403;
     throw error;
@@ -104,9 +104,9 @@ export const checkProductOwnership = async (productId, userId) => {
 };
 
 export const checkArticleOwnership = async (articleId, userId) => {
-  const article = await prisma.article.findUnique({ 
+  const article = await prisma.article.findUnique({
     where: { id: articleId },
-    select: { userId: true }, 
+    select: { userId: true },
   });
 
   if (!article) {
@@ -116,27 +116,27 @@ export const checkArticleOwnership = async (articleId, userId) => {
     });
   }
 
-  if (article.userId !== userId) { 
+  if (article.userId !== userId) {
     const error = new Error('게시글을 수정하거나 삭제할 권한이 없습니다.');
     error.statusCode = 403;
     throw error;
   }
 };
 
-export const prepareCommentCreateData = ({ parentId, userId, content }, parentModelName) => { 
+export const prepareCommentCreateData = ({ parentId, userId, content }, parentModelName) => {
   const data = {
     content: content,
-    [parentModelName === 'product' ? 'product' : 'article']: { 
+    [parentModelName === 'product' ? 'product' : 'article']: {
       connect: {
         id: parentId,
       },
     },
   };
 
-  if (userId) { 
+  if (userId) {
     data.user = {
       connect: {
-        id: userId, 
+        id: userId,
       },
     };
   }
@@ -159,16 +159,14 @@ export const getCommentIncludeOptions = (parentSelectField) => ({
 export const findCommentsCommon = async (modelName, parentId, queryParams, parentSelectField) => {
   const model = prisma[modelName];
   const { parsedLimit, ...findManyOptions } = getCursorPaginationOptions(queryParams);
-
   const comments = await model.findMany({
     where: {
-      [parentSelectField === 'name' ? 'productId' : 'articleId']: parentId 
+      [parentSelectField === 'name' ? 'productId' : 'articleId']: parentId
     },
     ...findManyOptions,
     include: getCommentIncludeOptions(parentSelectField),
     orderBy: { createdAt: 'desc' },
   });
-
   const nextCursor = calculateNextCursor(comments, parsedLimit);
   return { comments, nextCursor };
 };
