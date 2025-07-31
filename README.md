@@ -89,6 +89,20 @@
 - [x] CORS를 설정해 주세요.
 - [ ] render.com으로 배포해 주세요.
 
+- [x] Product 클래스와 ElectronicProduct 클래스 생성
+- [x] favorite 메소드
+- [x] Article 클래스 생성
+- [x] getArticleList, getArticle, patchArticle, deleteArticle 함수
+- [x] fetch 혹은 axios 이용, 에러 메세지 출력
+- [x] .then() 메소드 이용, .catch() 이용
+- [x] getProductList(), getProduct(), createProduct, patchProduct(), deleteProduct() 함수
+- [x] async / await 비동기 처리, try/catch 오류 처리
+- [x] products 배열 / 인스턴스 생성
+- [x] ProductService.js ArticleService.js 파일 분리
+
+### 심화
+- [ ] Article 클래스에 createdAt 프로퍼티 생성
+
 ## 주요 변경사항
 - 
 - 
