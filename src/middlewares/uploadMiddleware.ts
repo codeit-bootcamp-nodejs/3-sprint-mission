@@ -1,9 +1,13 @@
 import multer from 'multer';
-import { Request, RequestHandler } from "express";
+import { Request } from 'express';
+import { FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// 기본 업로드 디렉토리 (최상위 uploads 폴더)
+type DestinationCallback = (error: Error | null, destination: string) => void;
+type FileNameCallback = (error: Error | null, filename: string) => void;
+
+// 기본 업로드 디렉토리
 const baseUploadDir = path.resolve(process.cwd(), 'uploads');
 if (!fs.existsSync(baseUploadDir)) {
   fs.mkdirSync(baseUploadDir, { recursive: true });
@@ -11,33 +15,34 @@ if (!fs.existsSync(baseUploadDir)) {
 
 // Multer DiskStorage 설정
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (req: Request, file: Express.Multer.File, cb: DestinationCallback) => {
     const targetUploadDir = req.uploadPath || baseUploadDir;
     if (!fs.existsSync(targetUploadDir)) {
       fs.mkdirSync(targetUploadDir, { recursive: true });
     }
     cb(null, targetUploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (req: Request, file: Express.Multer.File, cb: FileNameCallback) => {
     const extname = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${Date.now()}${extname}`);
   }
 });
 
-const fileFilter: RequestHandler = (req, file, cb) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only images (jpeg, png, gif) are allowed!'), false);
+    cb(new Error('Only images (jpeg, png, gif) are allowed!'));
   }
 };
 
+
 const uploadImage = multer({
   storage: storage,
-  fileFilter: fileFilter,
+  fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB 제한
+    fileSize: 5 * 1024 * 1024
   }
 });
 
