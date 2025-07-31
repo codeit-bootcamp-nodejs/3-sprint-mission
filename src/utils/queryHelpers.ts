@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
+import { HttpError } from "./errors";
 
 interface PagenationQuery {
   offset?: string;
@@ -99,8 +100,7 @@ export const checkCommentOwnership = async (
   }
 
   if (comment.userId !== userId) {
-    const error = new Error('댓글을 수정/삭제할 권한이 없습니다.');
-    (error as any).statusCode = 403;
+    const error = new HttpError('댓글을 수정/삭제할 권한이 없습니다.', 403);
     throw error;
   }
 };
@@ -124,8 +124,7 @@ export const checkProductOwnership = async (
   }
 
   if (product.userId !== userId) {
-    const error = new Error('상품을 수정하거나 삭제할 권한이 없습니다.');
-    (error as any).statusCode = 403;
+    const error = new HttpError('상품을 수정하거나 삭제할 권한이 없습니다.', 403);
     throw error;
   }
 };
@@ -149,8 +148,7 @@ export const checkArticleOwnership = async (
   }
 
   if (article.userId !== userId) {
-    const error = new Error('게시글을 수정하거나 삭제할 권한이 없습니다.');
-    (error as any).statusCode = 403;
+    const error = new HttpError('게시글을 수정하거나 삭제할 권한이 없습니다.', 403);
     throw error;
   }
 };
@@ -182,7 +180,7 @@ export function prepareCommentCreateData(
   { parentId, userId, content }: CommentCreateArgs,
   parentModelName: ParentModelName
 ): Prisma.ProductCommentCreateInput | Prisma.ArticleCommentCreateInput {
-  const data: any = {
+  const baseData = {
     content: content,
     user: {
       connect: {
@@ -192,19 +190,24 @@ export function prepareCommentCreateData(
   };
 
   if (parentModelName === 'product') {
-    (data as Prisma.ProductCommentCreateInput).product = {
-      connect: {
-        id: parentId,
+    return {
+      ...baseData,
+      product: {
+        connect: {
+          id: parentId,
+        },
       },
     };
   } else {
-    (data as Prisma.ArticleCommentCreateInput).article = {
-      connect: {
-        id: parentId,
+    return {
+      ...baseData,
+      article: {
+        connect: {
+          id: parentId,
+        },
       },
     };
   }
-  return data;
 }
 
 type ParentSelectField = 'name' | 'title'
@@ -220,7 +223,7 @@ export function getCommentIncludeOptions(
 export function getCommentIncludeOptions(
   parentSelectField: ParentSelectField
 ): Prisma.ProductCommentInclude | Prisma.ArticleCommentInclude { // 포괄적인 반환 타입
-  const includeOptions: any = {
+  const baseIncludeOptions = {
     user: {
       select: {
         username: true
@@ -229,20 +232,26 @@ export function getCommentIncludeOptions(
   };
 
   if (parentSelectField === 'name') {
-    (includeOptions as Prisma.ProductCommentInclude).product = {
-      select: {
-        name: true
+    return {
+      ...baseIncludeOptions,
+      product: {
+        select: {
+          name: true
+        }
       }
     };
   } else { // 'title'일 경우
-    (includeOptions as Prisma.ArticleCommentInclude).article = {
-      select: {
-        title: true
+    return {
+      ...baseIncludeOptions,
+      article: {
+        select: {
+          title: true
+        }
       }
     };
   }
-  return includeOptions;
 }
+
 
 type CommentModelNameForFind = 'ProductComment' | 'ArticleComment';
 
@@ -282,7 +291,9 @@ export async function findCommentsCommon(
 }> {
   const { parsedLimit, ...findManyOptions } = getCursorPaginationOptions(queryParams);
 
-  let includeOptions: Prisma.ProductCommentInclude | Prisma.ArticleCommentInclude;
+  let includeOptions:
+    Prisma.ProductCommentInclude |
+    Prisma.ArticleCommentInclude;
 
   if (parentSelectField === 'name') {
     includeOptions = getCommentIncludeOptions('name');
@@ -290,10 +301,12 @@ export async function findCommentsCommon(
     includeOptions = getCommentIncludeOptions('title');
   }
 
-  let comments: (Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> | Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>)[] = [];
+  let commentsResult:
+    Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }>[] |
+    Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>[] = [];
 
   if (modelName === 'ProductComment') {
-    comments = await prisma.productComment.findMany({
+    commentsResult = await prisma.productComment.findMany({
       where: {
         productId: parentId
       },
@@ -302,7 +315,7 @@ export async function findCommentsCommon(
       orderBy: { createdAt: 'desc' },
     });
   } else if (modelName === 'ArticleComment') {
-    comments = await prisma.articleComment.findMany({
+    commentsResult = await prisma.articleComment.findMany({
       where: {
         articleId: parentId
       },
@@ -312,6 +325,11 @@ export async function findCommentsCommon(
     });
   }
 
-  const nextCursor = calculateNextCursor(comments, parsedLimit);
-  return { comments, nextCursor };
+  const nextCursor = calculateNextCursor(commentsResult as Array<{ id: string }>, parsedLimit);
+  return {
+    comments: commentsResult as (
+      Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> |
+      Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>
+    )[], nextCursor
+  }
 }

@@ -1,9 +1,12 @@
-export const convertProductUploadFields = (req, res, next) => {
+import { Request, Response, NextFunction } from "express";
+import { HttpError } from "./errors";
+
+export const convertProductUploadFields = (req: Request, res: Response, next: NextFunction) => {
   // name: String (변환 필요 없음)
   // description: String (변환 필요 없음)
   // price: Int (숫자로 변환)
   if (req.body.price !== undefined && typeof req.body.price === 'string') {
-    req.body.price = parseInt(req.body.price);
+    req.body.price = parseInt(req.body.price, 10);
   }
   // isSold: Boolean (불리언으로 변환)
   // 'true' 문자열은 true로, 'false' 문자열은 false로 변환.
@@ -18,10 +21,8 @@ export const convertProductUploadFields = (req, res, next) => {
   if (req.body.tags !== undefined && typeof req.body.tags === 'string') {
     try {
       req.body.tags = JSON.parse(req.body.tags);
-    } catch (e) {
-      console.error("Product Tags parsing error in convertProductUploadFields:", req.body.tags, e);
-      const error = new Error('태그(tags) 형식이 올바르지 않습니다. JSON 배열 형식으로 입력해주세요.');
-      error.status = 400; // HTTP 상태 코드를 400으로 설정
+    } catch (e: unknown) {
+      const error = new HttpError('태그(tags) 형식이 올바르지 않습니다. JSON 배열 형식으로 입력해주세요.', 400);
       return next(error); // 에러를 다음 미들웨어로 전달
     }
   }
@@ -29,5 +30,5 @@ export const convertProductUploadFields = (req, res, next) => {
   if (req.body.stock !== undefined && typeof req.body.stock === 'string') {
     req.body.stock = parseInt(req.body.stock, 10);
   }
-  next(); // 다음 미들웨어로 진행
+  next();
 };
