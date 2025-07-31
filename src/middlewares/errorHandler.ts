@@ -1,7 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UnauthorizedError } from 'express-jwt';
-import { HttpError } from '../utils/errors'
+import { HttpError, ValidationError } from '../utils/errors'
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("전역 에러 발생:", err);
@@ -24,6 +24,11 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
       statusCode = 401;
       message = '액세스 토큰이 유효하지 않습니다.';
     }
+  }
+  else if (err instanceof ValidationError) {
+    statusCode = err.statusCode;
+    message = err.message;
+    details = err.details;
   }
   else if (err instanceof HttpError) {
     statusCode = err.statusCode;
@@ -49,11 +54,8 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         message = typeof err.message === 'string' && err.message ? err.message : '데이터베이스 관련 오류가 발생했습니다.';
         break;
     }
-  } else if (typeof err.message === 'string' && err.message === '유효성 검사 오류' && Array.isArray(err.details)) {
-    statusCode = 400;
-    message = err.message;
-    details = err.details;
-  } else {
+  }
+  else {
     // 그 외 예측하지 못한 오류 또는 사용자 정의 오류
     statusCode = err.statusCode || 500;
     message = typeof err.message === 'string' && err.message ? err.message : '서버 내부 오류가 발생했습니다.';
