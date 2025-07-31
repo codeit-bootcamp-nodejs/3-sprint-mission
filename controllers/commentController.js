@@ -71,6 +71,34 @@ export const getArticleCommentList = async (req, res, next) => {
   }
 };
 
+export const getProductComment = async (req, res, next) => {
+  try {
+    const { id: productId } = req.params;
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: productId }
+    })
+
+    res.status(200).json(comment)
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getArticleComment = async (req, res, next) => {
+  try {
+    const { id: articleId } = req.params;
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: articleId }
+    })
+
+    res.status(200).json(comment)
+  } catch (error) {
+    next(error);
+  }
+}
+
 export const postProductComment = async (req, res, next) => {
   try {
     assert(req.body, Comment);

@@ -17,3 +17,9 @@ export const Article = s.object({
 export const Comment = s.object({
   content: s.size(s.string(), 1, 500)
 })
+
+export const User = s.object({
+  email: s.size(s.string(),5,30),
+  nickname: s.size(s.string(), 2, 10),
+  image: s.nullable(s.string()),
+})

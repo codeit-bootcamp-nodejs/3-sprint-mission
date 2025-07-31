@@ -82,9 +82,9 @@ export const postArticle = async (req, res, next) => {
 
     res.status(201).json(article);
   } catch (error) {
-    if (error?.title === 'StructError') {
-      return res.status(400).json({ error: '해당 게시글을 등록할 수 없습니다.' });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 게시글을 등록할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -108,9 +108,9 @@ export const patchArticle = async (req, res, next) => {
 
     res.status(200).json(article);
   } catch (error) {
-    if (error?.title === 'StructError') {
-      return res.status(400).json({ error: '해당 게시글을 등록할 수 없습니다.' });
-    }
+    // if (error?.title === 'StructError') {
+    //   return res.status(400).json({ error: '해당 게시글을 수정할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -128,9 +128,9 @@ export const deleteArticle = async (req, res, next) => {
 
     res.status(204).json(article);
   } catch (error) {
-    if (error?.title === 'StructError') {
-      return res.status(400).json({ error: error.message });
-    }
+    // if (error?.title === 'StructError') {
+    //   return res.status(400).json({ error: error.message });
+    // }
     next(error);
   }
 }

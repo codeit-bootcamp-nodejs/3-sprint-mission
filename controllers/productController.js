@@ -44,6 +44,47 @@ export const getProductList = async (req, res, next) => {
   }
 };
 
+export const getProductListByAuthorId = async (req, res, next) => {
+  try {
+    const { page = 1, pageSize = 10, keyword = '' } = req.query;
+
+    const skip = (Number(page) - 1) * Number(pageSize);
+    const take = Number(pageSize);
+
+    const where = {
+      OR: [
+        { name: { contains: keyword, mode: 'insensitive' } },
+        { description: { contains: keyword, mode: 'insensitive' } }
+      ]
+    };
+    const { id: authorId } = req.params;
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: { id: authorId },
+        // select: {
+        //   id: true,
+        //   name: true,
+        //   price: true,
+        //   createdAt: true
+        // },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take
+      }),
+      prisma.product.count({ where })
+    ]);
+
+    res.status(200).json({
+      page: Number(page),
+      pageSize: Number(pageSize),
+      total,
+      products
+    });
+  } catch (error) {
+    next(error); // 에러 핸들러로 전달
+  }
+};
+
 export const getProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -95,9 +136,9 @@ export const postProduct = async (req, res, next) => {
 
     res.status(201).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -129,9 +170,9 @@ export const patchProduct = async (req, res, next) => {
 
     res.status(200).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
     next(error);
   }
 }
@@ -149,9 +190,9 @@ export const deleteProduct = async (req, res, next) => {
 
     res.status(204).json(product);
   } catch (error) {
-    if (error?.name === 'StructError') {
-      return res.status(400).json({ error: error.message });
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: error.message });
+    // }
     next(error);
   }
 }
