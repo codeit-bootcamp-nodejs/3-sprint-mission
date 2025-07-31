@@ -1,12 +1,5 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { promises } from 'dns';
-
-export const prisma = global.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
+import prisma from '../lib/prisma';
+import { Prisma } from '@prisma/client';
 
 interface PagenationQuery {
   offset?: string;
@@ -80,35 +73,32 @@ export const calculateNextCursor = <T extends { id: string }>(items: T[], parsed
 
 export const checkCommentOwnership = async (
   commentId: string,
-  usersId: string,
-  modelName: Prisma.ModelName
+  userId: string,
+  modelName: 'productComment' | 'articleComment'  // 사용 가능한 모델 제한
 ): Promise<void> => {
-  const model: any = prisma[modelName];
+  let comment: { userId: string } | null = null;
 
-  if (!model) {
-    const error = new Error(`Invalid model name provided: ${modelName}`);
-    (error as any).statusCode = 500;
-    throw error;
+  if (modelName === 'productComment') {
+    comment = await prisma.productComment.findUnique({
+      where: { id: commentId },
+      select: { userId: true },
+    });
+  } else if (modelName === 'articleComment') {
+    comment = await prisma.articleComment.findUnique({
+      where: { id: commentId },
+      select: { userId: true },
+    });
   }
 
-  const comment = await model.findUnique({
-    where: { id: commentId },
-    select: { id: true, userId: true }, // 필요한 필드만 선택
-  }) as (
-      Prisma.ProductCommentGetPayload<{ select: { id: true, userId: true } }> |
-      Prisma.ArticleCommentGetPayload<{ select: { id: true, userId: true } }> |
-      null
-    );
-
   if (!comment) {
-    throw new PrismaClientKnownRequestError('댓글을 찾을 수 없습니다.', {
+    throw new Prisma.PrismaClientKnownRequestError('댓글을 찾을 수 없습니다.', {
       code: 'P2025',
       meta: { modelName: modelName, cause: 'record not found' },
       clientVersion: '5.22.0',
     });
   }
 
-  if (comment.userId !== usersId) {
+  if (comment.userId !== userId) {
     const error = new Error('댓글을 수정/삭제할 권한이 없습니다.');
     (error as any).statusCode = 403;
     throw error;
@@ -119,14 +109,14 @@ export const checkProductOwnership = async (
   productId: string,
   userId: string
 ): Promise<void> => {
-  const product: Prisma.ProductGetPayload<{ select: { userId: true } }> =
+  const product: Prisma.ProductGetPayload<{ select: { userId: true } }> | null =
     await prisma.product.findUnique({
       where: { id: productId },
       select: { userId: true },
     });
 
   if (!product) {
-    throw new PrismaClientKnownRequestError('상품을 찾을 수 없습니다.', {
+    throw new Prisma.PrismaClientKnownRequestError('상품을 찾을 수 없습니다.', {
       code: 'P2025',
       meta: { modelName: 'Product', cause: 'record not found' },
       clientVersion: '5.22.0',
@@ -144,14 +134,14 @@ export const checkArticleOwnership = async (
   articleId: string,
   userId: string
 ): Promise<void> => {
-  const article: Prisma.ArticleGetPayload<{ select: { userId: true } }> =
+  const article: Prisma.ArticleGetPayload<{ select: { userId: true } }> | null =
     await prisma.article.findUnique({
       where: { id: articleId },
       select: { userId: true },
     });
 
   if (!article) {
-    throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
+    throw new Prisma.PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
       code: 'P2025',
       meta: { modelName: 'Article', cause: 'record not found' },
       clientVersion: '5.22.0',
@@ -254,7 +244,9 @@ export function getCommentIncludeOptions(
   return includeOptions;
 }
 
-// 1. ProductComment를 조회할 때 (parentSelectField가 'name'일 경우)
+type CommentModelNameForFind = 'ProductComment' | 'ArticleComment';
+
+// --- findCommentsCommon 함수 오버로드 시그니처 정의 시작 ---
 export function findCommentsCommon(
   modelName: 'ProductComment',
   parentId: string,
@@ -265,7 +257,6 @@ export function findCommentsCommon(
   nextCursor: string | null
 }>;
 
-// 2. ArticleComment를 조회할 때 (parentSelectField가 'title'일 경우)
 export function findCommentsCommon(
   modelName: 'ArticleComment',
   parentId: string,
@@ -275,44 +266,20 @@ export function findCommentsCommon(
   comments: Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>[],
   nextCursor: string | null
 }>;
+// --- findCommentsCommon 함수 오버로드 시그니처 정의 끝 ---
 
-// --- 함수 오버로드 시그니처 정의 시작 ---
-
-// 1. ProductComment를 조회할 때 (parentSelectField가 'name'일 경우)
-export function findCommentsCommon(
-  modelName: 'ProductComment',
-  parentId: string,
-  queryParams: Options,
-  parentSelectField: 'name'
-): Promise<{
-  comments: Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }>[],
-  nextCursor: string | null
-}>;
-
-// 2. ArticleComment를 조회할 때 (parentSelectField가 'title'일 경우)
-export function findCommentsCommon(
-  modelName: 'ArticleComment',
-  parentId: string,
-  queryParams: Options,
-  parentSelectField: 'title'
-): Promise<{
-  comments: Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>[],
-  nextCursor: string | null
-}>;
-
-// --- 함수 오버로드 시그니처 정의 끝 ---
-
-// 3. 실제 함수 구현 (implementation signature)
 export async function findCommentsCommon(
-  modelName: Prisma.ModelName,
+  modelName: CommentModelNameForFind,
   parentId: string,
   queryParams: Options,
   parentSelectField: ParentSelectField
 ): Promise<{
-  comments: (Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> | Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>)[],
+  comments: (
+    Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> |
+    Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>
+  )[],
   nextCursor: string | null
 }> {
-  const model: any = (prisma as any)[modelName];
   const { parsedLimit, ...findManyOptions } = getCursorPaginationOptions(queryParams);
 
   let includeOptions: Prisma.ProductCommentInclude | Prisma.ArticleCommentInclude;
@@ -323,15 +290,27 @@ export async function findCommentsCommon(
     includeOptions = getCommentIncludeOptions('title');
   }
 
-  const comments: (Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> | Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>)[] =
-    await model.findMany({
+  let comments: (Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> | Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>)[] = [];
+
+  if (modelName === 'ProductComment') {
+    comments = await prisma.productComment.findMany({
       where: {
-        [parentSelectField === 'name' ? 'productId' : 'articleId']: parentId
+        productId: parentId
       },
       ...findManyOptions,
-      include: includeOptions,
+      include: includeOptions as Prisma.ProductCommentInclude,
       orderBy: { createdAt: 'desc' },
     });
+  } else if (modelName === 'ArticleComment') {
+    comments = await prisma.articleComment.findMany({
+      where: {
+        articleId: parentId
+      },
+      ...findManyOptions,
+      include: includeOptions as Prisma.ArticleCommentInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 
   const nextCursor = calculateNextCursor(comments, parsedLimit);
   return { comments, nextCursor };
