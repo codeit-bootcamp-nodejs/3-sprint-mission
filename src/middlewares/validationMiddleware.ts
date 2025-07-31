@@ -1,11 +1,19 @@
 import * as s from 'superstruct';
+import { Request, Response, NextFunction } from 'express';
+import { Struct } from 'superstruct';
+import { ValidationError } from '../utils/errors';
 import isEmail from 'is-email';
 import isUuid from 'is-uuid';
 
 // --- 공통 타입 정의 ---
-export const Uuid = s.define('Uuid', (value) => isUuid.v4(value));
+export const Uuid = s.define<string>('Uuid', (value: unknown) => {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return isUuid.v4(value);
+});
 
-export const Email = s.define('Email', (value) => {
+export const Email = s.define<string>('Email', (value: unknown) => {
   if (typeof value !== 'string') {
     return false;
   }
@@ -41,7 +49,7 @@ export const createUserSchema = s.object({
   username: s.size(s.string(), 2, 20),
   email: Email,
   address: s.optional(s.size(s.string(), 5, 100)),
-  password: s.refine(s.string(), 'password', (value) => {
+  password: s.refine(s.string(), 'password', (value: string): boolean | string => {
     return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
       '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
   }),
@@ -52,7 +60,7 @@ export const updateUserSchema = s.object({
   username: s.optional(s.size(s.string(), 2, 20)),
   email: s.optional(Email),
   address: s.optional(s.size(s.string(), 5, 100)),
-  password: s.optional(s.refine(s.string(), 'password', (value) => {
+  password: s.optional(s.refine(s.string(), 'password', (value: string): boolean | string => {
     return /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(value) ||
       '비밀번호는 영문과 숫자 조합으로 8자에서 16자 사이여야 합니다.';
   })),
@@ -117,34 +125,32 @@ export const UpdateCommentBaseSchema = s.object({
 });
 
 export const updateProductCommentParamsSchema = s.object({
-  productId: Uuid, // 기존 상품 ID 유효성 검사
-  id: Uuid,         // <-- 이 줄을 추가해야 합니다! (댓글 ID 유효성 검사)
+  productId: Uuid,
 });
 
 export const updateArticleCommentParamsSchema = s.object({
   articleId: Uuid,
-  id: Uuid, // <-- 이 줄도 추가해야 합니다! (게시글 댓글 ID 유효성 검사, 미리 해두는 것이 좋습니다)
 });
 
 // --- 유효성 검사 미들웨어 ---
-export const validate = (schema, type) => (req, res, next) => {
+export const validate = <T>(schema: Struct<T>, type: 'body' | 'query' | 'params') => (req: Request, res: Response, next: NextFunction) => {
   try {
-    s.assert(req[type], schema);
+    s.assert(req[type] as unknown, schema);
     next();
   } catch (error) {
     if (error instanceof s.StructError) {
-      // Superstruct 에러를 캐치했을 때, 커스텀 에러 객체를 생성하여 next()로 전달합니다.
-      // 이 커스텀 에러 객체에 message와 details를 담아서 전달합니다.
-      const validationError = new Error('유효성 검사 오류');
-      validationError.statusCode = 400;
-      validationError.details = Array.from(error.failures()).map((failure) => ({
-        type: failure.type,
-        expected: failure.expected,
-        message: failure.message,
-      }));
+      const validationError = new ValidationError(
+        '유효성 검사 오류',
+        Array.from(error.failures()).map((failure) => ({
+          type: failure.type,
+          message: failure.message,
+          path: failure.path.join('.'),
+          value: failure.value,
+        }))
+      );
       next(validationError);
     } else {
-      next(error); // 예상치 못한 에러도 전역 에러 핸들러로 전달
+      next(error);
     }
   }
 };

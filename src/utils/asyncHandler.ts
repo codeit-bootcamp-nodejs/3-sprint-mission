@@ -1,9 +1,10 @@
+import { Request, Response, NextFunction } from "express"
 
-function asyncHandler(handler) {
-  return async function (req, res, next) {
+function asyncHandler(handler: (req: Request, res: Response, next: NextFunction) => Promise<any>) {
+  return async function (req: Request, res: Response, next: NextFunction) {
     try {
       await handler(req, res, next);
-    } catch (e) {
+    } catch (e: unknown) {
       next(e);
     }
   };
