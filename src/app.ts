@@ -3,11 +3,11 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
-import productRouter from './routes/products.router.js';
-import userRouter from './routes/users.router.js';
-import articleRouter from './routes/articles.router.js';
-import productCommentRouter from './routes/productComments.router.js';
-import articleCommentsRouter from './routes/articleComments.router.js';
+import productRouter from './routes/productRouter.js';
+import userRouter from './routes/userRouter.js';
+import articleRouter from './routes/articleRouter.js';
+import productCommentRouter from './routes/productCommentsRouter.js';
+import articleCommentsRouter from './routes/articleCommentsRouter.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();

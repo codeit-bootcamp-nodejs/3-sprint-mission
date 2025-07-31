@@ -11,7 +11,7 @@ import {
   deleteUser,
   loginUser,
   createToken
-} from '../services/users.service.js';
+} from '../services/userService.js';
 import {
   validate,
   createUserSchema,

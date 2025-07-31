@@ -13,7 +13,7 @@ import {
   findAllProductComments,
   updateProductComment,
   deleteProductComment
-} from '../services/productComments.service.js';
+} from '../services/productCommentsService.js';
 
 const productCommentRouter = express.Router({ mergeParams: true });
 

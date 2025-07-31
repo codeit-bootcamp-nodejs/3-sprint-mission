@@ -8,7 +8,7 @@ import {
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
 } from '../middlewares/validationMiddleware.js';
-import * as articleCommentsService from '../services/articleComments.service.js';
+import * as articleCommentsService from '../services/articleCommentsService.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 const router = express.Router({ mergeParams: true });

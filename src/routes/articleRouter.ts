@@ -14,7 +14,7 @@ import {
   updateArticle,
   toggleArticleLike,
   deleteArticle,
-} from '../services/articles.service.js';
+} from '../services/articleService.js';
 
 const articleRouter: Router = express.Router();
 

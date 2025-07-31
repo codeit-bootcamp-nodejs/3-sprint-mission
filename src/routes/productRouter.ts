@@ -11,7 +11,7 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductLike,
-} from "../services/products.service.js";
+} from "../services/productService.js";
 import {
   validate,
   createProductSchema,
