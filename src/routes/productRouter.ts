@@ -1,5 +1,5 @@
 import express from "express";
-import uploadImage from '../middlewares/upload.middleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import path from 'path';
 import asyncHandler from "../utils/asyncHandler.js";
 import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
@@ -17,7 +17,7 @@ import {
   createProductSchema,
   getProductByIdSchema,
   updateProductSchema,
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 
 const productRouter = express.Router();
 

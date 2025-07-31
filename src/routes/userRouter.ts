@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { verifyAccessToken, verifyRefreshToken } from '../middlewares/auth.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import uploadImage from '../middlewares/upload.middleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import {
   createUser,
   // findAllUsers,
@@ -17,7 +17,7 @@ import {
   createUserSchema,
   updateUserSchema,
   loginSchema
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 
 
 

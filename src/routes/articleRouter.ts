@@ -1,12 +1,12 @@
 import express, { Router } from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
-import uploadImage from '../middlewares/upload.middleware.js';
+import uploadImage from '../middlewares/uploadMiddleware.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   validate, createArticleSchema,
   updateArticleSchema,
   getArticleByIdSchema
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 import {
   findAllArticles,
   createArticle,

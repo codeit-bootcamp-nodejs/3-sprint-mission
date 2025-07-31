@@ -7,7 +7,7 @@ import {
   CommentBaseSchema,
   getProductByIdSchema,
   UpdateCommentBaseSchema,
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 import {
   createProductComment,
   findAllProductComments,

@@ -7,7 +7,7 @@ import {
   UpdateCommentBaseSchema,
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
-} from '../middlewares/validation.middleware.js';
+} from '../middlewares/validationMiddleware.js';
 import * as articleCommentsService from '../services/articleComments.service.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
