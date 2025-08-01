@@ -75,16 +75,16 @@ export const calculateNextCursor = <T extends { id: string }>(items: T[], parsed
 export const checkCommentOwnership = async (
   commentId: string,
   userId: string,
-  modelName: 'productComment' | 'articleComment'  // 사용 가능한 모델 제한
+  modelName: 'ProductComment' | 'ArticleComment'  // 사용 가능한 모델 제한
 ): Promise<void> => {
   let comment: { userId: string } | null = null;
 
-  if (modelName === 'productComment') {
+  if (modelName === 'ProductComment') {
     comment = await prisma.productComment.findUnique({
       where: { id: commentId },
       select: { userId: true },
     });
-  } else if (modelName === 'articleComment') {
+  } else if (modelName === 'ArticleComment') {
     comment = await prisma.articleComment.findUnique({
       where: { id: commentId },
       select: { userId: true },

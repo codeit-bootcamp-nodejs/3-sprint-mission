@@ -8,7 +8,7 @@ declare global {
       file?: File;
       files?: { [fieldname: string]: File[] } | File[];
       user?: {
-        id: string;
+        userId: string;
       }
     }
   }

@@ -72,7 +72,7 @@ export const loginSchema = s.object({
   password: s.string(), // 로그인 시에는 문자열이기만 하면 됩니다.
 });
 
-// --- Product 관련 스키마 --- (변경 없음)
+// --- Product 관련 스키마 --- 
 export const createProductSchema = s.object({
   name: s.size(s.string(), 2, 50),
   description: s.optional(s.size(s.string(), 0, 500)),
@@ -97,7 +97,7 @@ export const getProductByIdSchema = s.object({
   productId: Uuid,
 });
 
-// --- Article 관련 스키마 --- (변경 없음)
+// --- Article 관련 스키마 --- 
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
@@ -115,13 +115,9 @@ export const getArticleByIdSchema = s.object({
 });
 
 
-// --- Comment 관련 스키마 --- (변경 없음)
+// --- Comment 관련 스키마 --- 
 export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
-});
-
-export const UpdateCommentBaseSchema = s.object({
-  content: s.optional(s.size(s.string(), 1, 500)),
 });
 
 export const updateProductCommentParamsSchema = s.object({
@@ -131,6 +127,12 @@ export const updateProductCommentParamsSchema = s.object({
 export const updateArticleCommentParamsSchema = s.object({
   articleId: Uuid,
 });
+// --- 쿼리 유효성 검사 ---
+export const paginationQuerySchema = s.object({
+  cursor: s.optional(s.string()),
+  limit: s.optional(s.string()),
+});
+
 
 // --- 유효성 검사 미들웨어 ---
 export const validate = <T>(schema: Struct<T>, type: 'body' | 'query' | 'params') => (req: Request, res: Response, next: NextFunction) => {
