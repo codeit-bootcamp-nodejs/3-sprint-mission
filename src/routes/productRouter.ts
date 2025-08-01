@@ -1,9 +1,13 @@
 import express from "express";
+import { ProductTag } from '@prisma/client';
 import uploadImage from '../middlewares/uploadMiddleware.js';
 import path from 'path';
 import asyncHandler from "../utils/asyncHandler.js";
 import { convertProductUploadFields } from '../utils/uploadDataConverter.js';
-import { verifyAccessToken } from '../middlewares/auth.js';
+import {
+  verifyAccessToken,
+  optionalVerifyAccessToken,
+} from '../middlewares/auth.js';
 import {
   findAllProducts,
   createProduct,
@@ -40,8 +44,17 @@ productRouter.route('/')
     validate(createProductSchema, 'body'),
     asyncHandler(async (req, res, next) => {
       const imageUrl = req.file ? req.file.path : null;
-      const { name, description, price, isSold, tags, stock } = req.body;
-      const userId = req.user.userId;
+      const { name, description, price, isSold, tags, stock } = req.body as {
+        name: string;
+        description?: string;
+        price: number;
+        userId: string;
+        isSold?: boolean;
+        tags?: ProductTag[];
+        stock?: number;
+        imageUrl?: string | null
+      };
+      const userId = req.user!.userId;
 
       const newProduct = await createProduct({
         name,
@@ -62,30 +75,12 @@ productRouter.route('/')
 
 productRouter.route('/:productId')
   .get(
+    optionalVerifyAccessToken,
     validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
       const { productId } = req.params;
-      let currentUserId = null;
-      // 액세스 토큰이 있다면, 이를 검증하여 userId를 가져옴
-      try {
-        if (req.headers.authorization) {
-          await new Promise((resolve, reject) => {
-            verifyAccessToken(req, res, (err) => {
-              if (err) {
-                currentUserId = null;
-                resolve(); // 에러를 던지지 않고 resolve하여 다음 로직 진행
-              } else {
-                currentUserId = req.user.userId;
-                resolve();
-              }
-            });
-          });
-        }
-      } catch (error) {
-        currentUserId = null;
-      }
+      const currentUserId = req.user?.userId
       const product = await findProductById(productId, currentUserId);
-
       res.status(200).json({
         message: '상품 상세 조회',
         data: product,
@@ -105,7 +100,7 @@ productRouter.route('/:productId')
     asyncHandler(async (req, res, next) => {
       const { productId } = req.params;
       const imageUrl = req.file ? req.file.path : undefined;
-      const loggedInUserId = req.user.userId;
+      const loggedInUserId = req.user!.userId;
       const updateData = req.body;
 
       if (imageUrl !== undefined) {
@@ -127,7 +122,7 @@ productRouter.route('/:productId')
     validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
       const { productId } = req.params;
-      const loggedInUserId = req.user.userId;
+      const loggedInUserId = req.user!.userId;
       await deleteProduct(productId, loggedInUserId);
       res.status(204).end();
     })
@@ -139,8 +134,8 @@ productRouter.route('/:productId/like')
     validate(getProductByIdSchema, 'params'),
     asyncHandler(async (req, res, next) => {
       const { productId } = req.params;
-      const loggedInUserId = req.user.userId;
-      const result = await toggleProductLike(loggedInUserId, productId);
+      const loggedInUserId = req.user!.userId;
+      const result = await toggleProductLike(productId, loggedInUserId);
       res.status(200).json(result)
     })
   );

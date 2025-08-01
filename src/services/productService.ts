@@ -1,13 +1,44 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { ProductTag } from '@prisma/client';
+import prisma from '../lib/prisma';
 import {
   getPaginationParams,
   getSearchParams,
   getSortParams,
-  prisma,
-  checkProductOwnership
+  checkProductOwnership,
 } from '../utils/queryHelpers.js';
 
-export const findAllProducts = async ({ offset, limit, sort, search }) => {
+interface findAllProductsArg {
+  offset?: string;
+  limit?: string;
+  sort?: string;
+  search?: string;
+}
+
+interface createProductData {
+  name: string;
+  description?: string;
+  price: number;
+  userId: string;
+  isSold?: boolean;
+  tags?: ProductTag[];
+  stock?: number;
+  imageUrl?: string | null
+}
+
+interface updateData {
+  name?: string;
+  description?: string;
+  price?: number;
+  userId?: string;
+  isSold?: boolean;
+  tags?: ProductTag[];
+  stock?: number;
+  imageUrl?: string | null
+}
+
+
+export const findAllProducts = async ({ offset, limit, sort, search }: findAllProductsArg) => {
   const { skip, take } = getPaginationParams({ offset, limit });
   const orderBy = getSortParams({ sort }, 'createdAt');
   const where = getSearchParams(search, ['name', 'description']);
@@ -49,7 +80,7 @@ export const createProduct = async ({
   stock,
   userId,
   imageUrl
-}) => {
+}: createProductData) => {
   try {
     const product = await prisma.product.create({
       data: {
@@ -73,7 +104,7 @@ export const createProduct = async ({
   }
 };
 
-export const findProductById = async (productId, currentUserId = null) => {
+export const findProductById = async (productId: string, currentUserId?: string | null) => {
   try {
     const product = await prisma.product.findUnique({
       where: {
@@ -103,6 +134,7 @@ export const findProductById = async (productId, currentUserId = null) => {
       throw new PrismaClientKnownRequestError('상품을 찾을 수 없습니다.', {
         code: 'P2025',
         meta: { modelName: 'Product', cause: 'record not found' },
+        clientVersion: '5.22.0',
       });
     }
     // isLiked 필드 계산: currentUserId가 있고, 해당 유저의 좋아요 레코드가 존재하면 true
@@ -117,7 +149,7 @@ export const findProductById = async (productId, currentUserId = null) => {
   }
 };
 
-export const updateProduct = async (productId, userId, updateData) => {
+export const updateProduct = async (productId: string, userId: string, updateData: updateData) => {
   try {
     await checkProductOwnership(productId, userId);
     const updatedProduct = await prisma.product.update({
@@ -148,7 +180,7 @@ export const updateProduct = async (productId, userId, updateData) => {
   }
 };
 
-export const deleteProduct = async (productId, userId) => {
+export const deleteProduct = async (productId: string, userId: string) => {
   try {
     await checkProductOwnership(productId, userId);
     const deletedProduct = await prisma.product.delete({
@@ -173,7 +205,7 @@ export const deleteProduct = async (productId, userId) => {
   }
 };
 
-export const toggleProductLike = async (userId, productId) => {
+export const toggleProductLike = async (productId: string, userId: string) => {
   try {
     const existinglike = await prisma.productLike.findUnique({
       where: {

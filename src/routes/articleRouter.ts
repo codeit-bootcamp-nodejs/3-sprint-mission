@@ -1,7 +1,10 @@
 import express, { Router } from 'express';
 import asyncHandler from '../utils/asyncHandler.js';
 import uploadImage from '../middlewares/uploadMiddleware.js';
-import { verifyAccessToken, optionalVerifyAccessToken, } from '../middlewares/auth.js';
+import {
+  verifyAccessToken,
+  optionalVerifyAccessToken,
+} from '../middlewares/auth.js';
 import {
   validate, createArticleSchema,
   updateArticleSchema,
@@ -45,7 +48,7 @@ articleRouter.route('/')
       const { title, content } = req.body as {
         title: string
         content: string
-        imageUrl?: string
+        imageUrl?: string | null
       };
       const imageUrl = req.file
         ? `/uploads/articles/${req.file.filename}`
@@ -81,7 +84,7 @@ articleRouter.route('/:articleId')
       const updateData = req.body as {
         title?: string
         content?: string
-        imageUrl?: string
+        imageUrl?: string | null
       };
 
       if (req.file) {
