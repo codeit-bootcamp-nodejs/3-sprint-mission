@@ -10,7 +10,8 @@ import {
   updateUser,
   deleteUser,
   loginUser,
-  createToken
+  createToken,
+  logoutUser,
 } from '../services/userService.js';
 import {
   validate,
@@ -18,8 +19,6 @@ import {
   updateUserSchema,
   loginSchema
 } from '../middlewares/validationMiddleware.js';
-
-
 
 const userRouter = express.Router();
 
@@ -35,7 +34,7 @@ userRouter.route('/')
     asyncHandler(async (req, res, next) => {
       const imageUrl = req.file ? `/uploads/users/${req.file.filename}` : null;
       const { username, email, password, address } = req.body;
-      const newUser = await createUser(username, email, password, address, imageUrl);
+      const newUser = await createUser({ username, email, password, address, imageUrl });
       res.status(201).json({
         message: '회원가입이 성공적으로 완료되었습니다.',
         user: newUser,
@@ -76,7 +75,7 @@ userRouter.post(
   '/logout',
   verifyAccessToken,
   asyncHandler(async (req, res, next) => {
-    const userId = req.user.userId;
+    const userId = req.user!.userId;
     await logoutUser(userId);
     // 클라이언트 측 쿠키에서 리프레시 토큰을 제거하도록 지시
     res.clearCookie('refreshToken', {
@@ -94,7 +93,7 @@ userRouter.post(
 userRouter.post('/refresh-token',
   verifyRefreshToken,
   asyncHandler(async (req, res, next) => {
-    const { userId } = req.user;
+    const userId = req.user!.userId;
     const oldRefreshToken = req.cookies.refreshToken;
     const user = await findUserById(userId, {
       id: true,
@@ -129,7 +128,7 @@ userRouter.route('/me')
   .get(
     verifyAccessToken,
     asyncHandler(async (req, res, next) => {
-      const { userId } = req.user;
+      const userId = req.user!.userId;
       console.log(req.user)
       // findUserById 호출 시 refreshToken을 제외하도록 selectOptions 명시
       const user = await findUserById(userId, {
@@ -156,7 +155,7 @@ userRouter.route('/me')
     uploadImage.single('image'),
     validate(updateUserSchema, 'body'),
     asyncHandler(async (req, res, next) => {
-      const userId = req.user.userId;
+      const userId = req.user!.userId;
       const updateData = req.body;
 
       if (req.file) {
@@ -172,7 +171,7 @@ userRouter.route('/me')
   .delete(
     verifyAccessToken,
     asyncHandler(async (req, res, next) => {
-      const userId = req.user.userId;
+      const userId = req.user!.userId;
       await updateUser(userId, { refreshToken: null });
       await deleteUser(userId);
       res.status(204).end();

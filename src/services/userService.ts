@@ -1,20 +1,37 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../utils/queryHelpers.js';
-import hash from '../utils/hash.js';
+import prisma from '../lib/prisma';
+import hash from '../utils/hash';
+
+interface UpdateUserData {
+  username?: string;
+  email?: string;
+  address?: string;
+  password?: string;
+  imageUrl?: string;
+  refreshToken: string | null
+}
+
+interface CreateUserData {
+  username: string;
+  email: string;
+  password: string;
+  address: string;
+  imageUrl?: string | null;
+}
 
 // 토큰 생성 유틸리티 함수
-export const createToken = (user, type) => {
+export const createToken = (user: { id: string }, type: 'access' | 'refresh') => {
   const payload = { userId: user.id };
   let secret;
   let expiresIn;
 
   if (type === 'access') {
-    secret = process.env.ACCESS_TOKEN_SECRET;
-    expiresIn = '1h';
+    secret = process.env.ACCESS_TOKEN_SECRET as string;
+    expiresIn = 60 * 60; // 1h
   } else if (type === 'refresh') {
-    secret = process.env.REFRESH_TOKEN_SECRET;
-    expiresIn = '2w';
+    secret = process.env.REFRESH_TOKEN_SECRET as string;
+    expiresIn = 60 * 60 * 24 * 7 * 2; // 2w
   } else {
     throw new Error('유효하지 않은 토큰 타입입니다.');
   }
@@ -25,7 +42,8 @@ export const createToken = (user, type) => {
 };
 
 
-export const createUser = async (username, email, password, address, imageUrl) => {
+export const createUser = async (userData: CreateUserData) => {
+  const { username, email, password, address, imageUrl } = userData;
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -38,14 +56,16 @@ export const createUser = async (username, email, password, address, imageUrl) =
 
     if (existingUser) {
       if (existingUser.username === username) {
-        throw new PrismaClientKnownRequestError('이미 사용 중인 사용자 이름입니다.', {
-          code: 'P2002'
+        throw new Prisma.PrismaClientKnownRequestError('이미 사용 중인 사용자 이름입니다.', {
+          code: 'P2002',
+          clientVersion: '5.22.0',
         });
       }
 
       if (existingUser.email === email) {
-        throw new PrismaClientKnownRequestError('이미 사용 중인 이메일입니다.', {
-          code: 'P2002'
+        throw new Prisma.PrismaClientKnownRequestError('이미 사용 중인 이메일입니다.', {
+          code: 'P2002',
+          clientVersion: '5.22.0',
         });
       }
     }
@@ -95,37 +115,26 @@ export const createUser = async (username, email, password, address, imageUrl) =
 //   }
 // };
 
-export const findUserById = async (id, selectOptions = undefined) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      // selectOptions가 전달되면 그 값을 사용하고, 없으면 모든 필드를 가져옴
-      // 특정 필드만 필요한 경우 호출하는 곳에서 명시적으로 select 객체를 전달
-      select: selectOptions || {
-        id: true,
-        username: true,
-        email: true,
-        address: true,
-        imageUrl: true,
-        refreshToken: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+export const findUserById = async <T extends Prisma.UserSelect>(
+  id: string,
+  selectOptions: T
+): Promise<Prisma.UserGetPayload<{ select: T }> | null> => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: selectOptions,
+  });
 
-    if (!user) {
-      throw new PrismaClientKnownRequestError('사용자를 찾을 수 없습니다.', {
-        code: 'P2025',
-        meta: { modelName: 'User', cause: 'record not found' }
-      });
-    }
-    return user;
-  } catch (error) {
-    throw error;
+  if (!user) {
+    throw new Prisma.PrismaClientKnownRequestError('사용자를 찾을 수 없습니다.', {
+      code: 'P2025',
+      meta: { modelName: 'User', cause: 'record not found' },
+      clientVersion: '5.22.0',
+    });
   }
+  return user as Prisma.UserGetPayload<{ select: T }>;
 };
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({
     where: { email: email }
   });
@@ -158,7 +167,7 @@ export const loginUser = async (email, password) => {
   };
 };
 
-export const logoutUser = async (userId) => {
+export const logoutUser = async (userId: string) => {
   try {
     // 해당 사용자의 refreshToken 필드를 null로 업데이트하여 무효화
     const updatedUser = await prisma.user.update({
@@ -169,9 +178,10 @@ export const logoutUser = async (userId) => {
 
     if (!updatedUser) {
       // 사용자를 찾을 수 없거나 업데이트에 실패한 경우
-      throw new PrismaClientKnownRequestError('로그아웃할 사용자를 찾을 수 없습니다.', {
+      throw new Prisma.PrismaClientKnownRequestError('로그아웃할 사용자를 찾을 수 없습니다.', {
         code: 'P2025',
-        meta: { modelName: 'User', cause: 'user not found for logout' }
+        meta: { modelName: 'User', cause: 'user not found for logout' },
+        clientVersion: '5.22.0',
       });
     }
     return { message: '로그아웃 성공', userId: updatedUser.id };
@@ -181,7 +191,7 @@ export const logoutUser = async (userId) => {
   }
 };
 
-export const updateUser = async (id, updateData) => {
+export const updateUser = async (id: string, updateData: UpdateUserData) => {
   try {
     if (updateData.password) {
       updateData.password = await hash.hashingPassword(updateData.password);
@@ -208,7 +218,7 @@ export const updateUser = async (id, updateData) => {
   }
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async (id: string) => {
   try {
     const deletedUser = await prisma.user.delete({
       where: { id },
