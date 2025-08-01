@@ -1,14 +1,28 @@
 
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import prisma from '../lib/prisma'
 import {
   getPaginationParams,
   getSearchParams,
   getSortParams,
-  prisma,
   checkArticleOwnership
 } from '../utils/queryHelpers.js';
 
-export const findAllArticles = async ({ offset, limit, sort, search }) => {
+interface findAllArticlesArg {
+  offset?: string;
+  limit?: string;
+  sort?: string;
+  search?: string;
+}
+
+interface createArticleArg {
+  title: string
+  content: string
+  userId: string
+  imageUrl?: string | null
+}
+
+export const findAllArticles = async ({ offset, limit, sort, search }: findAllArticlesArg) => {
   try {
     const { skip, take } = getPaginationParams({ offset, limit });
     const orderBy = getSortParams({ sort }, 'createdAt');
@@ -41,7 +55,7 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
   }
 };
 
-export const createArticle = async ({ title, content, userId, imageUrl }) => {
+export const createArticle = async ({ title, content, userId, imageUrl }: createArticleArg) => {
   try {
     const newArticle = await prisma.article.create({
       data: {
@@ -68,7 +82,10 @@ export const createArticle = async ({ title, content, userId, imageUrl }) => {
   }
 };
 
-export const findArticleById = async (articleId, currentUserId) => {
+export const findArticleById = async (
+  articleId: string,
+  currentUserId?: string
+) => {
   try {
     const article = await prisma.article.findUnique({
       where: {
@@ -109,6 +126,7 @@ export const findArticleById = async (articleId, currentUserId) => {
       throw new PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
         code: 'P2025',
         meta: { modelName: 'Article', cause: 'record not found' },
+        clientVersion: '5.22.0',
       });
     }
     const isLiked = currentUserId ? article.ArticleLike?.length > 0 : false;
@@ -120,7 +138,13 @@ export const findArticleById = async (articleId, currentUserId) => {
   }
 };
 
-export const updateArticle = async (articleId, userId, updateData) => {
+export const updateArticle = async (
+  articleId: string,
+  userId: string,
+  updateData: {
+    title?: string;
+    content?: string;
+  }) => {
   try {
     await checkArticleOwnership(articleId, userId);
 
@@ -150,7 +174,7 @@ export const updateArticle = async (articleId, userId, updateData) => {
   }
 };
 
-export const deleteArticle = async (articleId, userId) => {
+export const deleteArticle = async (articleId: string, userId: string) => {
   try {
     await checkArticleOwnership(articleId, userId);
 
@@ -174,7 +198,7 @@ export const deleteArticle = async (articleId, userId) => {
   }
 };
 
-export const toggleArticleLike = async (currentUserId, articleId) => {
+export const toggleArticleLike = async (currentUserId: string, articleId: string) => {
   const existinglike = await prisma.articleLike.findUnique({
     where: {
       userId_articleId: {

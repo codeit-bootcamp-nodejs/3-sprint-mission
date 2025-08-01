@@ -101,13 +101,11 @@ export const getProductByIdSchema = s.object({
 export const createArticleSchema = s.object({
   title: s.size(s.string(), 5, 100),
   content: s.size(s.string(), 10, 5000),
-  imageUrl: s.optional(s.string()),
 });
 
 export const updateArticleSchema = s.object({
   title: s.optional(s.size(s.string(), 5, 100)),
   content: s.optional(s.size(s.string(), 10, 5000)),
-  imageUrl: s.optional(s.string()),
 });
 
 export const getArticleByIdSchema = s.object({
@@ -131,6 +129,14 @@ export const updateArticleCommentParamsSchema = s.object({
 export const paginationQuerySchema = s.object({
   cursor: s.optional(s.string()),
   limit: s.optional(s.string()),
+});
+
+// -> 이 코드는 '0' 이상의 숫자 문자열만 허용합니다.
+export const offsetQuerySchema = s.object({
+  offset: s.optional(s.pattern(s.string(), /^\d+$/)),
+  limit: s.optional(s.pattern(s.string(), /^\d+$/)),
+  sort: s.optional(s.string()),
+  search: s.optional(s.string()),
 });
 
 

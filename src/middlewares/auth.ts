@@ -1,5 +1,6 @@
 import { expressjwt } from 'express-jwt';
-import { Request } from 'express';
+import { Request, Response, NextFunction } from 'express';
+
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET
@@ -30,3 +31,20 @@ export const verifyRefreshToken = expressjwt({
   },
   requestProperty: 'user',
 });
+
+export const optionalVerifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
+  if (req.headers.authorization) {
+    // Authorization 헤더가 있으면 Access Token 검증 미들웨어 실행
+    verifyAccessToken(req, res, (err) => {
+      if (err) {
+        // 토큰이 있지만 유효하지 않은 경우, req.user를 초기화하고 다음으로 진행
+        req.user = undefined;
+      }
+      next(); // 오류가 있든 없든 다음 미들웨어로 넘어감
+    });
+  } else {
+    // Authorization 헤더가 없으면 req.user를 초기화하고 바로 다음으로 진행
+    req.user = undefined;
+    next();
+  }
+};
