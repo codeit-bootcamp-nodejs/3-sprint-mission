@@ -1,7 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UnauthorizedError } from 'express-jwt';
-import { HttpError, ValidationError } from '../utils/errors'
+import { HttpError, ValidationError } from '../../types/errors'
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("전역 에러 발생:", err);

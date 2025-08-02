@@ -1,5 +1,4 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { ProductTag } from '@prisma/client';
 import prisma from '../lib/prisma';
 import {
   getPaginationParams,
@@ -7,36 +6,7 @@ import {
   getSortParams,
   checkProductOwnership,
 } from '../utils/queryHelpers.js';
-
-interface findAllProductsArg {
-  offset?: string;
-  limit?: string;
-  sort?: string;
-  search?: string;
-}
-
-interface createProductData {
-  name: string;
-  description?: string;
-  price: number;
-  userId: string;
-  isSold?: boolean;
-  tags?: ProductTag[];
-  stock?: number;
-  imageUrl?: string | null
-}
-
-interface updateData {
-  name?: string;
-  description?: string;
-  price?: number;
-  userId?: string;
-  isSold?: boolean;
-  tags?: ProductTag[];
-  stock?: number;
-  imageUrl?: string | null
-}
-
+import { updateData, createProductData, findAllProductsArg } from '../../types/product'
 
 export const findAllProducts = async ({ offset, limit, sort, search }: findAllProductsArg) => {
   const { skip, take } = getPaginationParams({ offset, limit });

@@ -2,36 +2,21 @@ import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 import hash from '../utils/hash';
-
-interface UpdateUserData {
-  username?: string;
-  email?: string;
-  address?: string;
-  password?: string;
-  imageUrl?: string;
-  refreshToken: string | null
-}
-
-interface CreateUserData {
-  username: string;
-  email: string;
-  password: string;
-  address: string;
-  imageUrl?: string | null;
-}
+import { StringValue } from 'ms';
+import { CreateUserData, UpdateUserData } from '../../types/user'
 
 // 토큰 생성 유틸리티 함수
 export const createToken = (user: { id: string }, type: 'access' | 'refresh') => {
   const payload = { userId: user.id };
   let secret;
-  let expiresIn;
+  let expiresIn: StringValue;
 
   if (type === 'access') {
     secret = process.env.ACCESS_TOKEN_SECRET as string;
-    expiresIn = 60 * 60; // 1h
+    expiresIn = '1h'; // 1h
   } else if (type === 'refresh') {
     secret = process.env.REFRESH_TOKEN_SECRET as string;
-    expiresIn = 60 * 60 * 24 * 7 * 2; // 2w
+    expiresIn = '2w'; // 2w
   } else {
     throw new Error('유효하지 않은 토큰 타입입니다.');
   }

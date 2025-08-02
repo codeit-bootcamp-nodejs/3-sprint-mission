@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
-import { HttpError } from "./errors";
+import { HttpError } from "../../types/errors";
 
 interface PagenationQuery {
   offset?: string;

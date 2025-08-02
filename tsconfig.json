@@ -108,7 +108,8 @@
   "include": [
     "src/**/*",
     "types/**/*.d.ts",
-    "prisma/**/*"
+    "prisma/**/*",
+    "types/errors.ts"
   ],
   "exclude": [
     "node_modules",

@@ -5,23 +5,7 @@ import {
   findCommentsCommon,
 } from '../utils/queryHelpers.js';
 import prisma from '../lib/prisma';
-
-interface FindAllCommentsArgs {
-  articleId: string;
-  cursor?: string;
-  limit?: string;
-}
-
-interface UpdateCommentArgs {
-  content?: string;
-  userId: string;
-}
-
-interface CreateCommentArgs {
-  articleId: string;
-  content: string;
-  userId: string;
-}
+import { CreateCommentArgs, UpdateCommentArgs, FindAllCommentsArgs } from '../../types/articleComment'
 
 export const createArticleComment = async ({ articleId, userId, content }: CreateCommentArgs) => {
   const data = prepareCommentCreateData({ parentId: articleId, userId, content }, 'article');

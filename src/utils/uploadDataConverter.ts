@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "./errors";
+import { HttpError } from "../../types/errors";
 
 export const convertProductUploadFields = (req: Request, res: Response, next: NextFunction) => {
   // name: String (변환 필요 없음)

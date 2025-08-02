@@ -10,6 +10,9 @@ declare global {
       user?: {
         userId: string;
       }
+      cookies: {
+        refreshToken: string;
+      }
     }
   }
 }

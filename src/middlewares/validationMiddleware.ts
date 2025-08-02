@@ -1,7 +1,7 @@
 import * as s from 'superstruct';
 import { Request, Response, NextFunction } from 'express';
 import { Struct } from 'superstruct';
-import { ValidationError } from '../utils/errors';
+import { ValidationError } from '../../types/errors';
 import isEmail from 'is-email';
 import isUuid from 'is-uuid';
 

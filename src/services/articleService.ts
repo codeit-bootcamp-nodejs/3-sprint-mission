@@ -7,20 +7,7 @@ import {
   getSortParams,
   checkArticleOwnership
 } from '../utils/queryHelpers.js';
-
-interface findAllArticlesArg {
-  offset?: string;
-  limit?: string;
-  sort?: string;
-  search?: string;
-}
-
-interface createArticleArg {
-  title: string
-  content: string
-  userId: string
-  imageUrl?: string | null
-}
+import { createArticleArg, findAllArticlesArg } from '../../types/article'
 
 export const findAllArticles = async ({ offset, limit, sort, search }: findAllArticlesArg) => {
   try {
