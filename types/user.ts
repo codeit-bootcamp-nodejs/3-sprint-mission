@@ -1,12 +1,3 @@
-interface UpdateUserData {
-  username?: string;
-  email?: string;
-  address?: string;
-  password?: string;
-  imageUrl?: string;
-  refreshToken: string | null
-}
-
 interface CreateUserData {
   username: string;
   email: string;
@@ -15,4 +6,27 @@ interface CreateUserData {
   imageUrl?: string | null;
 }
 
-export { CreateUserData, UpdateUserData }
+interface SelectOptions {
+  id: true,
+  username: true,
+  email: true,
+  address: true,
+  imageUrl: true,
+  createdAt: true,
+  updatedAt: true,
+}
+
+interface UpdateUserProfileData {
+  username?: string;
+  email?: string;
+  address?: string;
+  password?: string;
+  imageUrl?: string;
+}
+
+
+interface UpdateUserTokenData {
+  refreshToken: string | null;
+}
+
+export { CreateUserData, SelectOptions, UpdateUserProfileData, UpdateUserTokenData }

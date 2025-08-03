@@ -35,11 +35,7 @@ productRouter.route('/')
   }))
   .post(
     verifyAccessToken,
-    (req, res, next) => {
-      req.uploadPath = path.resolve(process.cwd(), 'uploads/products');
-      next();
-    },
-    uploadImage.single('image'),
+    uploadImage('products').single('image'),
     convertProductUploadFields,
     validate(createProductSchema, 'body'),
     asyncHandler(async (req, res, next) => {

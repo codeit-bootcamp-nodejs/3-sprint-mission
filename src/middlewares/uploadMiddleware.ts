@@ -7,16 +7,11 @@ import fs from 'fs';
 type DestinationCallback = (error: Error | null, destination: string) => void;
 type FileNameCallback = (error: Error | null, filename: string) => void;
 
-// 기본 업로드 디렉토리
-const baseUploadDir = path.resolve(process.cwd(), 'uploads');
-if (!fs.existsSync(baseUploadDir)) {
-  fs.mkdirSync(baseUploadDir, { recursive: true });
-}
-
 // Multer DiskStorage 설정
-const storage = multer.diskStorage({
+const storage = (subpath: string) => multer.diskStorage({
   destination: (req: Request, file: Express.Multer.File, cb: DestinationCallback) => {
-    const targetUploadDir = req.uploadPath || baseUploadDir;
+    // 인자로 받은 subpath를 사용해 업로드 경로를 설정
+    const targetUploadDir = path.resolve(process.cwd(), 'uploads', subpath);
     if (!fs.existsSync(targetUploadDir)) {
       fs.mkdirSync(targetUploadDir, { recursive: true });
     }
@@ -37,13 +32,10 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
   }
 };
 
-
-const uploadImage = multer({
-  storage: storage,
+export const uploadImage = (subpath: string) => multer({
+  storage: storage(subpath),
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024
   }
 });
-
-export default uploadImage;
