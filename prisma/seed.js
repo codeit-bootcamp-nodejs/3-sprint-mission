@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -6,58 +7,51 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       email: 'test@example.com',
-      nickname: '테스터',
-      image: null,
-      password: 'hashed_password',
-    },
-  });
-  // 상품 생성
-  const product = await prisma.product.create({
-    data: {
-      name: '멋진 상품',
-      description: '이건 정말 멋진 상품입니다.',
-      price: 5000,
-      tags: ['테스트', '인기'],
-      userId: user.id,
+      nickname: '테스트유저',
+      password: 'hashed-password',
+      image: 'https://example.com/avatar.png',
     },
   });
 
   // 게시글 생성
   const article = await prisma.article.create({
     data: {
-      title: '첫 게시글',
-      content: '내용이 매우 알차요.',
+      title: '첫 번째 글',
+      content: '이건 예시 글입니다.',
       userId: user.id,
     },
   });
 
-  // 댓글 생성 (상품에)
-  await prisma.comment.create({
+  // 상품 생성
+  const product = await prisma.product.create({
     data: {
-      content: '이 상품 정말 좋아요!',
-      productId: product.id,
+      name: '예시 상품',
+      description: '좋은 상품입니다.',
+      price: 10000,
+      tags: ['추천', '인기'],
       userId: user.id,
     },
   });
 
-  // 댓글 생성 (게시글에)
+  // 댓글 생성 (게시글용)
   await prisma.comment.create({
     data: {
-      content: '이 게시글 정말 유익해요!',
+      content: '좋은 글이네요!',
+      userId: user.id,
       articleId: article.id,
-      userId: user.id,
     },
   });
 
-  // 좋아요 (상품)
-  await prisma.productLike.create({
+  // 댓글 생성 (상품용)
+  await prisma.comment.create({
     data: {
+      content: '이 상품 좋아요!',
       userId: user.id,
       productId: product.id,
     },
   });
 
-  // 좋아요 (게시글)
+  // 좋아요 생성
   await prisma.articleLike.create({
     data: {
       userId: user.id,
@@ -65,14 +59,19 @@ async function main() {
     },
   });
 
-  console.log('🌱 시드 데이터 삽입 완료!');
+  await prisma.productLike.create({
+    data: {
+      userId: user.id,
+      productId: product.id,
+    },
+  });
+
+  console.log('🌱 시드 데이터 생성 완료!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ 시드 실패:', e);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());
