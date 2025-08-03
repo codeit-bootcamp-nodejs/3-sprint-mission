@@ -1,5 +1,3 @@
-// src/repositories/articleRepository.ts
-
 import prisma from '../lib/prisma';
 import { CreateArticleData, UpdateArticleData, } from '../../types/article';
 import { PrismaFindManyArgs } from '../../types/pagenation';

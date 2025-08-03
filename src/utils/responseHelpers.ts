@@ -1,5 +1,3 @@
-// src/utils/responseHelpers.ts
-
 import { PaginationAndSearchRequest } from '../../types/pagenation';
 import { getPaginationParams, getSortParams, getSearchParams } from './queryHelpers';
 

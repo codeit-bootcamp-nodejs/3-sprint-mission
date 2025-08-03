@@ -1,5 +1,3 @@
-// src/types/express.d.ts
-
 import { Request as ExpressRequest } from 'express';
 import { File } from 'multer';
 

@@ -1,5 +1,3 @@
-// src/services/articleService.ts
-
 import * as articleRepository from '../repositories/articleRepository';
 import { CreateArticleData, UpdateArticleData, ArticleWithDetails } from '../../types/article';
 import { PaginationAndSearchRequest } from '../../types/pagenation';

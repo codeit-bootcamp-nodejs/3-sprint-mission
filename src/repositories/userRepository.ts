@@ -1,7 +1,6 @@
 import prisma from '../lib/prisma';
 import { CreateUserData, UpdateUserProfileData, UpdateUserTokenData } from '../../types/user';
 
-
 export const findFirstUserRp = async (username: string, email: string) =>
   await prisma.user.findFirst({
     where: {
