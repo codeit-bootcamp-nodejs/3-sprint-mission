@@ -9,7 +9,7 @@ import {
   findUserTokenByIdRp,
   updateUserProfileRp,
   deleteUserRp,
-} from '../repositorys/userRepository'
+} from '../repositories/userRepository'
 import { createToken } from '../utils/jwt';
 import { CreateUserData, UpdateUserProfileData } from '../../types/user';
 

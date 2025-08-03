@@ -1,3 +1,11 @@
+import { Request } from 'express';
+
+interface RefreshTokenRequest extends Request {
+  cookies: {
+    refreshToken: string;
+  };
+}
+
 interface CreateUserData {
   username: string;
   email: string;
@@ -29,4 +37,9 @@ interface UpdateUserTokenData {
   refreshToken: string | null;
 }
 
-export { CreateUserData, SelectOptions, UpdateUserProfileData, UpdateUserTokenData }
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+export { CreateUserData, SelectOptions, UpdateUserProfileData, UpdateUserTokenData, LoginData, RefreshTokenRequest }
