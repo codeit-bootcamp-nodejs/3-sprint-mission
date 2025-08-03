@@ -1,21 +1,24 @@
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { HttpError } from "../../types/errors";
+import {
+  PaginationQuery,
+  SortParamsQuery,
+  CursorPaginationOptions,
+  CursorPaginationReturnOptions,
+  CommentCreateArgs,
+  ParentModelName,
+  ParentSelectField,
+  CommentModelNameForFind,
+  ArticleGetPayload,
+  ProductGetPayload,
+} from '../../types/queryHelpers';
 
-interface PagenationQuery {
-  offset?: string;
-  limit?: string;
-}
-
-export const getPaginationParams = (query: PagenationQuery) => {
+export const getPaginationParams = (query: PaginationQuery) => {
   const skip = parseInt(query.offset || '0', 10);
-  const take = parseInt(query.limit || '10', 10)
+  const take = parseInt(query.limit || '10', 10);
   return { skip, take };
 };
-
-interface SortParamsQuery {
-  sort?: string
-}
 
 export const getSortParams = (query: SortParamsQuery, defaultSortField = 'createdAt') => {
   const { sort } = query;
@@ -39,19 +42,8 @@ export const getSearchParams = (search?: string, fields?: string[]) => {
   };
 };
 
-interface Options {
-  cursor?: string;
-  limit?: string;
-}
-
-interface CursorPaginationReturnOptions {
-  take: number;
-  cursor?: { id: string };
-  skip?: number;
-}
-
-export const getCursorPaginationOptions = ({ cursor, limit }: Options) => {
-  const parsedLimit = parseInt(limit || '10', 10)
+export const getCursorPaginationOptions = ({ cursor, limit }: CursorPaginationOptions) => {
+  const parsedLimit = parseInt(limit || '10', 10);
   const options: CursorPaginationReturnOptions = {
     take: parsedLimit,
   };
@@ -75,7 +67,7 @@ export const calculateNextCursor = <T extends { id: string }>(items: T[], parsed
 export const checkCommentOwnership = async (
   commentId: string,
   userId: string,
-  modelName: 'ProductComment' | 'ArticleComment'  // 사용 가능한 모델 제한
+  modelName: 'ProductComment' | 'ArticleComment'
 ): Promise<void> => {
   let comment: { userId: string } | null = null;
 
@@ -109,11 +101,10 @@ export const checkProductOwnership = async (
   productId: string,
   userId: string
 ): Promise<void> => {
-  const product: Prisma.ProductGetPayload<{ select: { userId: true } }> | null =
-    await prisma.product.findUnique({
-      where: { id: productId },
-      select: { userId: true },
-    });
+  const product: ProductGetPayload | null = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { userId: true },
+  });
 
   if (!product) {
     throw new Prisma.PrismaClientKnownRequestError('상품을 찾을 수 없습니다.', {
@@ -133,11 +124,10 @@ export const checkArticleOwnership = async (
   articleId: string,
   userId: string
 ): Promise<void> => {
-  const article: Prisma.ArticleGetPayload<{ select: { userId: true } }> | null =
-    await prisma.article.findUnique({
-      where: { id: articleId },
-      select: { userId: true },
-    });
+  const article: ArticleGetPayload | null = await prisma.article.findUnique({
+    where: { id: articleId },
+    select: { userId: true },
+  });
 
   if (!article) {
     throw new Prisma.PrismaClientKnownRequestError('게시글을 찾을 수 없습니다.', {
@@ -153,29 +143,14 @@ export const checkArticleOwnership = async (
   }
 };
 
-interface CommentCreateArgs {
-  parentId: string;
-  userId: string;
-  content: string;
-}
-
-type ParentModelName = 'product' | 'article'
-
-// --- 함수 오버로드 시그니처 정의 시작 ---
-
-// 1. parentModelName이 'product'일 때의 시그니처
 export function prepareCommentCreateData(
   args: CommentCreateArgs,
   parentModelName: 'product'
 ): Prisma.ProductCommentCreateInput;
-
-// 2. parentModelName이 'article'일 때의 시그니처
 export function prepareCommentCreateData(
   args: CommentCreateArgs,
   parentModelName: 'article'
 ): Prisma.ArticleCommentCreateInput;
-
-// 3. 실제 함수 구현 (implementation signature)
 export function prepareCommentCreateData(
   { parentId, userId, content }: CommentCreateArgs,
   parentModelName: ParentModelName
@@ -188,7 +163,6 @@ export function prepareCommentCreateData(
       },
     },
   };
-
   if (parentModelName === 'product') {
     return {
       ...baseData,
@@ -210,19 +184,15 @@ export function prepareCommentCreateData(
   }
 }
 
-type ParentSelectField = 'name' | 'title'
-
 export function getCommentIncludeOptions(
   parentSelectField: 'name'
 ): Prisma.ProductCommentInclude;
-
 export function getCommentIncludeOptions(
   parentSelectField: 'title'
 ): Prisma.ArticleCommentInclude;
-
 export function getCommentIncludeOptions(
   parentSelectField: ParentSelectField
-): Prisma.ProductCommentInclude | Prisma.ArticleCommentInclude { // 포괄적인 반환 타입
+): Prisma.ProductCommentInclude | Prisma.ArticleCommentInclude {
   const baseIncludeOptions = {
     user: {
       select: {
@@ -230,7 +200,6 @@ export function getCommentIncludeOptions(
       }
     }
   };
-
   if (parentSelectField === 'name') {
     return {
       ...baseIncludeOptions,
@@ -240,7 +209,7 @@ export function getCommentIncludeOptions(
         }
       }
     };
-  } else { // 'title'일 경우
+  } else {
     return {
       ...baseIncludeOptions,
       article: {
@@ -252,35 +221,28 @@ export function getCommentIncludeOptions(
   }
 }
 
-
-type CommentModelNameForFind = 'ProductComment' | 'ArticleComment';
-
-// --- findCommentsCommon 함수 오버로드 시그니처 정의 시작 ---
 export function findCommentsCommon(
   modelName: 'ProductComment',
   parentId: string,
-  queryParams: Options,
+  queryParams: CursorPaginationOptions,
   parentSelectField: 'name'
 ): Promise<{
   comments: Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }>[],
   nextCursor: string | null
 }>;
-
 export function findCommentsCommon(
   modelName: 'ArticleComment',
   parentId: string,
-  queryParams: Options,
+  queryParams: CursorPaginationOptions,
   parentSelectField: 'title'
 ): Promise<{
   comments: Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>[],
   nextCursor: string | null
 }>;
-// --- findCommentsCommon 함수 오버로드 시그니처 정의 끝 ---
-
 export async function findCommentsCommon(
   modelName: CommentModelNameForFind,
   parentId: string,
-  queryParams: Options,
+  queryParams: CursorPaginationOptions,
   parentSelectField: ParentSelectField
 ): Promise<{
   comments: (
@@ -290,7 +252,6 @@ export async function findCommentsCommon(
   nextCursor: string | null
 }> {
   const { parsedLimit, ...findManyOptions } = getCursorPaginationOptions(queryParams);
-
   let includeOptions:
     Prisma.ProductCommentInclude |
     Prisma.ArticleCommentInclude;
@@ -331,5 +292,5 @@ export async function findCommentsCommon(
       Prisma.ProductCommentGetPayload<{ include: Prisma.ProductCommentInclude }> |
       Prisma.ArticleCommentGetPayload<{ include: Prisma.ArticleCommentInclude }>
     )[], nextCursor
-  }
+  };
 }
