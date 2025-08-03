@@ -1,68 +1,50 @@
-
 import express from 'express';
+import asyncHandler from '../utils/asyncHandler.js';
 import { verifyAccessToken } from '../middlewares/auth.js';
 import {
   validate,
-  CommentBaseSchema,
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
+  CommentBaseSchema,
   paginationQuerySchema,
 } from '../middlewares/validationMiddleware.js';
-import * as articleCommentsService from '../services/articleCommentsService.js';
-import asyncHandler from '../utils/asyncHandler.js';
+import {
+  createCommentController,
+  getCommentsController,
+  updateCommentController,
+  deleteCommentController,
+} from '../controllers/articleCommentController.js';
 
-const router = express.Router({ mergeParams: true });
+const articleCommentRouter = express.Router({ mergeParams: true });
 
-router
+// 게시글 댓글 생성 및 목록 조회 라우트
+articleCommentRouter
   .route('/')
-  .get(
-    validate(getArticleByIdSchema, 'params'),
-    validate(paginationQuerySchema, 'query'),
-    asyncHandler(async (req, res) => {
-      const { articleId } = req.params;
-      const { cursor, limit } = req.query as { cursor?: string; limit?: string };
-      const { comments, nextCursor } = await articleCommentsService.findAllArticleComments({ articleId, cursor, limit });
-      res.status(200).json({ comments, nextCursor });
-    }))
   .post(
     verifyAccessToken,
     validate(getArticleByIdSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
-    asyncHandler(async (req, res) => {
-      const userId = req.user!.userId
-      const { articleId } = req.params;
-      const { content } = req.body as { content: string };
-      const newComment = await articleCommentsService.createArticleComment({
-        articleId,
-        content,
-        userId,
-      });
-      res.status(201).json(newComment);
-    })
+    asyncHandler(createCommentController)
+  )
+  .get(
+    validate(getArticleByIdSchema, 'params'),
+    validate(paginationQuerySchema, 'query'),
+    asyncHandler(getCommentsController)
   );
 
-router.route('/:id')
+// 특정 댓글 수정 및 삭제 라우트
+articleCommentRouter
+  .route('/:id')
   .patch(
     verifyAccessToken,
     validate(updateArticleCommentParamsSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
-    asyncHandler(async (req, res) => {
-      const userId = req.user!.userId
-      const { id } = req.params;
-      const { content } = req.body as { content: string };
-      const updatedComment = await articleCommentsService.updateArticleComment(id, { content, userId });
-      res.status(200).json(updatedComment);
-    })
+    asyncHandler(updateCommentController)
   )
   .delete(
     verifyAccessToken,
     validate(updateArticleCommentParamsSchema, 'params'),
-    asyncHandler(async (req, res) => {
-      const userId = req.user!.userId
-      const { id } = req.params;
-      await articleCommentsService.deleteArticleComment(id, userId);
-      res.status(204).send();
-    })
+    asyncHandler(deleteCommentController)
   );
 
-export default router;
+export default articleCommentRouter;

@@ -9,74 +9,42 @@ import {
   paginationQuerySchema,
 } from '../middlewares/validationMiddleware.js';
 import {
-  createProductComment,
-  findAllProductComments,
-  updateProductComment,
-  deleteProductComment
-} from '../services/productCommentsService.js';
+  createCommentController,
+  getCommentsController,
+  updateCommentController,
+  deleteCommentController,
+} from '../controllers/productCommentController.js';
 
 const productCommentRouter = express.Router({ mergeParams: true });
 
-productCommentRouter.route('/')
+// 상품 댓글 생성 및 목록 조회 라우트
+productCommentRouter
+  .route('/')
   .post(
     verifyAccessToken,
     validate(getProductByIdSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
-    asyncHandler(async (req, res, next) => {
-      const userId = req.user!.userId
-      const { productId } = req.params;
-      const { content } = req.body as {
-        content: string;
-      };
-      const newComment = await createProductComment({ productId, userId, content });
-      res.status(201).json({
-        message: '댓글이 저장되었습니다',
-        data: newComment
-      });
-    })
+    asyncHandler(createCommentController)
   )
   .get(
     validate(paginationQuerySchema, 'query'),
     validate(getProductByIdSchema, 'params'),
-    asyncHandler(async (req, res, next) => {
-      const { productId } = req.params;
-      const { cursor, limit } = req.query as { cursor?: string; limit?: string };
-      const { comments, nextCursor } = await findAllProductComments({ productId, cursor, limit });
-      res.status(200).json({
-        message: '요청하신 상품 댓글목록 입니다',
-        data: comments,
-        nextCursor
-      });
-    })
+    asyncHandler(getCommentsController)
   );
 
-productCommentRouter.route('/:id')
+// 특정 댓글 수정 및 삭제 라우트
+productCommentRouter
+  .route('/:id')
   .patch(
     verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
     validate(CommentBaseSchema, 'body'),
-    asyncHandler(async (req, res, next) => {
-      const userId = req.user!.userId
-      const { id: commentId } = req.params;
-      const { content } = req.body as {
-        content: string;
-      };
-      const updatedComment = await updateProductComment(commentId, { content, userId });
-      res.status(200).json({
-        message: '상품 댓글이 성공적으로 수정되었습니다.',
-        data: updatedComment
-      });
-    })
+    asyncHandler(updateCommentController)
   )
   .delete(
     verifyAccessToken,
     validate(updateProductCommentParamsSchema, 'params'),
-    asyncHandler(async (req, res, next) => {
-      const userId = req.user!.userId
-      const { id: commentId } = req.params;
-      await deleteProductComment(commentId, userId);
-      res.status(204).end();
-    })
+    asyncHandler(deleteCommentController)
   );
 
 export default productCommentRouter;
