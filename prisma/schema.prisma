@@ -17,6 +17,7 @@ model User {
   updatedAt DateTime  @updatedAt
   article   Article[]
   comments  Comment[]
+  product   Product[]
 }
 
 model Product {
@@ -29,6 +30,8 @@ model Product {
   updatedAt   DateTime  @updatedAt
   quantity    Int?
   comments    Comment[]
+  User        User?     @relation(fields: [userId], references: [id])
+  userId      Int?
 }
 
 model Article {

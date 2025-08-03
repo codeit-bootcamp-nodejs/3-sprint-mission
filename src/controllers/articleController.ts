@@ -1,19 +1,20 @@
-import { PrismaClient } from '@prisma/client';
-import { assert, create } from 'superstruct';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { assert, create, string } from 'superstruct';
 import { Article } from '../structs'
+import { RequestHandler } from 'express';
 const prisma = new PrismaClient();
 
-export const getArticleList = async (req, res, next) => {
+export const getArticleList: RequestHandler = async (req, res, next) => {
   try {
-    const { page = 1, pageSize = 10, keyword = '' } = req.query;
+    const { page = 1, pageSize = 10, keyword = '' }: {page?: number; pageSize?: number; keyword?: string} = req.query;
 
     const skip = (Number(page) - 1) * Number(pageSize);
     const take = Number(pageSize);
 
     const where = {
       OR: [
-        { title: { contains: keyword, mode: 'insensitive' } },
-        { content: { contains: keyword, mode: 'insensitive' } }
+        { title: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+        { content: { contains: keyword, mode: Prisma.QueryMode.insensitive } }
       ]
     };
 
@@ -43,7 +44,7 @@ export const getArticleList = async (req, res, next) => {
   }
 };
 
-export const getArticle = async (req, res, next) => {
+export const getArticle: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -67,11 +68,11 @@ export const getArticle = async (req, res, next) => {
   }
 };
 
-export const postArticle = async (req, res, next) => {
+export const postArticle: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Article);
 
-    const { title, content = [] } = req.body;
+    const { title, content } = req.body;
 
     const article = await prisma.article.create({
       data: {
@@ -89,12 +90,12 @@ export const postArticle = async (req, res, next) => {
   }
 }
 
-export const patchArticle = async (req, res, next) => {
+export const patchArticle: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Article);
 
     const { id } = req.params;
-    const { title, content = [] } = req.body;
+    const { title, content } = req.body;
 
     const article = await prisma.article.update({
       where: {
@@ -115,7 +116,7 @@ export const patchArticle = async (req, res, next) => {
   }
 }
 
-export const deleteArticle = async (req, res, next) => {
+export const deleteArticle: RequestHandler = async (req, res, next) => {
   try {
 
     const { id } = req.params;

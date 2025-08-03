@@ -1,99 +1,193 @@
-import axios from "axios";
+import { Prisma, PrismaClient } from '@prisma/client';
+import { assert, create } from 'superstruct';
+import { Product } from '../structs'
+import { RequestHandler } from 'express';
+import { errorHandler } from '../handler/errorHandler';
+import { Page } from '../dto/page.dto';
+const prisma = new PrismaClient();
 
-const BASE_URL = `https://panda-market-api-crud.vercel.app/products`;
-const instance = axios.create({
-  baseURL: BASE_URL,
-  timeout: 7_000
-})
+const getProductList = async (data: Page) => {
+  try {
+    const { page = 1, pageSize = 10, keyword = '' } = data;
 
-export const getProductList = async (params = {}) => {
-  try {
-    const res = await instance.get('/', { params })
-    if (res.status < 200 || res.status >= 300) {
-      console.error('비정상 응답:', res.status)
-      return null
-    }
-    return res.data
+    const skip = (Number(page) - 1) * Number(pageSize);
+    const take = Number(pageSize);
+
+    const where = {
+      OR: [
+        { name: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+        { description: { contains: keyword, mode: Prisma.QueryMode.insensitive } }
+      ]
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          createdAt: true
+        },
+        skip,
+        take
+      }),
+      prisma.product.count({ where })
+    ]);
+    return { products, total }
   } catch (error) {
-    if (error.response) {
-      console.error('ProductList 결과: 제품 목록을 불러올 수 없습니다.', error.response.status, error.response.statusText);
-    } else {
-      console.error('ProductList 결과: ' + error.response.status, error.response.statusText)
+    errorHandler
+  }
+};
+
+const getProductListByUserId = async (userId: number) => {
+  try {
+    const page = 1
+    const pageSize = 10
+    const skip = (Number(page) - 1) * Number(pageSize);
+    const take = Number(pageSize);
+    const where = {
+      userId: userId
+    };
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: { userId: userId },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          createdAt: true
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.product.count({ where })
+    ]);
+    return { products, total }
+  } catch (error) {
+    errorHandler
+  }
+};
+
+const getProduct: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        tags: {
+          select: { tag: true } // 만약 태그 포함 조회 원할 경우
+        },
+        createdAt: true,
+        userId: true,
+      }
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: '해당 상품을 찾을 수 없습니다.' });
     }
+
+    res.status(200).json(product);
+  } catch (error) {
+    next(error); // 에러 핸들러로 전달
+  }
+};
+
+const postProduct: RequestHandler = async (req, res, next) => {
+  try {
+    assert(req.body, Product);
+
+    const { name, description, price, tags, quantity } = req.body;
+
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price,
+        tags: {
+          connectOrCreate: tags?.map(tag => ({
+            where: { tag: tag },
+            create: { tag: tag }
+          })), // Tag 모델 연결 시
+        },
+        quantity
+      },
+    });
+
+    res.status(201).json(product);
+  } catch (error) {
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
+    next(error);
   }
 }
-export const getProduct = async (id) => {
+
+const patchProduct: RequestHandler = async (req, res, next) => {
   try {
-    const res = await instance.get(`${id}`)
-    if (res.status < 200 || res.status >= 300) {
-      console.error('비정상 응답:', res.status)
-      return null
-    }
-    return res.data
+    assert(req.body, Product);
+
+    const { id } = req.params;
+    const { name, description, price, tags, quantity } = req.body;
+
+    const product = await prisma.product.update({
+      where: {
+        id: id
+      },
+      data: {
+        name,
+        description,
+        price,
+        tags: {
+          connectOrCreate: tags?.map(tag => ({
+            where: { tag: tag },
+            create: { tag: tag }
+          })), // Tag 모델 연결 시
+        },
+        quantity
+      }
+    });
+
+    res.status(200).json(product);
   } catch (error) {
-    if (error.response) {
-      console.error('getProduct 결과: ' + `${id}` + ' 제품을 불러올 수 없습니다.', error.response.status, error.response.statusText);
-    } else {
-      console.error('getProduct 결과: ' + error.response.status, error.response.statusText)
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: '해당 상품을 등록할 수 없습니다.' });
+    // }
+    next(error);
   }
 }
-export const deleteProduct = async (id) => {
+
+const deleteProduct: RequestHandler = async (req, res, next) => {
   try {
-    const res = await instance.delete(`${id}`)
-    if (res.status < 200 || res.status >= 300) {
-      console.error('비정상 응답:', res.status)
-      return null
-    }
-    return res.data
+
+    const { id } = req.params;
+
+    const product = await prisma.product.delete({
+      where: {
+        id: id
+      }
+    });
+
+    res.status(204).json(product);
   } catch (error) {
-    if (error.response) {
-      console.error('Product Delete 결과: ID' + `${id}` + ' 제품 삭제 불가', error.response.status, error.response.statusText)
-    } else {
-      console.error('Product Delete 결과: ' + error.response.status, error.response.statusText)
-    }
+    // if (error?.name === 'StructError') {
+    //   return res.status(400).json({ error: error.message });
+    // }
+    next(error);
   }
 }
-export const createProduct = async ({ name, description, price, tags, images }) => {
-  try {
-    const res = await instance.post('/', {
-      name,
-      description,
-      price,
-      tags,
-      images
-    })
-    if (res.status < 200 || res.status >= 300) {
-      console.error('비정상 응답:', res.status)
-    }
-    return res.data
-  } catch (error) {
-    if (error.response) {
-      console.error('Product Post 결과: 에러 발생', error.response.status, error.response.statusText)
-    } else {
-      console.error('Product Post 결과: ' + error.response.status, error.response.statusText)
-    }
-  }
-}
-export const patchProduct = async (id, { name, description, price, tags, images }) => {
-  try {
-    const res = await instance.patch(`/${id}`, {
-      name,
-      description,
-      price,
-      tags,
-      images
-    })
-    if (res.status < 200 || res.status >= 300) {
-      console.error('비정상 응답:', res.status)
-      return null
-    }
-    return res.data
-  } catch (error) {
-    if (error.response) {
-      console.error('Patch Product 결과: ID ' + `${id}` + '는 존재하지 않는 제품입니다.', error.response.status, error.response.statusText)
-    } else {
-      console.error('Patch Product 결과: ' + error.response.status, error.response.statusText)
-    }
-  }
+
+export default {
+  getProductList,
+  getProductListByUserId,
+  getProduct,
+  postProduct,
+  patchProduct,
+  deleteProduct,
 }

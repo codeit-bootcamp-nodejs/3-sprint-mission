@@ -1,22 +1,27 @@
 import { assert } from 'superstruct';
 import { Product, Article } from '../structs';
+import { Request, Response, NextFunction } from 'express';
 
 // 상품 등록/수정 시 유효성 검증
-export function validateProduct(req, res, next) {
+export function validateProduct(req: Request, res: Response, next: NextFunction) {
   try {
     assert(req.body, Product);
     next();
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    }
   }
 }
 
 // 게시글 등록/수정 시 유효성 검증
-export function validateArticle(req, res, next) {
+export function validateArticle(req: Request, res: Response, next: NextFunction) {
   try {
     assert(req.body, Article);
     next();
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+    }
   }
 }

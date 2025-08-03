@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 
-const hashPassword = async (password) => {
+const hashPassword = async (password: string) => {
   const plainPassword = password
 
   const saltRounds = 10
@@ -12,7 +12,7 @@ const hashPassword = async (password) => {
   return hashedPassword
 }
 
-const verifyPassword = async (inputPassword, password) => {
+const verifyPassword = async (inputPassword: string, password: string) => {
   const isValid = await bcrypt.compare(inputPassword, password)
   if (!isValid) {
     const error = new Error('Unauthorized');

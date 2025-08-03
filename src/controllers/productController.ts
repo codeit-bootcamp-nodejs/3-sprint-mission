@@ -1,37 +1,23 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { assert, create } from 'superstruct';
 import { Product } from '../structs'
-const prisma = new PrismaClient();
+import { RequestHandler } from 'express';
+import productService from '../services/ProductService';
 
-export const getProductList = async (req, res, next) => {
+export const getProductList: RequestHandler = async (req, res, next) => {
   try {
-    const { page = 1, pageSize = 10, keyword = '' } = req.query;
+    const data = req.body
+    return await productService.getProductList(data)
+  } catch (error) {
+    next(error); // 에러 핸들러로 전달
+  }
+};
 
-    const skip = (Number(page) - 1) * Number(pageSize);
-    const take = Number(pageSize);
-
-    const where = {
-      OR: [
-        { name: { contains: keyword, mode: 'insensitive' } },
-        { description: { contains: keyword, mode: 'insensitive' } }
-      ]
-    };
-
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          createdAt: true
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take
-      }),
-      prisma.product.count({ where })
-    ]);
+export const getProductListByAuthorId: RequestHandler = async (req, res, next) => {
+  try {
+    const user = req.user.id
+    if(user)
+    {productService.getProductListByUserId(req.user.id)}
 
     res.status(200).json({
       page: Number(page),
@@ -44,48 +30,7 @@ export const getProductList = async (req, res, next) => {
   }
 };
 
-export const getProductListByAuthorId = async (req, res, next) => {
-  try {
-    const { page = 1, pageSize = 10, keyword = '' } = req.query;
-
-    const skip = (Number(page) - 1) * Number(pageSize);
-    const take = Number(pageSize);
-
-    const where = {
-      OR: [
-        { name: { contains: keyword, mode: 'insensitive' } },
-        { description: { contains: keyword, mode: 'insensitive' } }
-      ]
-    };
-    const { id: authorId } = req.params;
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where: { id: authorId },
-        // select: {
-        //   id: true,
-        //   name: true,
-        //   price: true,
-        //   createdAt: true
-        // },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take
-      }),
-      prisma.product.count({ where })
-    ]);
-
-    res.status(200).json({
-      page: Number(page),
-      pageSize: Number(pageSize),
-      total,
-      products
-    });
-  } catch (error) {
-    next(error); // 에러 핸들러로 전달
-  }
-};
-
-export const getProduct = async (req, res, next) => {
+export const getProduct: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -99,7 +44,8 @@ export const getProduct = async (req, res, next) => {
         tags: {
           select: { tag: true } // 만약 태그 포함 조회 원할 경우
         },
-        createdAt: true
+        createdAt: true,
+        userId: true,
       }
     });
 
@@ -113,7 +59,7 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
-export const postProduct = async (req, res, next) => {
+export const postProduct: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Product);
 
@@ -125,7 +71,7 @@ export const postProduct = async (req, res, next) => {
         description,
         price,
         tags: {
-          connectOrCreate: tags.map(tag => ({
+          connectOrCreate: tags?.map(tag => ({
             where: { tag: tag },
             create: { tag: tag }
           })), // Tag 모델 연결 시
@@ -143,7 +89,7 @@ export const postProduct = async (req, res, next) => {
   }
 }
 
-export const patchProduct = async (req, res, next) => {
+export const patchProduct: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Product);
 
@@ -159,7 +105,7 @@ export const patchProduct = async (req, res, next) => {
         description,
         price,
         tags: {
-          connectOrCreate: tags.map(tag => ({
+          connectOrCreate: tags?.map(tag => ({
             where: { tag: tag },
             create: { tag: tag }
           })), // Tag 모델 연결 시
@@ -177,7 +123,7 @@ export const patchProduct = async (req, res, next) => {
   }
 }
 
-export const deleteProduct = async (req, res, next) => {
+export const deleteProduct: RequestHandler = async (req, res, next) => {
   try {
 
     const { id } = req.params;

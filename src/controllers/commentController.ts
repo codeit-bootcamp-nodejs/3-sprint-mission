@@ -1,44 +1,24 @@
 //등록 수정 삭제 목록 조회
 
 import { PrismaClient } from '@prisma/client';
-import { assert, create } from 'superstruct';
+import { assert, create, number } from 'superstruct';
 import { Comment } from '../structs'
-const prisma = new PrismaClient();
+import { RequestHandler } from 'express';
+import commentService from '../services/commentService';
 
-export const getProductCommentList = async (req, res, next) => {
+export const getProductCommentList: RequestHandler = async (req, res, next) => {
   try {
     const { id: productId } = req.params;
     const { cursor, limit = 10 } = req.query;
-    const take = Number(limit);
-
-    let comments;
-    if (cursor) {
-      // cursor 있을 때
-      comments = await prisma.comment.findMany({
-        where: { productId },
-        select: { id: true, content: true, createdAt: true },
-        orderBy: { id: 'asc' },
-        take,
-        cursor: { id: Number(cursor) },
-        skip: 1
-      });
-    } else {
-      // cursor 없을 때
-      comments = await prisma.comment.findMany({
-        where: { productId },
-        select: { id: true, content: true, createdAt: true },
-        orderBy: { id: 'asc' },
-        take
-      });
-    }
-
+    const data = { productId, cursor, limit }
+    const comments = commentService.getProductCommentList(data)
     res.status(200).json(comments);
   } catch (error) {
     next(error);
   }
 };
 
-export const getArticleCommentList = async (req, res, next) => {
+export const getArticleCommentList: RequestHandler = async (req, res, next) => {
   try {
     const { id: articleId } = req.params;
     const { cursor, limit = 10 } = req.query;
@@ -71,12 +51,12 @@ export const getArticleCommentList = async (req, res, next) => {
   }
 };
 
-export const getProductComment = async (req, res, next) => {
+export const getComment: RequestHandler = async (req, res, next) => {
   try {
-    const { id: productId } = req.params;
+    const id: number = Number(req.params.id);
 
     const comment = await prisma.comment.findUnique({
-      where: { id: productId }
+      where: { id }
     })
 
     res.status(200).json(comment)
@@ -85,21 +65,7 @@ export const getProductComment = async (req, res, next) => {
   }
 }
 
-export const getArticleComment = async (req, res, next) => {
-  try {
-    const { id: articleId } = req.params;
-
-    const comment = await prisma.comment.findUnique({
-      where: { id: articleId }
-    })
-
-    res.status(200).json(comment)
-  } catch (error) {
-    next(error);
-  }
-}
-
-export const postProductComment = async (req, res, next) => {
+export const postProductComment: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
@@ -115,14 +81,14 @@ export const postProductComment = async (req, res, next) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 등록할 수 없습니다.' });
     }
     next(error);
   }
 }
 
-export const postArticleComment = async (req, res, next) => {
+export const postArticleComment: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
@@ -138,14 +104,14 @@ export const postArticleComment = async (req, res, next) => {
 
     res.status(201).json(comment);
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 등록할 수 없습니다.' });
     }
     next(error);
   }
 }
 
-export const patchProductComment = async (req, res, next) => {
+export const patchProductComment: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
@@ -163,14 +129,14 @@ export const patchProductComment = async (req, res, next) => {
 
     res.status(200).json(comment);
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 수정할 수 없습니다.' });
     }
     next(error);
   }
 }
 
-export const patchArticleComment = async (req, res, next) => {
+export const patchArticleComment: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Comment);
 
@@ -188,14 +154,14 @@ export const patchArticleComment = async (req, res, next) => {
 
     res.status(200).json(comment);
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 수정할 수 없습니다.' });
     }
     next(error);
   }
 }
 
-export const deleteProductComment = async (req, res, next) => {
+export const deleteProductComment: RequestHandler = async (req, res, next) => {
   try {
 
     const { commentId } = req.params;
@@ -208,14 +174,14 @@ export const deleteProductComment = async (req, res, next) => {
 
     res.status(204).end();
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 삭제할 수 없습니다.' });
     }
     next(error);
   }
 }
 
-export const deleteArticleComment = async (req, res, next) => {
+export const deleteArticleComment: RequestHandler = async (req, res, next) => {
   try {
 
     const { commentId } = req.params;
@@ -228,7 +194,7 @@ export const deleteArticleComment = async (req, res, next) => {
 
     res.status(204).end();
   } catch (error) {
-    if (error?.name === 'StructError') {
+    if (error instanceof Error && error?.name === 'StructError') {
       return res.status(400).json({ error: '해당 댓글을 삭제할 수 없습니다.' });
     }
     next(error);
