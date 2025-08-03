@@ -34,7 +34,7 @@ articleCommentRouter
 
 // 특정 댓글 수정 및 삭제 라우트
 articleCommentRouter
-  .route('/:id')
+  .route('/:commentId')
   .patch(
     verifyAccessToken,
     validate(updateArticleCommentParamsSchema, 'params'),

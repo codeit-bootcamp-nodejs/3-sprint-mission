@@ -2,14 +2,14 @@
   "name": "sprint_mission_3",
   "version": "3.0.1",
   "description": "중고마켓/자유게시판 API 서버",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
     "build": "tsc",
     "prisma:push": "npx prisma db push",
     "prisma:generate": "npx prisma generate",
-    "prisma:seed": "node dist/prisma/seed.js"
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "license": "김준철",
   "dependencies": {

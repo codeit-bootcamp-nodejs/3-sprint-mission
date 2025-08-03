@@ -35,7 +35,7 @@ export const getCommentsController = async (req: Request, res: Response, next: N
 // 댓글 수정 컨트롤러
 export const updateCommentController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id: commentId } = req.params;
+    const { commentId } = req.params;
     const { content } = req.body;
     const userId = req.user!.userId;
 
@@ -49,7 +49,7 @@ export const updateCommentController = async (req: Request, res: Response, next:
 // 댓글 삭제 컨트롤러
 export const deleteCommentController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id: commentId } = req.params;
+    const { commentId } = req.params;
     const userId = req.user!.userId;
 
     await articleCommentService.deleteArticleComment(commentId, userId);

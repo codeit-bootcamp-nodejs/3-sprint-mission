@@ -118,13 +118,20 @@ export const CommentBaseSchema = s.object({
   content: s.size(s.string(), 1, 500),
 });
 
+export const productCommentParamsSchema = s.object({
+  productId: Uuid,
+});
+
 export const updateProductCommentParamsSchema = s.object({
   productId: Uuid,
+  commentId: Uuid,
 });
 
 export const updateArticleCommentParamsSchema = s.object({
   articleId: Uuid,
+  commentId: Uuid, // 'commentId' 필드 추가
 });
+
 // --- 쿼리 유효성 검사 ---
 export const paginationQuerySchema = s.object({
   cursor: s.optional(s.string()),

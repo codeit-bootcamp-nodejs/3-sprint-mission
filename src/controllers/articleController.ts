@@ -101,7 +101,7 @@ export const toggleArticleLikeController = async (
 ) => {
   const { articleId } = req.params;
   const loggedInUserId = req.user!.userId;
-  const result = await toggleArticleLike(loggedInUserId, articleId);
+  const result = await toggleArticleLike(articleId, loggedInUserId);
 
   res.status(200).json(result);
 };

@@ -4,7 +4,8 @@ import * as productCommentService from '../services/productCommentService';
 // 댓글 생성 컨트롤러
 export const createCommentController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { productId, content } = req.body;
+    const { productId } = req.params;
+    const { content } = req.body;
     const userId = req.user!.userId;
 
     const newComment = await productCommentService.createProductComment({
@@ -12,11 +13,13 @@ export const createCommentController = async (req: Request, res: Response, next:
       content,
       userId,
     });
+
     res.status(201).json(newComment);
   } catch (error) {
     next(error);
   }
 };
+
 
 // 댓글 목록 조회 컨트롤러
 export const getCommentsController = async (req: Request, res: Response, next: NextFunction) => {

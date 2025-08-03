@@ -41,7 +41,15 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
           details = `중복된 필드: ${err.meta.target.join(', ')}`;
         }
         break;
-
+      case 'P2003': // Foreign key constraint violated 에러 처리 로직 추가
+        statusCode = 400; // 또는 404
+        message = '참조하는 데이터가 존재하지 않습니다.';
+        if (err.meta?.field_name) {
+          details = `오류 필드: ${err.meta.field_name}`;
+        } else {
+          details = '요청에 유효하지 않은 ID가 포함되어 있습니다.';
+        }
+        break;
       case 'P2025':
         statusCode = 404;
         message = typeof err.message === 'string' && err.message ? err.message : (err.meta?.cause as string || '요청한 데이터를 찾을 수 없습니다.');
