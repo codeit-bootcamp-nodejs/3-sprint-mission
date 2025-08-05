@@ -1,17 +1,17 @@
 import express, { Router } from 'express';
-import asyncHandler from '../utils/asyncHandler.js';
+import asyncHandler from '../utils/asyncHandler';
 import { uploadImage } from '../middlewares/uploadMiddleware';
 import {
   verifyAccessToken,
   optionalVerifyAccessToken,
-} from '../middlewares/auth.js';
+} from '../middlewares/auth';
 import {
   validate,
   createArticleSchema,
   updateArticleSchema,
   getArticleByIdSchema,
   offsetQuerySchema,
-} from '../middlewares/validationMiddleware.js';
+} from '../middlewares/validationMiddleware';
 import {
   getAllArticles,
   createArticleController,

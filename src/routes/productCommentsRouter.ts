@@ -1,19 +1,19 @@
 import express from 'express';
-import asyncHandler from '../utils/asyncHandler.js';
-import { verifyAccessToken } from '../middlewares/auth.js';
+import asyncHandler from '../utils/asyncHandler';
+import { verifyAccessToken } from '../middlewares/auth';
 import {
   validate,
   updateProductCommentParamsSchema,
   CommentBaseSchema,
   getProductByIdSchema,
   paginationQuerySchema,
-} from '../middlewares/validationMiddleware.js';
+} from '../middlewares/validationMiddleware';
 import {
   createCommentController,
   getCommentsController,
   updateCommentController,
   deleteCommentController,
-} from '../controllers/productCommentController.js';
+} from '../controllers/productCommentController';
 
 const productCommentRouter = express.Router({ mergeParams: true });
 

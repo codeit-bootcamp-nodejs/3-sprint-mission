@@ -2,9 +2,9 @@ import express from 'express';
 import {
   verifyAccessToken,
   verifyRefreshToken
-} from '../middlewares/auth.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import { uploadImage } from '../middlewares/uploadMiddleware.js';
+} from '../middlewares/auth';
+import asyncHandler from '../utils/asyncHandler';
+import { uploadImage } from '../middlewares/uploadMiddleware';
 import {
   registerUser,
   login,
@@ -19,7 +19,7 @@ import {
   createUserSchema,
   updateUserSchema,
   loginSchema
-} from '../middlewares/validationMiddleware.js';
+} from '../middlewares/validationMiddleware';
 
 const userRouter = express.Router();
 

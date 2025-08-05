@@ -107,7 +107,7 @@
   },
   "include": [
     "src/**/*",
-    "types/**/*.d.ts",
+    "types/**/*",
     "prisma/**/*",
     "types/errors.ts"
   ],
