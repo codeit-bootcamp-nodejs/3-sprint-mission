@@ -171,7 +171,7 @@ limit 10
  select
 	date
 	,
-	sum(od.quantity) as total_orders
+	COUNT(distinct(od.order_id)) as total_orders
 	,
 	ROUND(sum(od.quantity * price)) as total_amount
 from
