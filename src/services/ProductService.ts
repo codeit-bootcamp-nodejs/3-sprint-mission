@@ -1,19 +1,22 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { assert, create } from 'superstruct';
-import { Product } from '../structs.js'
+import { Product } from '../structs'
+import { RequestHandler } from 'express';
+import { errorHandler } from '../handler/errorHandler';
+import { Page } from '../dto/page.dto';
 const prisma = new PrismaClient();
 
-export const getProductList = async (req, res, next) => {
+const getProductList = async (data: Page) => {
   try {
-    const { page = 1, pageSize = 10, keyword = '' } = req.query;
+    const { page = 1, pageSize = 10, keyword = '' } = data;
 
     const skip = (Number(page) - 1) * Number(pageSize);
     const take = Number(pageSize);
 
     const where = {
       OR: [
-        { name: { contains: keyword, mode: 'insensitive' } },
-        { description: { contains: keyword, mode: 'insensitive' } }
+        { name: { contains: keyword, mode: Prisma.QueryMode.insensitive } },
+        { description: { contains: keyword, mode: Prisma.QueryMode.insensitive } }
       ]
     };
 
@@ -26,66 +29,48 @@ export const getProductList = async (req, res, next) => {
           price: true,
           createdAt: true
         },
-        orderBy: { createdAt: 'desc' },
         skip,
         take
       }),
       prisma.product.count({ where })
     ]);
-
-    res.status(200).json({
-      page: Number(page),
-      pageSize: Number(pageSize),
-      total,
-      products
-    });
+    return { products, total }
   } catch (error) {
-    next(error); // 에러 핸들러로 전달
+    errorHandler
   }
 };
 
-export const getProductListByAuthorId = async (req, res, next) => {
+const getProductListByUserId = async (userId: number) => {
   try {
-    const { page = 1, pageSize = 10, keyword = '' } = req.query;
-
+    const page = 1
+    const pageSize = 10
     const skip = (Number(page) - 1) * Number(pageSize);
     const take = Number(pageSize);
-
     const where = {
-      OR: [
-        { name: { contains: keyword, mode: 'insensitive' } },
-        { description: { contains: keyword, mode: 'insensitive' } }
-      ]
+      userId: userId
     };
-    const { id: authorId } = req.params;
     const [products, total] = await Promise.all([
       prisma.product.findMany({
-        where: { id: authorId },
-        // select: {
-        //   id: true,
-        //   name: true,
-        //   price: true,
-        //   createdAt: true
-        // },
+        where: { userId: userId },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          createdAt: true
+        },
         orderBy: { createdAt: 'desc' },
         skip,
-        take
+        take,
       }),
       prisma.product.count({ where })
     ]);
-
-    res.status(200).json({
-      page: Number(page),
-      pageSize: Number(pageSize),
-      total,
-      products
-    });
+    return { products, total }
   } catch (error) {
-    next(error); // 에러 핸들러로 전달
+    errorHandler
   }
 };
 
-export const getProduct = async (req, res, next) => {
+const getProduct: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -99,7 +84,8 @@ export const getProduct = async (req, res, next) => {
         tags: {
           select: { tag: true } // 만약 태그 포함 조회 원할 경우
         },
-        createdAt: true
+        createdAt: true,
+        userId: true,
       }
     });
 
@@ -113,7 +99,7 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
-export const postProduct = async (req, res, next) => {
+const postProduct: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Product);
 
@@ -125,7 +111,7 @@ export const postProduct = async (req, res, next) => {
         description,
         price,
         tags: {
-          connectOrCreate: tags.map(tag => ({
+          connectOrCreate: tags?.map(tag => ({
             where: { tag: tag },
             create: { tag: tag }
           })), // Tag 모델 연결 시
@@ -143,7 +129,7 @@ export const postProduct = async (req, res, next) => {
   }
 }
 
-export const patchProduct = async (req, res, next) => {
+const patchProduct: RequestHandler = async (req, res, next) => {
   try {
     assert(req.body, Product);
 
@@ -159,7 +145,7 @@ export const patchProduct = async (req, res, next) => {
         description,
         price,
         tags: {
-          connectOrCreate: tags.map(tag => ({
+          connectOrCreate: tags?.map(tag => ({
             where: { tag: tag },
             create: { tag: tag }
           })), // Tag 모델 연결 시
@@ -177,7 +163,7 @@ export const patchProduct = async (req, res, next) => {
   }
 }
 
-export const deleteProduct = async (req, res, next) => {
+const deleteProduct: RequestHandler = async (req, res, next) => {
   try {
 
     const { id } = req.params;
@@ -195,4 +181,13 @@ export const deleteProduct = async (req, res, next) => {
     // }
     next(error);
   }
+}
+
+export default {
+  getProductList,
+  getProductListByUserId,
+  getProduct,
+  postProduct,
+  patchProduct,
+  deleteProduct,
 }

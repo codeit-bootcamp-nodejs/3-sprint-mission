@@ -1,6 +1,6 @@
 import prisma from '../config/prisma.js';
 
-const findByEmail = async (email) => {
+const findByEmail = async (email: string) => {
   return await prisma.user.findUnique({
     where: {
       email: email
@@ -8,7 +8,7 @@ const findByEmail = async (email) => {
   })
 }
 
-const findById = async (id) => {
+const findById = async (id: number) => {
   if (!id) {
     throw new Error('findById 호출 시 id를 입력해야 합니다.')
   }
@@ -19,7 +19,7 @@ const findById = async (id) => {
   })
 }
 
-const save = async (user) => {
+const save = async (user: { email: string; nickname: string; password: string; image?: string; createdAt?: Date; updatedAt?: Date; }) => {
   return await prisma.user.create({
     data: {
       email: user.email,
@@ -32,7 +32,7 @@ const save = async (user) => {
   })
 }
 
-const getUserProfile = async (userId) => {
+const getUserProfile = async (userId: number) => {
   return await prisma.user.findUnique({
     where: {
       id: userId

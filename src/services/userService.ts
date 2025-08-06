@@ -1,8 +1,9 @@
 import userRepository from "../repository/userRepository.js"
 import hash from "../hash.js"
 import jwt from 'jsonwebtoken'
+import { filteredUserDto, UserDto } from "../dto/user.dto.js"
 
-const createUser = async (user) => {
+const createUser = async (user: UserDto) => {
   const { email, nickname, password } = user;
   const existedUser = await userRepository.findByEmail(user.email) // email 중복 확인
 
@@ -19,7 +20,7 @@ const createUser = async (user) => {
   return await filterSensitiveUserData(newUser)
 }
 
-async function getUser(email, password) {
+async function getUser(email: string, password: string) {
   const user = await userRepository.findByEmail(email)
   if (!user) {
     const error = new Error('Unauthorized')
@@ -30,7 +31,7 @@ async function getUser(email, password) {
   return filterSensitiveUserData(user)
 }
 
-const createToken = async (user) => {
+const createToken = async (user: filteredUserDto) => {
 
   const payload = { email: user.email, userId: user.id }
   const options = { expiresIn: '1h' }
@@ -43,19 +44,23 @@ const createToken = async (user) => {
   return jwt.sign(payload, process.env.JWT_SECRET, options)
 }
 
-const checkUser = async (payload) => {
-  const { email, userId } = payload;
-  const dbUser = await userRepository.findById(userId)
+const checkUser = async (user: UserDto) => {
+  const { email, id } = user;
+  const dbUser = await userRepository.findById(id)
+  if (!dbUser) {
+    const error = new Error('Unauthorized')
+    error.status = 404;
+    throw error;
+  }
   if (email !== dbUser.email) {
     const error = new Error(`Forbidden`);
     error.status = 403;
     throw error;
   }
-
   return dbUser
 }
 
-function filterSensitiveUserData(user) {
+function filterSensitiveUserData(user: UserDto) {
   const { password, ...insensitiveData } = user
   return insensitiveData
 }

@@ -2,11 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import productRouter from './routes/productRoute.js';
-import articleRouter from './routes/articleRoute.js';
-import { upload } from './middlewares/upload.js';
-import { errorHandler } from './handler/errorHandler.js';
-import userController from './controllers/userController.js';
+import productRouter from './routes/productRoute';
+import articleRouter from './routes/articleRoute';
+import { upload } from './middlewares/upload';
+import { errorHandler } from './handler/errorHandler';
+import userController from './controllers/userController';
 
 dotenv.config() //env 파일에 정의된 환경변수를 불러와 사용할 수 있게 해주는 명령어
 

@@ -4,3 +4,5 @@ prisma/migrations/
 package-lock.json
 http/
 log
+old_*
+disc/

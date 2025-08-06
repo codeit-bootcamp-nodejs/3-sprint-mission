@@ -1,8 +1,8 @@
 import express from 'express'
-import { deleteProduct, getProduct, getProductList, patchProduct, postProduct } from '../controllers/productController.js'
-import { deleteProductComment, getProductCommentList, patchProductComment, postProductComment } from '../controllers/commentController.js'
-import { validateProduct } from '../middlewares/validation.js'
-import auth from '../middlewares/auth.js'
+import { deleteProduct, getProduct, getProductList, patchProduct, postProduct } from '../controllers/productController'
+import { deleteProductComment, getProductCommentList, patchProductComment, postProductComment } from '../controllers/commentController'
+import { validateProduct } from '../middlewares/validation'
+import auth from '../middlewares/auth'
 
 const productRouter = express.Router()
 

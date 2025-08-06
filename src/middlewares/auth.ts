@@ -1,8 +1,9 @@
 import { expressjwt } from "express-jwt"
-import userRepository from "../repository/userRepository.js"
-import { getProduct } from "../controllers/productController.js";
-import { getArticle } from "../controllers/articleController.js";
-import { getProductComment, getArticleComment } from "../controllers/commentController.js"
+import userRepository from "../repository/userRepository"
+import { getProduct } from "../controllers/productController";
+import { getArticle } from "../controllers/articleController";
+import { getComment } from "../controllers/commentController"
+import { RequestHandler } from "express";
 
 const verifyAccessToken = expressjwt({
   secret: process.env.Jwt_SECRET,
@@ -10,7 +11,7 @@ const verifyAccessToken = expressjwt({
   requestProperty: 'user'
 })
 
-const verifyProductAuthorid = async (req, res, next) => {
+const verifyProductAuthorid: RequestHandler = async (req, res, next) => {
   const { id: productId } = req.params;
   try {
     const product = await getProduct(productId);
@@ -32,7 +33,7 @@ const verifyProductAuthorid = async (req, res, next) => {
   }
 }
 
-const verifyArticleAuthorid = async (req, res, next) => {
+const verifyArticleAuthorid: RequestHandler = async (req, res, next) => {
   const { id: articleId } = req.params;
   try {
     const article = await getArticle(articleId);
@@ -54,10 +55,10 @@ const verifyArticleAuthorid = async (req, res, next) => {
   }
 }
 
-const verifyProductCommentAuthorid = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
-  const { id: commentId } = req.params;
+const verifyProductCommentUserid: RequestHandler = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
+  const commentId = Number(req.params.id);
   try {
-    const comment = await getProductComment(commentId);
+    const comment = await getComment(commentId);
 
     if (!comment) {
       const error = new Error('Comment not found')
@@ -76,7 +77,13 @@ const verifyProductCommentAuthorid = async (req, res, next) => { //댓글 등록
   }
 }
 
-const verifyArticleCommentAuthorid = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
+const verifyArticleCommentUserid: RequestHandler = async (req, res, next) => { //댓글 등록 유저만 댓글 수정 삭제 가능
+  /**
+   * useId가 일치하는 id(CommentId)를 찾아야함.
+   * 1. userId를 받음
+   * 2. userId로 commentId를 검색
+   */
+  
   const { id: commentId } = req.params;
   try {
     const comment = await getArticleComment(commentId);
@@ -87,7 +94,7 @@ const verifyArticleCommentAuthorid = async (req, res, next) => { //댓글 등록
       throw error;
     }
 
-    if (comment.userId !== req.user.userId) {
+    if (comment.userId !== req.user?.id) {
       const error = new Error(`Forbidden`);
       error.code = 403;
       throw error;
@@ -103,6 +110,6 @@ export default {
   verifyAccessToken,
   verifyProductAuthorid,
   verifyArticleAuthorid,
-  verifyProductCommentAuthorid,
-  verifyArticleCommentAuthorid,
+  verifyProductCommentUserid,
+  verifyArticleCommentUserid,
 }
