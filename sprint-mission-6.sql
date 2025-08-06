@@ -28,13 +28,18 @@ offset 49
 ;
 -- 7. `orders` 테이블에서 커서 페이지네이션된 목록을 조회합니다. 페이지 크기가 10이고 최신순일때, `id` 값을 기준으로 커서를 사용합시다. 커서의 값이 `42`일 때 다음 페이지를 조회하세요.
 select * from orders
-order by id
+order by id DESC
 limit 10
 offset 41
 ;
 -- 8. `orders` 테이블에서 2025년 3월에 주문된 내역만 조회하세요.
-select * from orders
-where date = '2025-03-12'
+select
+	*
+from
+	orders
+where
+	extract(year from date) = 2025
+	and extract(month from date) = 3
 ;
 -- 9. `orders` 테이블에서 2025년 3월 12일 오전에 주문된 내역만 조회하세요.
 select * from orders
