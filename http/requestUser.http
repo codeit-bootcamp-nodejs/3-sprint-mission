@@ -1,5 +1,5 @@
 ### 회원가입
-POST http://localhost:3000/users/sign-in
+POST http://localhost:3000/users/sign-up
 Content-Type: application/json
 
 {
@@ -18,7 +18,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3000/users/password
+PATCH http://localhost:3000/users/password
 Content-Type: application/json
 
 {
