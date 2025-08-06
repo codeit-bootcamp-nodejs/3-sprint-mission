@@ -225,7 +225,19 @@ where
         XXL  | 1006.6000213623047
         ```
 */
-
+select
+	p.size
+,
+	sum(od.quantity * p.price ) as total_revenue
+from
+	order_details od
+join pizzas p on
+	od.pizza_id = p.id
+group by
+	p."size"
+order by
+	size
+;
 /*    
     5. `order_details`, `pizzas`, `pizza_types` 테이블을 JOIN해서 각 피자 종류의 총 수익을 계산하고, 수익이 높은 순서대로 출력하세요.
         
@@ -241,4 +253,18 @@ where
         The Italian Supreme Pizza                  |           33476.75
         ```
 */
-
+select
+	pt."name" 
+,
+	sum(od.quantity * p.price) as total_revenue
+from
+	order_details od
+join pizzas p on
+	od.pizza_id = p.id
+join pizza_types pt on
+	p.type_id = pt.id
+group by
+	pt."name"
+order by
+	total_revenue desc
+;
