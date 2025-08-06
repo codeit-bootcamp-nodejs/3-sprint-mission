@@ -1,0 +1,32 @@
+import { assert, object, partial, size, string } from 'superstruct';
+import { Email, Url } from '../utils/structs';
+import type { RequestHandler } from 'express';
+
+const UpdateUserStruct = partial(object({
+  email: Email,
+  nickname: size(string(), 1, 30),
+  image: Url,
+}));
+
+const UpdatePasswordStruct = object({
+  currentPassword: size(string(), 1, 30),
+  newPassword: size(string(), 1, 30),
+});
+
+export const validateUpdateUser: RequestHandler = (req, res, next) => {
+  try {
+    assert(req.body, UpdateUserStruct);
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const validateUpdatePassword: RequestHandler = (req, res, next) => {
+  try {
+    assert(req.body, UpdatePasswordStruct);
+    next();
+  } catch (err) {
+    next(err);
+  }
+}

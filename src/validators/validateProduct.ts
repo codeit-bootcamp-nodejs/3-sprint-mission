@@ -1,0 +1,29 @@
+import { array, assert, integer, min, object, partial, size, string } from 'superstruct';
+import type { RequestHandler } from 'express';
+
+const CreateProductStruct = object({
+  name: size(string(), 1, 30),
+  description: size(string(), 1, 500),
+  price: min(integer(), 0),
+  tags: array(size(string(), 1, 20)),
+});
+
+const UpdateProductStruct = partial(CreateProductStruct);
+
+export const validateCreateProduct: RequestHandler = (req, res, next) => {
+  try {
+    assert(req.body, CreateProductStruct);
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const validateUpdateProduct: RequestHandler = (req, res, next) => {
+  try {
+    assert(req.body, UpdateProductStruct);
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
