@@ -24,13 +24,13 @@ limit 10
 select * from orders
 order by date desc, time desc
 limit 10
-offset 49
+offset 40
 ;
 -- 7. `orders` 테이블에서 커서 페이지네이션된 목록을 조회합니다. 페이지 크기가 10이고 최신순일때, `id` 값을 기준으로 커서를 사용합시다. 커서의 값이 `42`일 때 다음 페이지를 조회하세요.
 select * from orders
+where id > 42
 order by id DESC
 limit 10
-offset 41
 ;
 -- 8. `orders` 테이블에서 2025년 3월에 주문된 내역만 조회하세요.
 select
@@ -43,7 +43,7 @@ where
 ;
 -- 9. `orders` 테이블에서 2025년 3월 12일 오전에 주문된 내역만 조회하세요.
 select * from orders
-where date = '2025-03-12' and time <= '12:00:00'
+where date = '2025-03-12' and time < '12:00:00'
 ;
 -- 10. `pizza_types` 테이블에서 이름에 'Cheese' 혹은 'Chicken'이 포함된 피자 종류를 조회하세요. (대소문자를 구분합니다)
 select * from pizza_types
@@ -73,7 +73,7 @@ GROUP BY
 select o.* 
 from order_details o
 where o.pizza_id in (select id  from pizzas
-where price >= 20)
+where price > 20)
 ;
 -- 4. `orders` 테이블에서 각 날짜별 총 주문 건수를 `order_count` 라는 이름으로 계산하고, 하루 총 주문 건수가 80건 이상인 날짜만 조회한 뒤, 주문 건수가 많은 순서대로 정렬하세요.
 select * from (select date
@@ -111,7 +111,7 @@ group by
 -- 7. 날짜별로 피자 주문 건수(`order_count`)와 총 주문 수량(`total_quantity`)을 구하세요.
 SELECT
 	o.date,
-	COUNT(o.id) AS order_count,
+	COUNT(DISTINCT(o.id)) AS order_count,
 	SUM(od.quantity) AS total_quantity
 FROM
 	orders o
@@ -119,6 +119,8 @@ INNER JOIN
 	order_details od ON o.id = od.order_id
 GROUP BY
 	o.date
+ORDER BY 
+	o.date DESC
 ;
 -- # 고급 문제
 
@@ -141,32 +143,33 @@ GROUP BY
         ```
 */
 select
-	p.*
-	,
-	SUM(od.quantity) as total_quantity
+	  p.id
+	, p.type_id
+	, p.size
+	, p.price
+	,SUM(od.quantity) as total_quantity
 from
 	pizzas p
 join
 	order_details od on
 	p.id = od.pizza_id
 group by
-	p.id
+	p.id, p.type_id, p.size, p.price
 order by
 	total_quantity desc
 limit 10
 ;
 /*
-    2. `orders` 테이블에서 2025년 3월의 일별 주문 수량을 `total_orders`라는 이름으로, 일별 총 주문 금액을 `total_amount`라는 이름으로 포함해서 조회하세요.
-        
-        출력 예시:
-        
-        ```sql
-        2025-03-01 |           99 | 1598.5500011444092
-        2025-03-02 |          138 |  2379.050001144409
-        2025-03-03 |          133 | 2287.8999996185303
-        2025-03-04 |          144 |  2444.300001144409
-        2025-03-05 |          140 |  2350.650005340576
-        ```
+    
+2. orders 테이블에서 2025년 3월의 일별 주문 수량을 total_orders라는 이름으로, 일별 총 주문 금액을 total_amount라는 이름으로 포함해서 조회하세요.
+     출력 예시:
+     
+     2025-03-01 |           49 | 1598.5500011444092
+     2025-03-02 |           58 |  2379.050001144409
+     2025-03-03 |           53 | 2287.8999996185303
+     2025-03-04 |           59 |  2444.300001144409
+     2025-03-05 |           64 |  2350.650005340576
+     
 */
  select
 	date
@@ -240,8 +243,9 @@ join pizzas p on
 	od.pizza_id = p.id
 group by
 	p."size"
-order by
-	size
+
+order by 
+        total_revenue DESC
 ;
 /*    
     5. `order_details`, `pizzas`, `pizza_types` 테이블을 JOIN해서 각 피자 종류의 총 수익을 계산하고, 수익이 높은 순서대로 출력하세요.
@@ -259,7 +263,7 @@ order by
         ```
 */
 select
-	pt."name" 
+	pt.name 
 ,
 	sum(od.quantity * p.price) as total_revenue
 from
@@ -269,7 +273,7 @@ join pizzas p on
 join pizza_types pt on
 	p.type_id = pt.id
 group by
-	pt."name"
+	pt.name
 order by
 	total_revenue desc
 ;
