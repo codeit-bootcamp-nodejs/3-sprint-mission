@@ -3,7 +3,7 @@ import { StringValue } from 'ms';
 
 export const createToken = (user: { id: string }, type: 'access' | 'refresh') => {
   const payload = { userId: user.id };
-  let secret;
+  let secret: string;
   let expiresIn: StringValue;
 
   if (type === 'access') {
