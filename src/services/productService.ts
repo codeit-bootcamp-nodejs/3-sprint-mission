@@ -1,6 +1,13 @@
 import * as productRepository from '../repositories/productRepository';
-import { CreateProductData, UpdateProductData, ProductWithDetails } from '../../types/product';
-import { PrismaFindManyArgs, PaginationAndSearchRequest } from '../../types/pagenation';
+import {
+  CreateProductData,
+  UpdateProductData,
+  ProductWithDetails
+} from '../../types/product';
+import {
+  PrismaFindManyArgs,
+  PaginationAndSearchRequest
+} from '../../types/pagenation';
 import { processFindManyArgs, processResponse } from '../utils/responseHelpers';
 import { checkProductOwnership } from '../utils/queryHelpers';
 
@@ -83,3 +90,12 @@ export const toggleProductLike = async (productId: string, userId: string) => {
     return { liked: true, message: '좋아요가 추가되었습니다' };
   }
 };
+
+export const findLikedProductByUserId = async (userId: string) => {
+  const likedProducts = await productRepository.findLikedProductRp(userId)
+  if (likedProducts.length === 0) {
+    throw new Error('상품을 찾을 수 없습니다.');
+  }
+  const products = likedProducts.map(like => like.product);
+  return products;
+}

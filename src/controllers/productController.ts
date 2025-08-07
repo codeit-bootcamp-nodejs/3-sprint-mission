@@ -6,6 +6,7 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductLike,
+  findLikedProductByUserId,
 } from '../services/productService';
 import { PaginationAndSearchRequest } from '../../types/pagenation';
 import {
@@ -111,7 +112,18 @@ export const toggleProductLikeController = async (
 ) => {
   const { productId } = req.params;
   const { userId } = req.user!;
-
   const result = await toggleProductLike(productId, userId);
   res.status(200).json(result);
+};
+
+export const getLikedProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  const { userId } = req.user!;
+  const products = await findLikedProductByUserId(userId);
+  res.status(200).json({
+    message: '좋아요 상품 조회 성공!',
+    data: products
+  });
 };

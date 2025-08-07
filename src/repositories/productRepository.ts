@@ -116,3 +116,15 @@ export const createProductLikeRp = async (userId: string, productId: string) => 
     data: { userId, productId },
   });
 };
+
+export const findLikedProductRp = async (userId: string) => {
+  const likedProducts = await prisma.productLike.findMany({
+    where: {
+      userId: userId,
+    },
+    include: {
+      product: true,
+    }
+  });
+  return likedProducts;
+}

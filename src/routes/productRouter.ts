@@ -6,6 +6,7 @@ import {
   updateProductController,
   deleteProductController,
   toggleProductLikeController,
+  getLikedProduct,
 } from '../controllers/productController';
 import {
   verifyAccessToken,
@@ -32,6 +33,12 @@ productRouter.route('/')
     uploadImage('products').single('image'),
     validate(createProductSchema, 'body'),
     asyncHandler(createProductController)
+  );
+
+productRouter.route('/liked-products')
+  .get(
+    verifyAccessToken,
+    asyncHandler(getLikedProduct)
   );
 
 // 특정 상품 조회, 수정, 삭제
