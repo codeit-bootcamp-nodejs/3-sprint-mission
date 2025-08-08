@@ -15,7 +15,12 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (err.code === 'credentials_required') {
       statusCode = 401;
       message = '액세스 토큰이 제공되지 않았습니다.';
-    } else if (err.code === 'invalid_token' && err.inner && typeof err.inner === 'object' && 'name' in err.inner && err.inner.name === 'TokenExpiredError') {
+    } else if (err.code === 'invalid_token' &&
+      err.inner &&
+      typeof err.inner === 'object' &&
+      'name' in err.inner &&
+      err.inner.name === 'TokenExpiredError'
+    ) {
       statusCode = 401;
       message = '액세스 토큰이 만료되었습니다. 리프레시 토큰으로 재발급해주세요.';
     } else {
@@ -36,7 +41,9 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     switch (err.code) {
       case 'P2002':
         statusCode = 409;
-        message = typeof err.message === 'string' && err.message ? err.message : '요청하신 데이터가 이미 존재합니다.';
+        message = typeof err.message === 'string' &&
+          err.message ? err.message :
+          '요청하신 데이터가 이미 존재합니다.';
         if (err.meta && Array.isArray(err.meta.target)) {
           details = `중복된 필드: ${err.meta.target.join(', ')}`;
         }
@@ -52,18 +59,24 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         break;
       case 'P2025':
         statusCode = 404;
-        message = typeof err.message === 'string' && err.message ? err.message : (err.meta?.cause as string || '요청한 데이터를 찾을 수 없습니다.');
+        message = typeof err.message === 'string' &&
+          err.message ? err.message :
+          (err.meta?.cause as string || '요청한 데이터를 찾을 수 없습니다.');
         break;
 
       default:
         statusCode = 500;
-        message = typeof err.message === 'string' && err.message ? err.message : '데이터베이스 관련 오류가 발생했습니다.';
+        message = typeof err.message === 'string' &&
+          err.message ? err.message :
+          '데이터베이스 관련 오류가 발생했습니다.';
         break;
     }
   }
   else {
     statusCode = err.statusCode || 500;
-    message = typeof err.message === 'string' && err.message ? err.message : '서버 내부 오류가 발생했습니다.';
+    message = typeof err.message === 'string' &&
+      err.message ? err.message :
+      '서버 내부 오류가 발생했습니다.';
   }
 
   res.status(statusCode).json({

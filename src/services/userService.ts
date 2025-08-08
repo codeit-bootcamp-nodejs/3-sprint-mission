@@ -13,8 +13,7 @@ import {
 import { createToken } from '../utils/jwt';
 import { CreateUserData, UpdateUserProfileData } from '../../types/user';
 
-// 토큰 생성 유틸리티 함수
-
+// 유저 생성
 export const createUser = async (userData: CreateUserData) => {
   const { username, email, password, address, imageUrl } = userData;
   const existingUser = await findFirstUserRp(username, email)
@@ -45,6 +44,7 @@ export const createUser = async (userData: CreateUserData) => {
   return newUser;
 };
 
+// 유저 로그인 
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmailRp(email);
   if (!user) {
@@ -73,6 +73,7 @@ export const loginUser = async (email: string, password: string) => {
   };
 };
 
+// 유저 로그아웃
 export const logoutUser = async (userId: string) => {
   const updatedUser = await updateUserTokenRp(userId, { refreshToken: null });
 
@@ -83,6 +84,7 @@ export const logoutUser = async (userId: string) => {
   return { message: '로그아웃 성공', userId: updatedUser.id };
 };
 
+// 토큰 재발급
 export const refreshUserToken = async (userId: string, oldRefreshToken: string) => {
   const user = await findUserTokenByIdRp(userId);
 
@@ -101,6 +103,7 @@ export const refreshUserToken = async (userId: string, oldRefreshToken: string) 
   return { newAccessToken, newRefreshToken };
 };
 
+// 유저 정보 조회
 export const getMyProfile = async (userId: string) => {
   const userProfile = await findUserProfileByIdRp(userId);
   if (!userProfile) {
@@ -109,6 +112,7 @@ export const getMyProfile = async (userId: string) => {
   return userProfile;
 };
 
+// 유저 정보 업데이트
 export const updateUser = async (id: string, updateData: UpdateUserProfileData) => {
   if (updateData.password) {
     updateData.password = await hash.hashingPassword(updateData.password);
@@ -117,6 +121,7 @@ export const updateUser = async (id: string, updateData: UpdateUserProfileData) 
   return updatedUser;
 };
 
+// 유저 삭제
 export const deleteMyProfile = async (userId: string) => {
   const deletedUser = await deleteUserRp(userId);
   return deletedUser;

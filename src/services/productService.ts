@@ -91,6 +91,7 @@ export const toggleProductLike = async (productId: string, userId: string) => {
   }
 };
 
+// 좋아요한 상품 조회
 export const findLikedProductByUserId = async (userId: string) => {
   const likedProducts = await productRepository.findLikedProductRp(userId)
   if (likedProducts.length === 0) {

@@ -35,6 +35,7 @@ productRouter.route('/')
     asyncHandler(createProductController)
   );
 
+// 좋아요한 상품 목록 조회
 productRouter.route('/liked-products')
   .get(
     verifyAccessToken,

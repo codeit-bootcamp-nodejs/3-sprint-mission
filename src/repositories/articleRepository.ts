@@ -123,6 +123,7 @@ export const deleteLikeRp = async (likeId: string) => {
   });
 };
 
+// 좋아요한 게시글 목록
 export const findLikedArticleRp = async (userId: string) => {
   return prisma.articleLike.findMany({
     where: {

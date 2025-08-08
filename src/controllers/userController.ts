@@ -15,7 +15,11 @@ import {
   UpdateUserProfileData,
 } from '../../types/user';
 
-export const registerUser = async (req: Request<{}, {}, CreateUserData>, res: Response, next: NextFunction) => {
+export const registerUser = async (
+  req: Request<{}, {}, CreateUserData>,
+  res: Response,
+  next: NextFunction
+) => {
   const imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
   const { username, email, password, address } = req.body;
 
@@ -26,7 +30,10 @@ export const registerUser = async (req: Request<{}, {}, CreateUserData>, res: Re
   });
 };
 
-export const login = async (req: Request<{}, {}, LoginData>, res: Response) => {
+export const login = async (
+  req: Request<{}, {}, LoginData>,
+  res: Response
+) => {
   const { email, password } = req.body;
 
   const { accessToken, refreshToken, user } = await loginUser(email, password);
@@ -45,7 +52,10 @@ export const login = async (req: Request<{}, {}, LoginData>, res: Response) => {
   });
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (
+  req: Request,
+  res: Response
+) => {
   const userId = req.user!.userId;
   await logoutUser(userId);
   // 클라이언트 측 쿠키에서 리프레시 토큰을 제거
@@ -60,7 +70,10 @@ export const logout = async (req: Request, res: Response) => {
   });
 };
 
-export const refreshToken = async (req: Request, res: Response) => {
+export const refreshToken = async (
+  req: Request,
+  res: Response
+) => {
   const typedReq = req as RefreshTokenRequest;
   const userId = typedReq.user!.userId;
   const oldRefreshToken = typedReq.cookies.refreshToken;
@@ -80,7 +93,10 @@ export const refreshToken = async (req: Request, res: Response) => {
   });
 };
 
-export const getMe = async (req: Request, res: Response) => {
+export const getMe = async (
+  req: Request,
+  res: Response
+) => {
   const userId = req.user!.userId;
   const user = await getMyProfile(userId);
 
@@ -90,7 +106,10 @@ export const getMe = async (req: Request, res: Response) => {
   });
 };
 
-export const updateMe = async (req: Request<{}, {}, UpdateUserProfileData>, res: Response) => {
+export const updateMe = async (
+  req: Request<{}, {}, UpdateUserProfileData>,
+  res: Response
+) => {
   const userId = req.user!.userId;
   const updateData = req.body;
 
@@ -106,7 +125,10 @@ export const updateMe = async (req: Request<{}, {}, UpdateUserProfileData>, res:
   });
 };
 
-export const deleteMe = async (req: Request, res: Response) => {
+export const deleteMe = async (
+  req: Request,
+  res: Response
+) => {
   const userId = req.user!.userId;
   await deleteMyProfile(userId);
 

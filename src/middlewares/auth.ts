@@ -32,7 +32,11 @@ export const verifyRefreshToken = expressjwt({
   requestProperty: 'user',
 });
 
-export const optionalVerifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
+export const optionalVerifyAccessToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (req.headers.authorization) {
     // Authorization 헤더가 있으면 Access Token 검증 미들웨어 실행
     verifyAccessToken(req, res, (err) => {

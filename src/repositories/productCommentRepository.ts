@@ -2,7 +2,9 @@ import prisma from '../lib/prisma';
 import { CreateProductCommentArg, FindCommentsRepoArgs, ProductCommentWithUser } from '../../types/productComment';
 
 // 댓글 생성 레포지토리 함수
-export const createProductCommentRp = async (data: CreateProductCommentArg): Promise<ProductCommentWithUser> => {
+export const createProductCommentRp = async (
+  data: CreateProductCommentArg
+): Promise<ProductCommentWithUser> => {
   return prisma.productComment.create({
     data: {
       productId: data.productId,
@@ -20,7 +22,9 @@ export const createProductCommentRp = async (data: CreateProductCommentArg): Pro
 };
 
 // 댓글 목록 조회 레포지토리 함수
-export const findAllProductCommentsRp = async (args: FindCommentsRepoArgs): Promise<ProductCommentWithUser[]> => {
+export const findAllProductCommentsRp = async (
+  args: FindCommentsRepoArgs
+): Promise<ProductCommentWithUser[]> => {
   return prisma.productComment.findMany({
     ...args,
     include: {

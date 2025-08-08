@@ -84,6 +84,7 @@ export const toggleArticleLike = async (articleId: string, userId: string) => {
   }
 };
 
+// 좋아요한 게시글 조회
 export const findLikedArticle = async (userId: string) => {
   const likedArticle = await articleRepository.findLikedArticleRp(userId)
   if (likedArticle.length === 0) {

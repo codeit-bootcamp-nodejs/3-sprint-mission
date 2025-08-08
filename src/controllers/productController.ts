@@ -116,6 +116,7 @@ export const toggleProductLikeController = async (
   res.status(200).json(result);
 };
 
+// 좋아요한 게시글 목록
 export const getLikedProduct = async (
   req: Request,
   res: Response,

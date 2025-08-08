@@ -148,7 +148,11 @@ export const offsetQuerySchema = s.object({
 
 
 // --- 유효성 검사 미들웨어 ---
-export const validate = <T>(schema: Struct<T>, type: 'body' | 'query' | 'params') => (req: Request, res: Response, next: NextFunction) => {
+export const validate = <T>(schema: Struct<T>, type: 'body' | 'query' | 'params') => (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     s.assert(req[type] as unknown, schema);
     next();

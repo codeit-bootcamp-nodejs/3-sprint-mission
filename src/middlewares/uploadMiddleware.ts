@@ -17,13 +17,21 @@ const storage = (subpath: string) => multer.diskStorage({
     }
     cb(null, targetUploadDir);
   },
-  filename: (req: Request, file: Express.Multer.File, cb: FileNameCallback) => {
+  filename: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: FileNameCallback
+  ) => {
     const extname = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${Date.now()}${extname}`);
   }
 });
 
-const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) => {
   const allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);

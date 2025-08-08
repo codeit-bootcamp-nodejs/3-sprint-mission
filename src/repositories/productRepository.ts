@@ -117,6 +117,7 @@ export const createProductLikeRp = async (userId: string, productId: string) => 
   });
 };
 
+// 좋아요한 상품 목록
 export const findLikedProductRp = async (userId: string) => {
   const likedProducts = await prisma.productLike.findMany({
     where: {

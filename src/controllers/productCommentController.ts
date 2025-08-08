@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import * as productCommentService from '../services/productCommentService';
 
 // 댓글 생성 컨트롤러
-export const createCommentController = async (req: Request, res: Response, next: NextFunction) => {
+export const createCommentController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { productId } = req.params;
   const { content } = req.body;
   const userId = req.user!.userId;
@@ -16,7 +20,11 @@ export const createCommentController = async (req: Request, res: Response, next:
 
 
 // 댓글 목록 조회 컨트롤러
-export const getCommentsController = async (req: Request, res: Response, next: NextFunction) => {
+export const getCommentsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const productId = req.params.productId;
   const cursor = req.query.cursor as string | undefined;
   const limit = req.query.limit as string | undefined;
@@ -25,7 +33,11 @@ export const getCommentsController = async (req: Request, res: Response, next: N
 };
 
 // 댓글 수정 컨트롤러
-export const updateCommentController = async (req: Request, res: Response, next: NextFunction) => {
+export const updateCommentController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const commentId = req.params.commentId;
   const { content } = req.body;
   const userId = req.user!.userId;
@@ -34,7 +46,11 @@ export const updateCommentController = async (req: Request, res: Response, next:
 };
 
 // 댓글 삭제 컨트롤러
-export const deleteCommentController = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteCommentController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const commentId = req.params.commentId;
   const userId = req.user!.userId;
   await productCommentService.deleteProductComment(commentId, userId);

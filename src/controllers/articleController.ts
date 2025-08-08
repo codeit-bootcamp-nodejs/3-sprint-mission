@@ -107,6 +107,7 @@ export const toggleArticleLikeController = async (
   res.status(200).json(result);
 };
 
+// 좋아요한 게시글 목록
 export const getLikedArticle = async (
   req: Request,
   res: Response,

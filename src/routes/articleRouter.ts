@@ -24,6 +24,7 @@ import {
 
 const articleRouter: Router = express.Router();
 
+// 게시글  조회 생성
 articleRouter.route('/')
   .get(
     validate(offsetQuerySchema, 'query'),
@@ -36,12 +37,14 @@ articleRouter.route('/')
     asyncHandler(createArticleController)
   );
 
+// 좋아요한 게시글 조회
 articleRouter.route('/liked-articles')
   .get(
     verifyAccessToken,
     asyncHandler(getLikedArticle)
   )
 
+// 게시글 상세 조회, 수정, 삭제
 articleRouter.route('/:articleId')
   .get(
     optionalVerifyAccessToken,
@@ -61,6 +64,7 @@ articleRouter.route('/:articleId')
     asyncHandler(deleteArticleController)
   );
 
+// 게시글 좋아요
 articleRouter.route('/:articleId/like')
   .post(
     verifyAccessToken,
