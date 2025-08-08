@@ -5,7 +5,7 @@ import {
   getSortParams,
   prisma,
   checkProductOwnership
-} from '../utils/queryHelpers.js';
+} from '../src/utils/queryHelpers.js';
 
 export const findAllProducts = async ({ offset, limit, sort, search }) => {
   const { skip, take } = getPaginationParams({ offset, limit });
@@ -183,7 +183,7 @@ export const toggleProductLike = async (userId, productId) => {
         },
       },
     });
-    
+
     if (existinglike) {
       await prisma.productLike.delete({
         where: {

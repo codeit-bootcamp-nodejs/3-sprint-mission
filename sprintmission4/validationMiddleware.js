@@ -1,19 +1,19 @@
 import * as s from 'superstruct';
 import { Request, Response, NextFunction } from 'express';
 import { Struct } from 'superstruct';
-import { ValidationError } from '../../types/errors';
+import { ValidationError } from '../types/errors';
 import isEmail from 'is-email';
 import isUuid from 'is-uuid';
 
 // --- 공통 타입 정의 ---
-export const Uuid = s.define<string>('Uuid', (value: unknown) => {
+export const Uuid = s.define < string > ('Uuid', (value: unknown) => {
   if (typeof value !== 'string') {
     return false;
   }
   return isUuid.v4(value);
 });
 
-export const Email = s.define<string>('Email', (value: unknown) => {
+export const Email = s.define < string > ('Email', (value: unknown) => {
   if (typeof value !== 'string') {
     return false;
   }
@@ -151,21 +151,21 @@ export const offsetQuerySchema = s.object({
 export const validate = <T>(schema: Struct<T>, type: 'body' | 'query' | 'params') => (req: Request, res: Response, next: NextFunction) => {
   try {
     s.assert(req[type] as unknown, schema);
-    next();
+  next();
   } catch (error) {
     if (error instanceof s.StructError) {
       const validationError = new ValidationError(
-        '유효성 검사 오류',
+  '유효성 검사 오류',
         Array.from(error.failures()).map((failure) => ({
-          type: failure.type,
-          message: failure.message,
-          path: failure.path.join('.'),
-          value: failure.value,
+    type: failure.type,
+  message: failure.message,
+  path: failure.path.join('.'),
+  value: failure.value,
         }))
-      );
-      next(validationError);
+  );
+  next(validationError);
     } else {
-      next(error);
+    next(error);
     }
   }
 };

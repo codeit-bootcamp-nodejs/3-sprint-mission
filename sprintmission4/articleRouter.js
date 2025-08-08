@@ -1,11 +1,13 @@
 import express from 'express';
-import asyncHandler from '../utils/asyncHandler.js';
-import { validate, 
-  createArticleSchema, 
-  updateArticleSchema, 
-  getArticleByIdSchema } from '../middlewares/validationMiddleware.js';
-import uploadImage from '../middlewares/uploadMiddleware.js';
-import { verifyAccessToken } from '../middlewares/auth.js';
+import asyncHandler from '../src/utils/asyncHandler.js';
+import {
+  validate,
+  createArticleSchema,
+  updateArticleSchema,
+  getArticleByIdSchema
+} from '../src/middlewares/validationMiddleware.js';
+import uploadImage from '../src/middlewares/uploadMiddleware.js';
+import { verifyAccessToken } from '../src/middlewares/auth.js';
 import {
   validate, createArticleSchema,
   updateArticleSchema,
@@ -102,7 +104,7 @@ articleRouter.route('/:articleId')
         data: patchArticle,
       });
     }))
-    
+
   .delete(
     verifyAccessToken,
     validate(getArticleByIdSchema, 'params'),
