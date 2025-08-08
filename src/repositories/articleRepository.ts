@@ -122,3 +122,14 @@ export const deleteLikeRp = async (likeId: string) => {
     },
   });
 };
+
+export const findLikedArticleRp = async (userId: string) => {
+  return prisma.articleLike.findMany({
+    where: {
+      userId: userId
+    },
+    include: {
+      article: true
+    }
+  });
+}

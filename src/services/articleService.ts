@@ -1,5 +1,9 @@
 import * as articleRepository from '../repositories/articleRepository';
-import { CreateArticleData, UpdateArticleData, ArticleWithDetails } from '../../types/article';
+import {
+  CreateArticleData,
+  UpdateArticleData,
+  ArticleWithDetails
+} from '../../types/article';
 import { PaginationAndSearchRequest } from '../../types/pagenation';
 import { processFindManyArgs, processResponse } from '../utils/responseHelpers';
 import { checkArticleOwnership } from '../utils/queryHelpers';
@@ -79,3 +83,12 @@ export const toggleArticleLike = async (articleId: string, userId: string) => {
     return { liked: true, message: '좋아요가 추가되었습니다' };
   }
 };
+
+export const findLikedArticle = async (userId: string) => {
+  const likedArticle = await articleRepository.findLikedArticleRp(userId)
+  if (likedArticle.length === 0) {
+    throw new Error('게시글을 찾을 수 없습니다.');
+  };
+  const articles = likedArticle.map(like => like.article);
+  return articles
+}

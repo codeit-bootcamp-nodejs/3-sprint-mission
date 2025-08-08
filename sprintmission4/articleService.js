@@ -6,7 +6,7 @@ import {
   getSortParams,
   prisma,
   checkArticleOwnership
-} from '../src/utils/queryHelpers.js';
+} from '../utils/queryHelpers.js';
 
 export const findAllArticles = async ({ offset, limit, sort, search }) => {
   try {

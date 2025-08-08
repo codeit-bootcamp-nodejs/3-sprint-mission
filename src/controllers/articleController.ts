@@ -6,6 +6,7 @@ import {
   updateArticle,
   deleteArticle,
   toggleArticleLike,
+  findLikedArticle,
 } from '../services/articleService';
 import { PaginationAndSearchRequest } from '../../types/pagenation';
 import { ArticleParamsRequest, CreateArticleData, UpdateArticleData } from '../../types/article';
@@ -104,4 +105,17 @@ export const toggleArticleLikeController = async (
   const result = await toggleArticleLike(articleId, loggedInUserId);
 
   res.status(200).json(result);
+};
+
+export const getLikedArticle = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req.user!;
+  const articles = await findLikedArticle(userId);
+  res.status(200).json({
+    message: '좋아요한 게시글 목록입니다.',
+    data: articles,
+  });
 };

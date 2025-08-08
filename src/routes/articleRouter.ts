@@ -19,6 +19,7 @@ import {
   updateArticleController,
   deleteArticleController,
   toggleArticleLikeController,
+  getLikedArticle,
 } from '../controllers/articleController';
 
 const articleRouter: Router = express.Router();
@@ -34,6 +35,12 @@ articleRouter.route('/')
     validate(createArticleSchema, 'body'),
     asyncHandler(createArticleController)
   );
+
+articleRouter.route('/liked-articles')
+  .get(
+    verifyAccessToken,
+    asyncHandler(getLikedArticle)
+  )
 
 articleRouter.route('/:articleId')
   .get(
