@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import hashUtils from '../src/utils/hash.js';
 
 const prisma = new PrismaClient();
@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-async function main() {
+async function main(): Promise<void> {
   console.log('--- Seeding Start ---');
 
   let retries = 0;
@@ -16,9 +16,9 @@ async function main() {
     try {
       console.log(`\nAttempting to seed (Attempt ${retries + 1}/${MAX_RETRIES})...`);
 
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         console.log('Clearing existing data...');
-        await Promise.all([
+        await Promise.all<Prisma.BatchPayload>([
           tx.productLike.deleteMany({}),
           tx.articleLike.deleteMany({}),
           tx.articleComment.deleteMany({}),
@@ -33,7 +33,7 @@ async function main() {
         const hashedPasswordKim = await hashUtils.hashingPassword('passwordKim1!');
         const userKim = await tx.user.create({
           data: {
-            username: '개발자김', // 👈 username을 닉네임 겸용으로 사용
+            username: '개발자김',
             email: 'dev.kim@example.com',
             password: hashedPasswordKim,
             address: '서울시 강남구 테헤란로',
@@ -65,7 +65,6 @@ async function main() {
           },
         });
         console.log(`User created: ${userPark.username} (ID: ${userPark.id})`);
-
 
         console.log('Creating products...');
         const productNodejs = await tx.product.create({
@@ -205,8 +204,7 @@ async function main() {
 
       seedingSuccessful = true;
       console.log('--- Seeding finished successfully ---');
-
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(`Seeding attempt ${retries + 1} failed: Transaction rolled back. Error:`, e);
       retries++;
 
@@ -225,8 +223,9 @@ async function main() {
 }
 
 main()
-  .catch(async (e) => {
+  .catch(async (e: unknown) => {
     console.error('An unexpected error occurred outside of seeding attempts:', e);
+    await prisma.$disconnect();
     process.exit(1);
   })
   .finally(async () => {

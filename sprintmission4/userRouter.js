@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
-import { verifyAccessToken, verifyRefreshToken } from '../middlewares/auth.js';
-import asyncHandler from '../utils/asyncHandler.js';
+import { verifyAccessToken, verifyRefreshToken } from '../src/middlewares/auth.js';
+import asyncHandler from '../src/utils/asyncHandler.js';
 import uploadImage from '../middlewares/upload.middleware.js';
 import {
   createUser,
@@ -11,16 +11,16 @@ import {
   deleteUser,
   loginUser,
   createToken
-} from '../services/userService.js';
-import { verifyAccessToken, verifyRefreshToken } from '../middlewares/auth.js';
+} from '../src/services/userService.js';
+import { verifyAccessToken, verifyRefreshToken } from '../src/middlewares/auth.js';
 import {
   validate,
   createUserSchema,
   updateUserSchema,
   loginSchema
-} from '../middlewares/validationMiddleware.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import uploadImage from '../middlewares/uploadMiddleware.js';
+} from '../src/middlewares/validationMiddleware.js';
+import asyncHandler from '../src/utils/asyncHandler.js';
+import uploadImage from '../src/middlewares/uploadMiddleware.js';
 import path from 'path';
 
 const userRouter = express.Router();
@@ -164,7 +164,7 @@ userRouter.route('/me')
     asyncHandler(async (req, res, next) => {
       const userId = req.user.userId;
       const updateData = req.body;
-      
+
       if (req.file) {
         updateData.imageUrl = `/uploads/users/${req.file.filename}`;
       }

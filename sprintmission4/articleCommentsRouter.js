@@ -1,15 +1,15 @@
 
 import express from 'express';
-import { verifyAccessToken } from '../middlewares/auth.js';
+import { verifyAccessToken } from '../src/middlewares/auth.js';
 import {
   validate,
   CommentBaseSchema,
   UpdateCommentBaseSchema,
   getArticleByIdSchema,
   updateArticleCommentParamsSchema,
-} from '../middlewares/validationMiddleware.js';
-import * as articleCommentsService from '../services/articleCommentService.js';
-import asyncHandler from '../utils/asyncHandler.js';
+} from '../src/middlewares/validationMiddleware.js';
+import * as articleCommentsService from '../src/services/articleCommentService.js';
+import asyncHandler from '../src/utils/asyncHandler.js';
 
 const router = express.Router({ mergeParams: true });
 
@@ -53,7 +53,7 @@ router.route('/:id')
       res.status(200).json(updatedComment);
     })
   )
-  
+
   .delete(
     verifyAccessToken,
     validate(updateArticleCommentParamsSchema, 'params'),

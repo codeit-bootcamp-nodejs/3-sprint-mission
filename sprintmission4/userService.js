@@ -135,7 +135,7 @@ export const loginUser = async (email, password) => {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }
   const isPasswordValid = await hash.verifyPassword(password, user.password);
-  
+
   if (!isPasswordValid) {
     throw new Error('이메일 또는 비밀번호를 확인해주세요.');
   }

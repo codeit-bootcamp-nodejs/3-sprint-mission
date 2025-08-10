@@ -12,7 +12,7 @@ export const findAllArticles = async ({ offset, limit, sort, search }) => {
   try {
     const { skip, take } = getPaginationParams({ offset, limit });
     const orderBy = getSortParams({ sort }, 'createdAt');
-    const where = getSearchParams(search, ['title', 'content']);s
+    const where = getSearchParams(search, ['title', 'content']); s
     const articles = await prisma.article.findMany({
       skip,
       take,
@@ -182,7 +182,7 @@ export const toggleArticleLike = async (currentUserId, articleId) => {
       },
     },
   });
-  
+
   if (existinglike) {
     await prisma.articleLike.delete({
       where: {
