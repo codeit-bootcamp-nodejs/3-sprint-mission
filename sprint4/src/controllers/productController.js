@@ -18,7 +18,10 @@ export const getProducts = async (req, res) => {
       name: true,
       price: true,
       createdAt: true,
-      likedUser: userId ? { where: { id: userId } } : false
+      likedUser: userId ? { 
+        where: { id: userId },
+        select: { id: true }
+      } : false
     },
     where: {
       OR: [
@@ -53,7 +56,7 @@ export const getProduct = async (req, res) => {
       name: true,
       description: true,
       price: true,
-      tags: true,
+      tag: true,
       likedUser: userId ? {
         where: { id: userId },
         select: { id: true }
