@@ -9,7 +9,9 @@
   - 현재 로그인한 유저 id가 1이라고 가정
 */
 UPDATE member
-SET name = 'test'
+SET 
+  name = 'test'
+  updated = now()
 WHERE id = 1
 ;
 /*
@@ -26,7 +28,8 @@ LIMIT 10 OFFSET 20
 /*
   3. 내가 생성한 상품의 총 개수
 */
-SELECT COUNT(*) FROM product
+SELECT COUNT(*) AS "생성한 상품의 총 개수"
+  FROM product
 WHERE userId = 1
 ;
 
@@ -86,7 +89,7 @@ SELECT
    FROM like_product lp
    WHERE lp.productId = p.id) AS like_count
 FROM product p
-WHERE p.name = 'test'
+WHERE p.name LIKE '%test%'
 ORDER BY p.created DESC
 LIMIT 10;
 --join 방식
@@ -175,3 +178,4 @@ FROM product_inquiry
 WHERE productId = 1 AND created < '2025-03-25 00:00:00'
 ORDER BY created DESC
 LIMIT 10;
+
