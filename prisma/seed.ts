@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import hashUtils from '../src/utils/hash.js';
+import hashUtils from '../src/utils/hash';
 
 const prisma = new PrismaClient();
 
@@ -19,6 +19,7 @@ async function main(): Promise<void> {
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         console.log('Clearing existing data...');
         await Promise.all<Prisma.BatchPayload>([
+          tx.notification.deleteMany({}),
           tx.productLike.deleteMany({}),
           tx.articleLike.deleteMany({}),
           tx.articleComment.deleteMany({}),

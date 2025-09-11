@@ -75,3 +75,11 @@ export const deleteArticleCommentRp = async (commentId: string) => {
     },
   });
 };
+
+export const findArticleOwnerByArticleIdRp = async (articleId: string) => {
+  const article = await prisma.article.findUnique({
+    where: { id: articleId },
+    select: { userId: true },
+  });
+  return article?.userId || null;
+};

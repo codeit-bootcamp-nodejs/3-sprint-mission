@@ -9,6 +9,7 @@ import articleRouter from './routes/articleRouter';
 import productCommentRouter from './routes/productCommentsRouter';
 import articleCommentsRouter from './routes/articleCommentsRouter';
 import errorHandler from './middlewares/errorHandler';
+import notificationRouter from './routes/notificationRouter';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/products', productRouter);
 app.use('/api/products/:productId/comments', productCommentRouter);
 app.use('/api/articles', articleRouter);
 app.use('/api/articles/:articleId/comments', articleCommentsRouter);
+app.use('/api/notifications', notificationRouter);
 
 app.use(errorHandler);
 

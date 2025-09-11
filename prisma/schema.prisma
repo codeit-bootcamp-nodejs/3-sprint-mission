@@ -31,6 +31,11 @@ enum ProductTag {
   IMAGE_UPLOADED
 }
 
+enum NotificationType {
+  PRODUCT_PRICE_CHANGED
+  ARTICLE_COMMENT_ADDED
+}
+
 model User {
   id              String           @id @default(uuid())
   username        String           @unique
@@ -41,6 +46,7 @@ model User {
   refreshToken    String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+  Notifications   Notification[]
   products        Product[]
   articles        Article[]
   productComments ProductComment[]
@@ -133,4 +139,16 @@ model ArticleComment {
 
   @@index([articleId])
   @@index([userId])
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+  type NotificationType
+  title String
+  message String
+  isRead Boolean @default(false)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  relatedId String?
+  createdAt DateTime @default(now())
 }

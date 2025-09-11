@@ -10,10 +10,25 @@ import {
   checkCommentOwnership,
 } from '../utils/queryHelpers';
 import { HttpError } from '../../types/errors';
+import { sendRealtimeNotification } from './realtimeNotificationService';
+import { NotificationType } from '@prisma/client';
+import { CreateNotificationData } from '../../types/notification';
 
 // 게시글 댓글 생성 서비스
 export const createArticleComment = async (data: CreateCommentArgs) => {
   const newComment = await articleCommentRepository.createArticleCommentRp(data);
+  if(newComment) {
+    const ownArticleUserId = await articleCommentRepository.findArticleOwnerByArticleIdRp(data.articleId);
+    if(ownArticleUserId && ownArticleUserId !== data.userId) {
+    const notificationData: CreateNotificationData = {
+      type: NotificationType.ARTICLE_COMMENT_ADDED,
+      title: "새 댓글 알림",
+      message: `새 댓글이 작성되었습니다: ${newComment.content}`,
+      relatedId: data.articleId,
+      };
+      await sendRealtimeNotification(ownArticleUserId, notificationData);
+    }
+  }
   return newComment;
 };
 
