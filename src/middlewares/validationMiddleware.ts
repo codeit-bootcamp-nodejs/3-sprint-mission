@@ -112,6 +112,10 @@ export const getArticleByIdSchema = s.object({
   articleId: Uuid,
 });
 
+export const getNotificationByIdSchema = s.object({
+  notificationId: s.pattern(s.string(), /^\d+$/),
+});
+
 
 // --- Comment 관련 스키마 --- 
 export const CommentBaseSchema = s.object({
