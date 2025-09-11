@@ -113,7 +113,9 @@ export const getArticleByIdSchema = s.object({
 });
 
 export const getNotificationByIdSchema = s.object({
-  notificationId: s.pattern(s.string(), /^\d+$/),
+  notificationId: s.refine(s.string(), 'notificationId', (value: string) => {
+    return /^\d+$/.test(value) || '알림 ID는 숫자여야 합니다.';
+  }),
 });
 
 
