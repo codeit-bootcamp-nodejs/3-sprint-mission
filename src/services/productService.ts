@@ -61,16 +61,18 @@ export const updateProduct = async (
   updateData: UpdateProductData
 ) => {
   await checkProductOwnership(productId, userId);
-
-    if(updateData.price){
-    const oldPrice = await productRepository.getProductPriceByIdRp(productId);
-    if(oldPrice && oldPrice !== updateData.price){
+  const oldPrice = await productRepository.getProductPriceByIdRp(productId);
+  const updatedProduct = await productRepository.updateProductRp(
+    productId,
+    updateData
+  );
+  if(oldPrice && oldPrice !== updatedProduct.price){
       const likeUsers = await productRepository.getLikedUsersByProductId(productId);
       if(likeUsers.length > 0){
         const notificationData:CreateNotificationData = {
           type: NotificationType.PRODUCT_PRICE_CHANGED,
           title: "관심 상품 가격 변동 알림",
-          message: `${oldPrice}원에서 ${updateData.price}원으로 가격이 변경되었습니다.`,
+          message: `${oldPrice}원에서 ${updatedProduct.price}원으로 가격이 변경되었습니다.`,
           relatedId: productId
         };
         for(const likeUser of likeUsers){
@@ -78,14 +80,8 @@ export const updateProduct = async (
         }
       }
     }
-  }
-  const updatedProduct = await productRepository.updateProductRp(
-    productId,
-    updateData
-  );
-
-  return processResponse(updatedProduct, 'ProductLike');
-};
+    return processResponse(updatedProduct, 'ProductLike');
+  };
 
 // 상품을 삭제하는 서비스
 export const deleteProduct = async (productId: string, userId: string) => {
