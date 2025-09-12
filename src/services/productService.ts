@@ -75,9 +75,11 @@ export const updateProduct = async (
           message: `${oldPrice}원에서 ${updatedProduct.price}원으로 가격이 변경되었습니다.`,
           relatedId: productId
         };
-        for(const likeUser of likeUsers){
-          await sendRealtimeNotification(likeUser.id, notificationData);
-        }
+        Promise.all(
+          likeUsers.map(likeUser => 
+            sendRealtimeNotification(likeUser.id, notificationData)
+          )
+        );
       }
     }
     return processResponse(updatedProduct, 'ProductLike');
