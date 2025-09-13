@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationType {
+  PRICE_CHANGE
+  NEW_COMMENT
+}
+
+enum NotificationEntity {
+  PRODUCT
+  COMMENT
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  tags        String[]
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  comments Comment[]
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int?
+  likes    Like[]
+}
+
+model Article {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[]
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int?
+  likes    Like[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int?
+
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int?
+
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int?
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  nickname     String   @unique
+  image        String?
+  password     String
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products Product[]
+  articles Article[]
+  comments Comment[]
+  likes    Like[]
+
+  notifications Notification[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int?
+
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int?
+
+  @@unique([userId, productId])
+  @@unique([userId, articleId])
+}
+
+model Notification {
+  id          Int                @id @default(autoincrement())
+  userId      Int
+  type        NotificationType
+  entityType  NotificationEntity
+  entityId    Int
+  title       String
+  body        String
+  metadata    Json               @default("{}")
+  dedupKey    String?            @db.VarChar(128)
+  isRead      Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  readAt      DateTime?
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, isRead], map: "idx_unread")
+  @@unique([userId, type, entityType, entityId, dedupKey], map: "uniq_dedup")
+}
