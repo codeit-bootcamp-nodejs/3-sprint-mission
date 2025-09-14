@@ -8,6 +8,8 @@ import {
   update,
   remove,
 } from '../repositories/commentRepository.js';
+import * as articleRepo from '../repositories/articleRepository.js';
+import * as notificationService from '../notifications/notificationService.js';
 
 export const createProductComment = async (productId: number, userId: number, content: string) => {
   if (!Number.isInteger(productId) || productId <= 0) throw new CustomError('상품 ID가 올바르지 않습니다.', 400);
@@ -25,10 +27,31 @@ export const getProductComments = async (
   return findForProduct(productId, cursor, limit);
 };
 
-export const createArticleComment = async (articleId: number, userId: number, content: string) => {
-  if (!Number.isInteger(articleId) || articleId <= 0) throw new CustomError('게시글 ID가 올바르지 않습니다.', 400);
+export const createArticleComment = async (
+  articleId: number,
+  userId: number,
+  content: string
+) => {
+  if (!Number.isInteger(articleId) || articleId <= 0)
+    throw new CustomError("게시글 ID가 올바르지 않습니다.", 400);
 
-  return createForArticle(articleId, userId, content);
+  const comment = await createForArticle(articleId, userId, content);
+
+  /**
+   * 본인 게시글에 타인 댓글이 달리면 알림 생성
+   */
+  const article = await articleRepo.findById(articleId);
+  const recipientId = article?.userId;
+  if (recipientId && recipientId !== userId) {
+    await notificationService.createNewComment({
+      recipientUserId: recipientId,
+      postId: articleId,
+      commentId: comment.id,
+      commentPreview: content.slice(0, 80),
+    });
+  }
+
+  return comment;
 };
 
 export const getArticleComments = async (

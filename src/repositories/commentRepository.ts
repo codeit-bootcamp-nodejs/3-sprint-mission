@@ -16,6 +16,14 @@ export const createForArticle = (articleId: number, userId: number, content: str
       user: { connect: { id: userId } },
       article: { connect: { id: articleId } },
     },
+    select: {
+      id: true,
+      articleId: true,
+      productId: true,
+      userId: true,
+      content: true,
+      createdAt: true,
+    },
   });
 
 export const findForProduct = (productId: number, cursor?: number, limit = 10) =>

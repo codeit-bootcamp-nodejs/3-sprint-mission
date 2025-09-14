@@ -6,6 +6,7 @@ import commentRoutes from './commentRoutes.js';
 import productRoutes from './productRoutes.js';
 import uploadRoutes from './uploadRoutes.js';
 import userRoutes from './userRoutes.js';
+import notificationRoutes from './notificationRoutes.js';
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use('/products', productRoutes);
 router.use('/articles', articleRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/comments', commentRoutes);
+router.use('/notifications', notificationRoutes);
 
 export default router;

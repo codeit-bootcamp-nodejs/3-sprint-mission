@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { initWs } from './ws/index.js';
 
 import { errorHandler } from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
@@ -28,7 +30,10 @@ app.get('/', (req: Request, res: Response): void => {
 
 app.use(errorHandler);
 
+const server = http.createServer(app);
+initWs(server);
+
 // 서버 실행
-app.listen(PORT, (): void => {
+server.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
 });

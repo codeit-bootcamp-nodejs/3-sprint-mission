@@ -42,3 +42,7 @@ export const findUserLikedArticles = (userId: number) =>
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  export const findUsersByProduct = (productId: number) =>
+  prisma.like.findMany({ where: { productId }, select: { userId: true } });
+  

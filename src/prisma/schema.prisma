@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum NotificationType {
+  PRICE_CHANGE
+  NEW_COMMENT
+}
+
+enum NotificationEntity {
+  PRODUCT
+  COMMENT
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
@@ -65,6 +75,8 @@ model User {
   articles Article[]
   comments Comment[]
   likes    Like[]
+
+  notifications Notification[]
 }
 
 model Like {
@@ -82,4 +94,25 @@ model Like {
 
   @@unique([userId, productId])
   @@unique([userId, articleId])
+}
+
+model Notification {
+  id          Int                @id @default(autoincrement())
+  userId      Int
+  type        NotificationType
+  entityType  NotificationEntity
+  entityId    Int
+  title       String
+  body        String
+  metadata    Json               @default("{}")
+  dedupKey    String?            @db.VarChar(128)
+  isRead      Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  readAt      DateTime?
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, isRead], map: "idx_unread")
+  @@unique([userId, type, entityType, entityId, dedupKey], map: "uniq_dedup")
 }
