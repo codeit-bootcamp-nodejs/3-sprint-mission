@@ -5,6 +5,11 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+//소켓 관련
+import http from 'http';
+import { createSocketServer } from './socket/soketServer';
+
+
 //미들웨어 & 설정
 import corsOptions from './config/corsOptions';
 import { errorHandler } from './middlewares/errorHandler';
@@ -15,11 +20,15 @@ import productRouter from './routes/productRouter';
 import { productCommentRouter, freeCommentRouter } from './routes/commentRouter';
 import articleRouter from './routes/articleRouter';
 import uploadImageRouter from './routes/uploadImageRouter';
+import notificationRouter from './socket/notification.router';
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+//소켓 서버
+const server = http.createServer(app);
+createSocketServer(server);
 //기본 미들웨어
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -34,10 +43,11 @@ app.use('/articles', articleRouter);
 app.use('/product-comments', productCommentRouter);
 app.use('/freeBoard-comments', freeCommentRouter);
 app.use('/upload', uploadImageRouter);
+app.use('/notifications', notificationRouter);
 //에러 핸들러
 app.use(errorHandler);
 
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`서버가 ${PORT} 포트에서 실행 중입니다.`);
+  console.log(`Socket.IO 서버도 ${PORT} 포트에서 실행 중입니다.`);
 });

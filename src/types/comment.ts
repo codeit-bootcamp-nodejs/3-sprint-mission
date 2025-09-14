@@ -18,18 +18,6 @@ export interface CommentDto {
  */
 export type BoardTypeDto = { [productId: string] : string } | { [articleId: string] : string };
 
-/**
- * PatchCommentDto example:
- * {
- * content: string
- * }
- */
 export type CreateCommentDto = Omit<CommentDto, 'id' | 'createdAt'>;
 
-/**
- * PatchCommentDto example:
- * {
- * content: string
- * }
- */
 export type PatchCommentDto = Partial<Omit<CreateCommentDto, 'userId' | 'productId' | 'articleId'>>;

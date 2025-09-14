@@ -97,7 +97,7 @@ const ArticleService = {
         },
       })
     } catch (error) {
-      if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
+      if (typeof error === 'object' && error !== null && 'code' in error && (error as any).code === 'P2002') {
         throw new HttpError('이미 좋아요를 누른 게시글입니다.', 409);
       }
     }

@@ -24,3 +24,6 @@ dist/
 build/
 
 package-lock.json
+
+#prisma/migrations
+prisma/migrations/

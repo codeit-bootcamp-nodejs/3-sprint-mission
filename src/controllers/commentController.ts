@@ -1,6 +1,10 @@
 import { RequestHandler } from "express";
+import { eventBus } from "../config/event-bus";
 import { HttpError } from "../types/error";
+import ProductService from "../services/productService";
+import ArticleService from "../services/articleService";
 import CommentService from "../services/commentService";
+import NotificationService from "../socket/notification.service";
 import { setBoardTypeByBaseUrl } from "../utils/boardTypeSet";
 import { checkUser } from "../utils/checkUser";
 import { COMMENT_ERROR } from "../constants/commentConstants";
@@ -22,7 +26,6 @@ const getCommentList: RequestHandler = async (req, res, next) => {
   const { cursor, limit } = req.query;
   const typeCursor = cursor ? String(cursor) : null;
   const parsedLimit = parseInt(limit ? String(limit) : '10');
-
   try {
     const comments = await CommentService.getCommentList(
       id,
@@ -55,8 +58,24 @@ const createComment: RequestHandler = async (req, res, next) => {
   const user = await checkUser(userId);
   const data = { content: req.body.content, userId: user.id };
   const id = { [setBoardTypeByBaseUrl(req.baseUrl)]: req.params.id };
+  const targetkey = Object.values(id)[0];
+  const targetId = req.params.id;
+
+  let target; 
+  if (targetkey === 'ProductId') {
+    target = await ProductService.getProduct(targetId);
+  } else {
+    target = await ArticleService.getArticle(targetId);
+  }
+  
   try {
     const comment = await CommentService.createComment(id, data);
+    const notification = await NotificationService.createNotification({
+      userId: target.userId,
+      type: 'COMMENT',
+      message: `${user.nickname}님이 댓글을 작성했습니다.`,
+    });
+    eventBus.emit('newNotification', notification);
     res.status(201).json(comment);
   } catch (error) {
     if (error instanceof HttpError) {

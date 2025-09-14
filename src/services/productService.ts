@@ -147,7 +147,17 @@ const ProductService = {
       ...data,
       isLiked: !!isLiked,
     };
+  },
+
+  async getProductLikeUserList(productId: string): Promise<{ userId: string }[]> {
+    return await prisma.productLike.findMany({
+      where: { productId },
+      select: {
+        userId: true,
+      }
+    })
   }
 }
+
 
 export default ProductService;
