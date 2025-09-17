@@ -20,7 +20,6 @@ userRouter.route('/password')
 userRouter.route('/products')
     .get(auth.verifyAccessToken, userController.getUsersProductList)
 
-
 userRouter.route('/')
     .get(auth.verifyAccessToken, userController.getUserWithToken)
     .patch(auth.verifyAccessToken, auth.verifyUserAuth, userController.patchUser)

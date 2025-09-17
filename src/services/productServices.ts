@@ -4,7 +4,8 @@ import {
     CreateProductDto, UpdateProductDto,
     CreateProductCommentDto, UpdateProductCommentDto,
     likedProduct
-} from '../../types/product.js'
+} from '../types/product.js'
+import { createNotification } from './notificationService.js';
 
 async function findComments(limit: number, cursor: string) {
     const commentList = await productRepository.getCommentList(limit, cursor);
@@ -44,7 +45,23 @@ async function findProductById(id: string, userId: number | undefined) {
 }
 
 async function updateProduct(productDto: UpdateProductDto, id: string) {
-    const product = productRepository.update(productDto, id);
+    const oldProduct = await productRepository.getById(id);
+    const product = await productRepository.update(productDto, id);
+    /**
+     * 알람 전송 파트 : 좋아요를 누른 가격의 상품이 변동되면 좋아요한 사람들에게 전부 알람 전송
+     */
+    if (oldProduct?.price !== product.price) {
+        const likedUsers = await productRepository.findLikedUsersByProductId(id);
+        if (likedUsers) {
+            const notificationPromises = likedUsers.map((user) => {
+                return createNotification({
+                    content: "좋아요를 누른 가격의 상품이 변동되었습니다",
+                    userId: user.id
+                });
+            });
+            await Promise.all(notificationPromises);
+        }
+    }
     return product;
 }
 

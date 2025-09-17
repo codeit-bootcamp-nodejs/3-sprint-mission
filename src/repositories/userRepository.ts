@@ -1,6 +1,6 @@
 import { Product, User } from '@prisma/client';
 import { prisma } from '../config/prismaClient.js';
-import { UpdateUserDto } from '../../types/user.js';
+import { UpdateUserDto } from '../types/user.js';
 
 class UserRepository {
     save = async (email: string, nickname: string, password: string, image: string[]): Promise<User> => {

@@ -3,10 +3,6 @@ import express from 'express'
 declare global {
     namespace Express {
         interface Request {
-            body: {
-                email?: string,
-                password?: string
-            },
             cookies: {
                 refreshToken?: string
             }

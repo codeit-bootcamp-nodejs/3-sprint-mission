@@ -7,7 +7,7 @@ import {
 import {
     CreateProductDto, UpdateProductDto,
     CreateProductCommentDto, UpdateProductCommentDto
-} from '../../types/product.js'
+} from '../types/product.js'
 
 const productController = {
     getComments: async (req: Request, res: Response, next: NextFunction) => {

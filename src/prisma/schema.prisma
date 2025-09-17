@@ -37,7 +37,7 @@ model Article {
   articleComment ArticleComment[]
   uploadUser     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         Int?
-  likedUser       User[]           @relation("UserLikeArticle")
+  likedUser      User[]           @relation("UserLikeArticle")
 }
 
 model ArticleComment {
@@ -77,4 +77,15 @@ model User {
   ArticleComment ArticleComment[]
   likeProduct    Product[]        @relation("UserLikeProduct")
   likeArticle    Article[]        @relation("UserLikeArticle")
+  Notification   Notification[]
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isChecked Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }

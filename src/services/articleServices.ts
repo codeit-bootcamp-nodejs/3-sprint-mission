@@ -3,8 +3,9 @@ import {
     CreateArticleCommentDto, UpdateArticleCommentDto,
     CreateArticleDto, UpdateArticleDto,
     likedArticle,
-} from '../../types/article.js';
+} from '../types/article.js';
 import { Article } from '@prisma/client';
+import { createNotification } from './notificationService.js';
 
 
 async function findComments(limit: string, cursor: string) {
@@ -14,6 +15,16 @@ async function findComments(limit: string, cursor: string) {
 
 async function createComment(commentBody: CreateArticleCommentDto) {
     const comment = await articleRepository.createComment(commentBody);
+    /**
+     * 알람 전송 확인을 위한 파트 (다른사람인지 확인)
+     */
+    const article = await articleRepository.getById(commentBody.articleId)
+    if (commentBody.userId !== article?.userId) {
+        await createNotification({
+            content: "새로운 댓글이 달렸습니다",
+            userId: article!.userId as number
+        })
+    }
     return comment;
 }
 

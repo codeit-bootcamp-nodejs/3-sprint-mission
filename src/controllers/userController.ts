@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { createUser, getUser, createToken, refreshingToken, getUserById, updateUser, updateUserPassword, getUsersProductList } from '../services/userServices.js'
-import { ChangePasswordDto, CreateUserDto, filteredUser, UpdateUserDto } from '../../types/user.js';
+import { ChangePasswordDto, CreateUserDto, filteredUser, UpdateUserDto } from '../types/user.js';
 import { Product } from '@prisma/client';
-import { Message } from '../../types/express.js';
+import { Message } from '../types/express.js';
 
 const userController = {
     postUser: async (req: Request, res: Response, next: NextFunction): Promise<void> => {

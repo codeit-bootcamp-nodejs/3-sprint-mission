@@ -1,5 +1,5 @@
 import { Article } from '@prisma/client';
-import { CreateArticleDto, UpdateArticleDto } from '../../types/article.js';
+import { CreateArticleDto, UpdateArticleDto } from '../types/article.js';
 import { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle, updateLikeArticle } from '../services/articleServices.js';
 import { Request, Response, NextFunction } from 'express';
 
