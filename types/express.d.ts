@@ -1,4 +1,4 @@
-import { Request as ExpressRequest } from 'express';
+import { Request } from 'express';
 import { File } from 'multer';
 
 // JWT 페이로드에 담길 사용자 정보의 타입을 정의합니다.

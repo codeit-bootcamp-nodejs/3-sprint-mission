@@ -10,6 +10,9 @@ import {
 } from '../../types/pagenation';
 import { processFindManyArgs, processResponse } from '../utils/responseHelpers';
 import { checkProductOwnership } from '../utils/queryHelpers';
+import { sendRealtimeNotification } from './realtimeNotificationService';
+import { CreateNotificationData } from '../../types/notification';
+import { NotificationType } from '@prisma/client';
 
 // 상품 목록을 조회하는 서비스 (페이지네이션, 정렬, 검색 포함)
 export const findAllProducts = async (query: PaginationAndSearchRequest['query']) => {
@@ -58,14 +61,29 @@ export const updateProduct = async (
   updateData: UpdateProductData
 ) => {
   await checkProductOwnership(productId, userId);
-
+  const oldPrice = await productRepository.getProductPriceByIdRp(productId);
   const updatedProduct = await productRepository.updateProductRp(
     productId,
     updateData
   );
-
-  return processResponse(updatedProduct, 'ProductLike');
-};
+  if(oldPrice && oldPrice !== updatedProduct.price){
+      const likeUsers = await productRepository.getLikedUsersByProductId(productId);
+      if(likeUsers.length > 0){
+        const notificationData:CreateNotificationData = {
+          type: NotificationType.PRODUCT_PRICE_CHANGED,
+          title: "관심 상품 가격 변동 알림",
+          message: `${oldPrice}원에서 ${updatedProduct.price}원으로 가격이 변경되었습니다.`,
+          relatedId: productId
+        };
+        Promise.all(
+          likeUsers.map(likeUser => 
+            sendRealtimeNotification(likeUser.id, notificationData)
+          )
+        );
+      }
+    }
+    return processResponse(updatedProduct, 'ProductLike');
+  };
 
 // 상품을 삭제하는 서비스
 export const deleteProduct = async (productId: string, userId: string) => {
@@ -100,3 +118,4 @@ export const findLikedProductByUserId = async (userId: string) => {
   const products = likedProducts.map(like => like.product);
   return products;
 }
+

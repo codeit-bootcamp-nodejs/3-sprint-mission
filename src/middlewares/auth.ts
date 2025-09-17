@@ -1,4 +1,5 @@
 import { expressjwt } from 'express-jwt';
+import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
 
@@ -50,5 +51,17 @@ export const optionalVerifyAccessToken = (
     // Authorization 헤더가 없으면 req.user를 초기화하고 바로 다음으로 진행
     req.user = undefined;
     next();
+  }
+};
+
+export const verifySocketToken = (token: string): { userId: string } => {
+  try {
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET, {
+      algorithms: ['HS256'],
+    }) as { userId: string };
+    return decoded;
+  } catch (error) {
+    console.error('WebSocket token verification failed:', error);
+    throw new Error('Invalid token');
   }
 };

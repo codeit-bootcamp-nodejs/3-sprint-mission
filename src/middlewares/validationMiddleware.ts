@@ -112,6 +112,12 @@ export const getArticleByIdSchema = s.object({
   articleId: Uuid,
 });
 
+export const getNotificationByIdSchema = s.object({
+  notificationId: s.refine(s.string(), 'notificationId', (value: string) => {
+    return /^\d+$/.test(value) || '알림 ID는 숫자여야 합니다.';
+  }),
+});
+
 
 // --- Comment 관련 스키마 --- 
 export const CommentBaseSchema = s.object({

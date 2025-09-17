@@ -129,3 +129,26 @@ export const findLikedProductRp = async (userId: string) => {
   });
   return likedProducts;
 }
+
+export const getProductPriceByIdRp = async (productId: string) => {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { price: true }
+  });
+  return product?.price || null;
+}
+
+export const getLikedUsersByProductId = async (productId: string) => {
+  const likedUsers = await prisma.productLike.findMany({
+    where: { productId },
+    include: {
+      user: {
+        select: {
+          id: true,
+        }
+      }
+    }
+  });
+  return likedUsers.map(like => like.user);
+}
+

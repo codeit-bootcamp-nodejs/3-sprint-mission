@@ -1,10 +1,10 @@
 import { ErrorRequestHandler } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UnauthorizedError } from 'express-jwt';
-import { HttpError, ValidationError } from '../../types/errors'
+import { HttpError, ValidationError } from '../../types/errors';
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error("전역 에러 발생:", err);
+  console.error('전역 에러 발생:', err);
 
   let statusCode = 500;
   let message: string = '서버 내부 오류가 발생했습니다.';
@@ -15,7 +15,8 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (err.code === 'credentials_required') {
       statusCode = 401;
       message = '액세스 토큰이 제공되지 않았습니다.';
-    } else if (err.code === 'invalid_token' &&
+    } else if (
+      err.code === 'invalid_token' &&
       err.inner &&
       typeof err.inner === 'object' &&
       'name' in err.inner &&
@@ -27,24 +28,29 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
       statusCode = 401;
       message = '액세스 토큰이 유효하지 않습니다.';
     }
-  }
-  else if (err instanceof ValidationError) {
+  } else if (err instanceof ValidationError) {
     statusCode = err.statusCode;
     message = err.message;
     details = err.details;
-  }
-  else if (err instanceof HttpError) {
+  } else if (err instanceof HttpError) {
     statusCode = err.statusCode;
     message = err.message;
-  }
-  else if (err instanceof PrismaClientKnownRequestError) {
+  } else if (err instanceof PrismaClientKnownRequestError) {
     switch (err.code) {
       case 'P2002':
         statusCode = 409;
-        message = typeof err.message === 'string' &&
-          err.message ? err.message :
-          '요청하신 데이터가 이미 존재합니다.';
-        if (err.meta && Array.isArray(err.meta.target)) {
+        // 서비스에서 보낸 커스텀 메시지가 있으면 그것을 사용, 없으면 기본 메시지
+        message =
+          typeof err.message === 'string' &&
+          err.message &&
+          !err.message.includes('Unique constraint failed')
+            ? err.message
+            : '요청하신 데이터가 이미 존재합니다.';
+        if (
+          err.meta &&
+          Array.isArray(err.meta.target) &&
+          message === '요청하신 데이터가 이미 존재합니다.'
+        ) {
           details = `중복된 필드: ${err.meta.target.join(', ')}`;
         }
         break;
@@ -59,24 +65,26 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
         break;
       case 'P2025':
         statusCode = 404;
-        message = typeof err.message === 'string' &&
-          err.message ? err.message :
-          (err.meta?.cause as string || '요청한 데이터를 찾을 수 없습니다.');
+        message =
+          typeof err.message === 'string' && err.message
+            ? err.message
+            : (err.meta?.cause as string) || '요청한 데이터를 찾을 수 없습니다.';
         break;
 
       default:
         statusCode = 500;
-        message = typeof err.message === 'string' &&
-          err.message ? err.message :
-          '데이터베이스 관련 오류가 발생했습니다.';
+        message =
+          typeof err.message === 'string' && err.message
+            ? err.message
+            : '데이터베이스 관련 오류가 발생했습니다.';
         break;
     }
-  }
-  else {
+  } else {
     statusCode = err.statusCode || 500;
-    message = typeof err.message === 'string' &&
-      err.message ? err.message :
-      '서버 내부 오류가 발생했습니다.';
+    message =
+      typeof err.message === 'string' && err.message
+        ? err.message
+        : '서버 내부 오류가 발생했습니다.';
   }
 
   res.status(statusCode).json({

@@ -9,14 +9,15 @@ import {
   findUserTokenByIdRp,
   updateUserProfileRp,
   deleteUserRp,
-} from '../repositories/userRepository'
+} from '../repositories/userRepository';
 import { createToken } from '../utils/jwt';
 import { CreateUserData, UpdateUserProfileData } from '../../types/user';
+import { HttpError } from '../../types/errors';
 
 // 유저 생성
 export const createUser = async (userData: CreateUserData) => {
   const { username, email, password, address, imageUrl } = userData;
-  const existingUser = await findFirstUserRp(username, email)
+  const existingUser = await findFirstUserRp(username, email);
 
   if (existingUser) {
     if (existingUser.username === username) {
@@ -44,7 +45,7 @@ export const createUser = async (userData: CreateUserData) => {
   return newUser;
 };
 
-// 유저 로그인 
+// 유저 로그인
 export const loginUser = async (email: string, password: string) => {
   const user = await findUserByEmailRp(email);
   if (!user) {
@@ -114,9 +115,25 @@ export const getMyProfile = async (userId: string) => {
 
 // 유저 정보 업데이트
 export const updateUser = async (id: string, updateData: UpdateUserProfileData) => {
+  // 미리 중복 검사
+  if (updateData.username) {
+    const existingUser = await findFirstUserRp(updateData.username, '');
+    if (existingUser && existingUser.username === updateData.username && existingUser.id !== id) {
+      throw new HttpError('이미 사용 중인 사용자 이름입니다.', 409);
+    }
+  }
+
+  if (updateData.email) {
+    const existingUser = await findUserByEmailRp(updateData.email);
+    if (existingUser && existingUser.id !== id) {
+      throw new HttpError('이미 사용 중인 이메일입니다.', 409);
+    }
+  }
+
   if (updateData.password) {
     updateData.password = await hash.hashingPassword(updateData.password);
   }
+
   const updatedUser = await updateUserProfileRp(id, updateData);
   return updatedUser;
 };

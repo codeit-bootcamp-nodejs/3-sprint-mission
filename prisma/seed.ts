@@ -1,24 +1,21 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-import hashUtils from '../src/utils/hash.js';
-
-const prisma = new PrismaClient();
+import { Prisma } from '@prisma/client';
+import hashUtils from '../src/utils/hash';
+import prisma from '../src/lib/prisma';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-async function main(): Promise<void> {
-  console.log('--- Seeding Start ---');
+async function seedDatabase(): Promise<void> {
 
   let retries = 0;
   let seedingSuccessful = false;
 
   while (retries < MAX_RETRIES && !seedingSuccessful) {
     try {
-      console.log(`\nAttempting to seed (Attempt ${retries + 1}/${MAX_RETRIES})...`);
 
       await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-        console.log('Clearing existing data...');
         await Promise.all<Prisma.BatchPayload>([
+          tx.notification.deleteMany({}),
           tx.productLike.deleteMany({}),
           tx.articleLike.deleteMany({}),
           tx.articleComment.deleteMany({}),
@@ -27,9 +24,7 @@ async function main(): Promise<void> {
           tx.article.deleteMany({}),
           tx.user.deleteMany({}),
         ]);
-        console.log('Existing data cleared successfully.');
 
-        console.log('Creating users...');
         const hashedPasswordKim = await hashUtils.hashingPassword('passwordKim1!');
         const userKim = await tx.user.create({
           data: {
@@ -40,7 +35,6 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/userkim/200/200',
           },
         });
-        console.log(`User created: ${userKim.username} (ID: ${userKim.id})`);
 
         const hashedPasswordLee = await hashUtils.hashingPassword('passwordLee2!');
         const userLee = await tx.user.create({
@@ -52,7 +46,6 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/userlee/200/200',
           },
         });
-        console.log(`User created: ${userLee.username} (ID: ${userLee.id})`);
 
         const hashedPasswordPark = await hashUtils.hashingPassword('passwordPark3!');
         const userPark = await tx.user.create({
@@ -64,9 +57,7 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/userpark/200/200',
           },
         });
-        console.log(`User created: ${userPark.username} (ID: ${userPark.id})`);
 
-        console.log('Creating products...');
         const productNodejs = await tx.product.create({
           data: {
             name: '노드JS 마스터 가이드 북 (새상품)',
@@ -79,7 +70,6 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/nodejsbook/600/400',
           },
         });
-        console.log(`Product created: ${productNodejs.name} (ID: ${productNodejs.id})`);
 
         const productIphone = await tx.product.create({
           data: {
@@ -93,7 +83,6 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/iphone13/600/400',
           },
         });
-        console.log(`Product created: ${productIphone.name} (ID: ${productIphone.id})`);
 
         const productSneakers = await tx.product.create({
           data: {
@@ -107,9 +96,7 @@ async function main(): Promise<void> {
             imageUrl: 'https://picsum.photos/seed/sneakers/600/400',
           },
         });
-        console.log(`Product created: ${productSneakers.name} (ID: ${productSneakers.id})`);
 
-        console.log('Creating articles...');
         const articlePrisma = await tx.article.create({
           data: {
             title: 'Prisma 마이그레이션 전략에 대한 고찰',
@@ -118,7 +105,6 @@ async function main(): Promise<void> {
             userId: userKim.id,
           },
         });
-        console.log(`Article created: ${articlePrisma.title} (ID: ${articlePrisma.id})`);
 
         const articleExpress = await tx.article.create({
           data: {
@@ -128,9 +114,7 @@ async function main(): Promise<void> {
             userId: userLee.id,
           },
         });
-        console.log(`Article created: ${articleExpress.title} (ID: ${articleExpress.id})`);
 
-        console.log('Creating comments...');
         await tx.productComment.create({
           data: {
             content: '이 책 정말 내용이 알차 보여요! 혹시 목차 사진 볼 수 있을까요?',
@@ -138,7 +122,6 @@ async function main(): Promise<void> {
             user: { connect: { id: userLee.id } },
           },
         });
-        console.log(`Product comment created for product: ${productNodejs.name}`);
 
         await tx.productComment.create({
           data: {
@@ -147,7 +130,6 @@ async function main(): Promise<void> {
             user: { connect: { id: userKim.id } },
           },
         });
-        console.log(`Product comment created for product: ${productIphone.name}`);
 
         await tx.articleComment.create({
           data: {
@@ -156,7 +138,6 @@ async function main(): Promise<void> {
             user: { connect: { id: userPark.id } },
           },
         });
-        console.log(`Article comment created for article: ${articlePrisma.title}`);
 
         await tx.articleComment.create({
           data: {
@@ -165,17 +146,14 @@ async function main(): Promise<void> {
             user: { connect: { id: userKim.id } },
           },
         });
-        console.log(`Article comment created for article: ${articleExpress.title}`);
 
         // --- 좋아요 시딩 ---
-        console.log('Creating likes...');
         await tx.productLike.create({
           data: {
             userId: userLee.id,
             productId: productNodejs.id,
           },
         });
-        console.log(`Product like created by ${userLee.username} for ${productNodejs.name}`);
 
         await tx.productLike.create({
           data: {
@@ -183,7 +161,6 @@ async function main(): Promise<void> {
             productId: productIphone.id,
           },
         });
-        console.log(`Product like created by ${userPark.username} for ${productIphone.name}`);
 
         await tx.articleLike.create({
           data: {
@@ -191,7 +168,6 @@ async function main(): Promise<void> {
             articleId: articlePrisma.id,
           },
         });
-        console.log(`Article like created by ${userLee.username} for ${articlePrisma.title}`);
 
         await tx.articleLike.create({
           data: {
@@ -199,20 +175,18 @@ async function main(): Promise<void> {
             articleId: articleExpress.id,
           },
         });
-        console.log(`Article like created by ${userKim.username} for ${articleExpress.title}`);
       });
 
       seedingSuccessful = true;
-      console.log('--- Seeding finished successfully ---');
+      console.log('✅ Seeding completed successfully');
     } catch (e: unknown) {
-      console.error(`Seeding attempt ${retries + 1} failed: Transaction rolled back. Error:`, e);
+      console.error(`❌ Seeding attempt ${retries + 1} failed:`, e);
       retries++;
 
       if (retries < MAX_RETRIES) {
-        console.log(`Retrying in ${RETRY_DELAY_MS / 1000} seconds...`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
       } else {
-        console.error(`Maximum retry attempts (${MAX_RETRIES}) reached. Seeding failed ultimately.`);
+        console.error(`❌ Maximum retry attempts reached. Seeding failed.`);
       }
     }
   }
@@ -222,12 +196,16 @@ async function main(): Promise<void> {
   }
 }
 
-main()
-  .catch(async (e: unknown) => {
-    console.error('An unexpected error occurred outside of seeding attempts:', e);
-    await prisma.$disconnect();
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  seedDatabase()
+    .catch(async (e) => {
+      console.error('Seeding failed:', e);
+      await prisma.$disconnect();
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
+
+  export default seedDatabase
