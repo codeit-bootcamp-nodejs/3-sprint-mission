@@ -3,8 +3,8 @@ import type {Config} from 'jest';
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
-  testMatch: ['**/__tests__/**/*.test.ts', '**/*.spec.ts'],
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  testMatch: ['**/tests/**/*.test.ts', '**/*.spec.ts'],
   
   // 변환 설정
   transform: {
@@ -15,7 +15,7 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   
   // 커버리지 설정
-  collectCoverage: true,
+  // collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
   
