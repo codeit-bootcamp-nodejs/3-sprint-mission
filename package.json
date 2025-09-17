@@ -8,8 +8,13 @@
     "dev": "nodemon --watch src --exec \"ts-node --files src/server.ts\"",
     "build": "tsc",
     "prisma:push": "npx prisma db push",
-    "prisma:generate": "npx prisma generate",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "test": "dotenv -e .env.test -- jest",
+    "test:watch": "dotenv -e .env.test -- jest --watch",
+    "test:coverage": "dotenv -e .env.test -- jest --coverage",
+    "test:setup": "dotenv -e .env.test -- npm run prisma:migrate && dotenv -e .env.test -- npm run prisma:seed"
   },
   "license": "김준철",
   "dependencies": {
@@ -27,6 +32,7 @@
     "multer": "^1.4.5-lts.1",
     "socket.io": "^4.8.1",
     "superstruct": "^1.0.3",
+    "tsx": "^4.20.5",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -52,8 +58,5 @@
     "ts-jest": "^29.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
-  },
-  "prisma": {
-    "seed": "node dist/prisma/seed.js"
   }
 }
