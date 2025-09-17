@@ -1,12 +1,11 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import hashUtils from '../src/utils/hash';
-
-const prisma = new PrismaClient();
+import prisma from '../src/lib/prisma';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-async function main(): Promise<void> {
+async function seedDatabase(): Promise<void> {
   console.log('--- Seeding Start ---');
 
   let retries = 0;
@@ -223,12 +222,16 @@ async function main(): Promise<void> {
   }
 }
 
-main()
-  .catch(async (e: unknown) => {
-    console.error('An unexpected error occurred outside of seeding attempts:', e);
-    await prisma.$disconnect();
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  seedDatabase()
+    .catch(async (e) => {
+      console.error('Seeding failed:', e);
+      await prisma.$disconnect();
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
+
+  export default seedDatabase
