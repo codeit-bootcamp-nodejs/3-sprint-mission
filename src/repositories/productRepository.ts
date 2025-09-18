@@ -2,11 +2,6 @@ import prisma from '../lib/prisma';
 import { CreateProductData, UpdateProductData } from '../../types/product';
 import { PrismaFindManyArgs } from '../../types/pagenation';
 
-// 상품 목록 조회
-export const findAllProductsRp = async (params: PrismaFindManyArgs) => {
-  return await prisma.product.findMany(params);
-};
-
 // N+1 쿼리 문제를 해결하기 위한 함수
 export const findAllProductsWithDetailsRp = async (params: PrismaFindManyArgs) => {
   return await prisma.product.findMany({
@@ -14,14 +9,17 @@ export const findAllProductsWithDetailsRp = async (params: PrismaFindManyArgs) =
     include: {
       user: {
         select: {
-          username: true
-        }
+          username: true,
+        },
       },
       _count: {
         select: {
-          ProductLike: true
-        }
+          ProductLike: true,
+        },
       },
+    },
+    orderBy: {
+      createdAt: 'asc',
     },
   });
 };
@@ -52,13 +50,13 @@ export const findProductByIdRp = async (productId: string) => {
     include: {
       user: {
         select: {
-          username: true
-        }
+          username: true,
+        },
       },
       _count: {
         select: {
-          ProductLike: true
-        }
+          ProductLike: true,
+        },
       },
     },
   });
@@ -125,18 +123,18 @@ export const findLikedProductRp = async (userId: string) => {
     },
     include: {
       product: true,
-    }
+    },
   });
   return likedProducts;
-}
+};
 
 export const getProductPriceByIdRp = async (productId: string) => {
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { price: true }
+    select: { price: true },
   });
   return product?.price || null;
-}
+};
 
 export const getLikedUsersByProductId = async (productId: string) => {
   const likedUsers = await prisma.productLike.findMany({
@@ -145,10 +143,9 @@ export const getLikedUsersByProductId = async (productId: string) => {
       user: {
         select: {
           id: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  return likedUsers.map(like => like.user);
-}
-
+  return likedUsers.map((like) => like.user);
+};

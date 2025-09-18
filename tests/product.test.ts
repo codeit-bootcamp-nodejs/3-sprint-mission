@@ -292,9 +292,8 @@ describe('[상품 통합 테스트]', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.headers['set-cookie']).toBeDefined();
-      // 상품 리스트 조회
-      const listResponse = await request(app).get('/api/products');
-      const productId = listResponse.body.data[0].id;
+      // 김의 상품 ID (고정)
+      const productId = '550e8400-e29b-41d4-a716-446655441001';
       // 리스트에서 받은 상품Id로 수정
       const productData = {
         userId: loginResponse.body.userId,
@@ -342,9 +341,8 @@ describe('[상품 통합 테스트]', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.headers['set-cookie']).toBeDefined();
-      // 상품 리스트 조회
-      const listResponse = await request(app).get('/api/products');
-      const productId = listResponse.body.data[0].id;
+      // 김의 상품 ID (이가 수정 권한 없음)
+      const productId = '550e8400-e29b-41d4-a716-446655441001';
       // 리스트에서 받은 상품Id로 수정
       const productData = {
         userId: loginResponse.body.userId,
@@ -376,9 +374,8 @@ describe('[상품 통합 테스트]', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.headers['set-cookie']).toBeDefined();
-      // 상품 리스트 조회
-      const listResponse = await request(app).get('/api/products');
-      const productId = listResponse.body.data[0].id;
+      // 김의 상품 ID (고정)
+      const productId = '550e8400-e29b-41d4-a716-446655441001';
       // 리스트에서 받은 상품Id로 수정
       const response = await request(app)
         .delete(`/api/products/${productId}`)
@@ -403,9 +400,8 @@ describe('[상품 통합 테스트]', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.headers['set-cookie']).toBeDefined();
-      // 상품 리스트 조회
-      const listResponse = await request(app).get('/api/products');
-      const productId = listResponse.body.data[0].id;
+      // 김의 상품 ID (이가 삭제 권한 없음)
+      const productId = '550e8400-e29b-41d4-a716-446655441001';
       // 리스트에서 받은 상품Id로 수정
       const response = await request(app)
         .delete(`/api/products/${productId}`)
@@ -430,9 +426,8 @@ describe('[상품 통합 테스트]', () => {
 
       expect(loginResponse.body.accessToken).toBeDefined();
       expect(loginResponse.headers['set-cookie']).toBeDefined();
-      // 상품 리스트 조회
-      const listResponse = await request(app).get('/api/products');
-      const productId = listResponse.body.data[0].id;
+      // 김이 좋아요하지 않은 상품 (박의 상품)
+      const productId = '550e8400-e29b-41d4-a716-446655441003';
       // 리스트에서 받은 상품Id로 좋아요 추가
       const firstResponse = await request(app)
         .post(`/api/products/${productId}/like`)

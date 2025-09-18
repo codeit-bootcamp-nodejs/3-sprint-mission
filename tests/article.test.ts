@@ -258,12 +258,8 @@ describe('[게시글 통합 테스트]', () => {
         .post('/api/users/login')
         .set('Content-Type', 'application/json')
         .send(loginData);
-      // 게시글 목록 조회
-      const listResponse = await request(app).get('/api/articles');
-      // 응답 구조
-      expect(listResponse.status).toBe(200);
-      // 목록 조회한 Id로 수정
-      const articleId = listResponse.body.data[0].id;
+      // 김의 게시글 ID (고정)
+      const articleId = '550e8400-e29b-41d4-a716-446655442001';
       const updateData = {
         userId: loginResponse.body.userId,
         title: '수정한 게시글',
@@ -302,12 +298,8 @@ describe('[게시글 통합 테스트]', () => {
         .post('/api/users/login')
         .set('Content-Type', 'application/json')
         .send(loginData);
-      // 게시글 목록 조회
-      const listResponse = await request(app).get('/api/articles');
-      // 응답 구조
-      expect(listResponse.status).toBe(200);
-      // 목록 조회한 Id로 수정
-      const articleId = listResponse.body.data[1].id;
+      // 이의 게시글 ID (김이 수정 권한 없음)
+      const articleId = '550e8400-e29b-41d4-a716-446655442002';
       const updateData = {
         userId: loginResponse.body.userId,
         title: '수정한 게시글',
@@ -338,12 +330,8 @@ describe('[게시글 통합 테스트]', () => {
         .post('/api/users/login')
         .set('Content-Type', 'application/json')
         .send(loginData);
-      // 게시글 목록 조회
-      const listResponse = await request(app).get('/api/articles');
-      // 응답 구조
-      expect(listResponse.status).toBe(200);
-      // 목록 조회한 Id로 삭제
-      const articleId = listResponse.body.data[0].id;
+      // 김의 게시글 ID (고정)
+      const articleId = '550e8400-e29b-41d4-a716-446655442001';
       const response = await request(app)
         .delete(`/api/articles/${articleId}`)
         .set('Authorization', `Bearer ${loginResponse.body.accessToken}`);
@@ -364,12 +352,8 @@ describe('[게시글 통합 테스트]', () => {
         .post('/api/users/login')
         .set('Content-Type', 'application/json')
         .send(loginData);
-      // 게시글 목록 조회
-      const listResponse = await request(app).get('/api/articles');
-      // 응답 구조
-      expect(listResponse.status).toBe(200);
-      // 목록 조회한 Id로 삭제
-      const articleId = listResponse.body.data[1].id;
+      // 이의 게시글 ID (김이 삭제 권한 없음)
+      const articleId = '550e8400-e29b-41d4-a716-446655442002';
       const response = await request(app)
         .patch(`/api/articles/${articleId}`)
         .set('Authorization', `Bearer ${loginResponse.body.accessToken}`);
@@ -393,12 +377,8 @@ describe('[게시글 통합 테스트]', () => {
         .post('/api/users/login')
         .set('Content-Type', 'application/json')
         .send(loginData);
-      // 게시글 목록 조회
-      const listResponse = await request(app).get('/api/articles');
-      // 응답 구조
-      expect(listResponse.status).toBe(200);
-      // 목록 조회한 Id로 게시글 좋아요
-      const articleId = listResponse.body.data[0].id;
+      // 김이 좋아요하지 않은 게시글 (김 자신의 게시글)
+      const articleId = '550e8400-e29b-41d4-a716-446655442001';
       const firstResponse = await request(app)
         .post(`/api/articles/${articleId}/like`)
         .set('Authorization', `Bearer ${loginResponse.body.accessToken}`);
