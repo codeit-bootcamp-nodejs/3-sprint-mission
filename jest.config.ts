@@ -18,6 +18,7 @@ const config: Config = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
+  coverageReporters: ['text', 'lcov', 'json-summary'],
 
   // 커버리지 수집 대상 (선택사항)
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts', '!src/**/*.spec.ts'],
