@@ -1,10 +1,6 @@
 # My Project
 
 ![Coverage](./coverage/badges.svg)
-![Lines](./coverage/badge-lines.svg)
-![Functions](./coverage/badge-functions.svg)
-![Branches](./coverage/badge-branches.svg)
-![Statements](./coverage/badge-statements.svg)
 
 ---
 
