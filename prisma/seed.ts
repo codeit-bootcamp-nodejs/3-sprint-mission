@@ -178,7 +178,9 @@ async function seedDatabase(): Promise<void> {
       });
 
       seedingSuccessful = true;
-      console.log('✅ Seeding completed successfully');
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('✅ Seeding completed successfully');
+      }
     } catch (e: unknown) {
       console.error(`❌ Seeding attempt ${retries + 1} failed:`, e);
       retries++;

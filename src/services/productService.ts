@@ -8,6 +8,7 @@ import {
   PrismaFindManyArgs,
   PaginationAndSearchRequest
 } from '../../types/pagenation';
+import { HttpError } from '../../types/errors';
 import { processFindManyArgs, processResponse } from '../utils/responseHelpers';
 import { checkProductOwnership } from '../utils/queryHelpers';
 import { sendRealtimeNotification } from './realtimeNotificationService';
@@ -38,7 +39,7 @@ export const findProductById = async (
   const product = await productRepository.findProductByIdRp(productId);
 
   if (!product) {
-    throw new Error('상품을 찾을 수 없습니다.');
+    throw new HttpError('상품을 찾을 수 없습니다.', 404);
   }
 
   let isLiked = false;
@@ -113,7 +114,7 @@ export const toggleProductLike = async (productId: string, userId: string) => {
 export const findLikedProductByUserId = async (userId: string) => {
   const likedProducts = await productRepository.findLikedProductRp(userId)
   if (likedProducts.length === 0) {
-    throw new Error('상품을 찾을 수 없습니다.');
+    throw new HttpError('상품을 찾을 수 없습니다.', 404);
   }
   const products = likedProducts.map(like => like.product);
   return products;

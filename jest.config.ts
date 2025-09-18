@@ -38,6 +38,9 @@ const config: Config = {
   
   // 각 테스트 전에 mock 초기화 (선택사항)
   clearMocks: true,
+
+  // 테스트 환경 설정 파일
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 };
 
 export default config;
