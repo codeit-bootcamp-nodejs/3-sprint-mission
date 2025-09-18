@@ -17,8 +17,7 @@ export const list = async (
   cursor?: number,
   limit: number = 20
 ): Promise<NotificationDTO[]> => {
-  if (!Number.isInteger(userId)) throw new CustomError('사용자 ID가 올바르지 않습니다', 400);
-  // TODO: 커서/리밋 유효성 검증
+  if (!Number.isInteger(userId) || userId <= 0) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
   return repo.findByUser(userId, { cursor, limit });
 };
 
@@ -26,7 +25,7 @@ export const list = async (
  * 미확인(안 읽음) 알림 개수
  */
 export const countUnread = async (userId: number): Promise<number> => {
-  if (!Number.isInteger(userId)) throw new CustomError('사용자 ID가 올바르지 않습니다', 400);
+  if (!Number.isInteger(userId) || userId <= 0) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
   return repo.countUnread(userId);
 };
 
@@ -34,8 +33,8 @@ export const countUnread = async (userId: number): Promise<number> => {
  * 단건 읽음 처리
  */
 export const markRead = async (id: number, userId: number): Promise<NotificationDTO> => {
-  if (!Number.isInteger(id)) throw new CustomError('알림 ID가 올바르지 않습니다', 400);
-  if (!Number.isInteger(userId)) throw new CustomError('사용자 ID가 올바르지 않습니다', 400);
+  if (!Number.isInteger(id) || id <= 0) throw new CustomError('알림 ID가 올바르지 않습니다', 400);
+  if (!Number.isInteger(userId) || userId <= 0) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
 
   // TODO: 소유권 검사(리포에서 WHERE id AND userId)
   const updated = await repo.markRead({ id, userId });
@@ -50,8 +49,7 @@ export const markReadAll = async (
   userId: number,
   before?: Date
 ): Promise<{ affected: number }> => {
-  if (!Number.isInteger(userId)) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
-  // TODO: before 유효성 검사
+  if (!Number.isInteger(userId) || userId <= 0) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
   const affected = await repo.markReadBefore({ userId, before });
 
   return { affected };
@@ -73,8 +71,8 @@ export const createPriceChange = async (args: {
   newPrice: number;
 }): Promise<NotificationDTO> => {
   const { recipientUserId, productId, oldPrice, newPrice } = args;
-  if (!Number.isInteger(recipientUserId)) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
-  if (!Number.isInteger(productId)) throw new CustomError('상품 ID가 올바르지 않습니다.', 400);
+  if (!Number.isInteger(recipientUserId) || recipientUserId <= 0) throw new CustomError('사용자 ID가 올바르지 않습니다.', 400);
+  if (!Number.isInteger(productId) || productId <= 0) throw new CustomError('상품 ID가 올바르지 않습니다.', 400);
 
   const title = '관심 상품 가격이 변경됐어요.';
   const body = '좋아요한 상품의 가격이 변경됐어요.';

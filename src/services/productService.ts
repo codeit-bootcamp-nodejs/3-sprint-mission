@@ -40,7 +40,7 @@ export const updateProduct = async (
 
   const product = await findById(id);
   if (!product) throw new CustomError("상품을 찾을 수 없습니다.", 404);
-  if (product.userId !== userId)
+   if (Number(product.userId) !== Number(userId))
     throw new CustomError("해당 상품에 대한 수정 권한이 없습니다.", 403);
 
   const oldPrice = product.price;
@@ -73,7 +73,8 @@ export const deleteProduct = async (id: number, userId: number) => {
 
   const product = await findById(id);
   if (!product) throw new CustomError('상품을 찾을 수 없습니다.', 404);
-  if (product.userId !== userId) throw new CustomError('해당 상품에 대한 삭제 권한이 없습니다.', 403);
+   if (Number(product.userId) !== Number(userId))
+    throw new CustomError('해당 상품에 대한 삭제 권한이 없습니다.', 403);
 
   return remove(id);
 };
