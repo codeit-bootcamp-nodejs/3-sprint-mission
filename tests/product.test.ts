@@ -2,7 +2,6 @@ import { beforeAll, beforeEach, afterAll, describe, test, expect } from '@jest/g
 import request from 'supertest';
 import app from '../src/app';
 import seedDatabase from '../prisma/seed';
-import prisma from '../src/lib/prisma';
 
 beforeEach(async () => {
   await seedDatabase();
@@ -276,6 +275,10 @@ describe('[상품 통합 테스트]', () => {
     });
 
     test('GET /api/products/:productId (상품 수정) 성공', async () => {
+      const spyOn = jest.spyOn(
+        require('../src/services/realtimeNotificationService'),
+        'sendRealtimeNotification',
+      );
       const loginData = {
         email: 'dev.kim@example.com',
         password: 'passwordKim1!',
@@ -307,6 +310,8 @@ describe('[상품 통합 테스트]', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('message', '상품 정보 수정 성공!');
       expect(response.body.data).toBeDefined();
+      // 알림 발송 감시
+      expect(spyOn).toHaveBeenCalled();
       // 응답 데이터 구조
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('name', '테스트 수정 상품');

@@ -11,8 +11,6 @@ const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((...args
     originalConsoleError(...args);
     return;
   }
-
-  // 다른 에러는 억제
 });
 
 // 테스트 완료 후 원래 상태로 복원
