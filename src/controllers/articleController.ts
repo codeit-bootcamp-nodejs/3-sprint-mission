@@ -32,7 +32,7 @@ export const createArticleController = async (
 ) => {
   const userId = req.user!.userId;
   const { title, content } = req.body;
-  const imageUrl = req.file ? `/uploads/articles/${req.file.filename}` : null;
+  const imageUrl = req.file ? req.file.location : null;
 
   const newArticle = await createArticle({ title, content, userId, imageUrl });
 
@@ -69,7 +69,7 @@ export const updateArticleController = async (
   const updateData = req.body as UpdateArticleData;
 
   if (req.file) {
-    updateData.imageUrl = `/uploads/articles/${req.file.filename}`;
+    updateData.imageUrl = req.file.location;
   }
 
   const patchArticle = await updateArticle(articleId, userId, updateData);

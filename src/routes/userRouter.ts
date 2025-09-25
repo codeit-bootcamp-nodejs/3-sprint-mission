@@ -26,7 +26,7 @@ const userRouter = express.Router();
 // --- 회원가입 및 전체 사용자 조회 라우트 ---
 userRouter.route('/')
   .post(
-    uploadImage('users').single('image'),
+    uploadImage('users'),
     validate(createUserSchema, 'body'),
     asyncHandler(registerUser)
   );
@@ -56,7 +56,7 @@ userRouter.route('/me')
   )
   .patch(
     verifyAccessToken,
-    uploadImage('users').single('image'),
+    uploadImage('users'),
     validate(updateUserSchema, 'body'),
     asyncHandler(updateMe)
   )
