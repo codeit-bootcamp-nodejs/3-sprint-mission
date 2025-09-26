@@ -12,7 +12,7 @@ const s3Client = new S3Client({
   },
 });
 
-const bucketName = process.env.AWS_S3_BUCKET_NAME!;
+const bucketName = process.env.AWS_S3_BUCKET!;
 // Multer memoryStorage 설정
 const storage = (subpath: string) => multer.memoryStorage();
 
