@@ -1,163 +1,96 @@
-import prisma, { Prisma } from '../config/prisma';
-import { HttpError } from '../types/error';
-import { PaginatedResponseDto } from '../types/common';
+import productRepository from "../repositories/productRepository";
+import { eventBus } from "../config/event-bus";
+import NotificationService from "../socket/notification.service";
+import { PaginatedResponseDto } from "../types/common";
 import {
   CreateProductDto,
   PatchProductDto,
   ProductDto,
   SimpleProductDto,
-  ProductWithLikeDto
-} from '../types/product';
+  ProductWithLikeDto,
+} from "../types/product";
 
+const getProductList = async (
+  offset = 0,
+  limit = 10,
+  orderBy: "asc" | "desc" = "desc",
+  keyword: string = ""
+): Promise<PaginatedResponseDto<SimpleProductDto>> => {
+  return productRepository.getProductList(offset, limit, orderBy, keyword);
+};
 
-const ProductService = {
-  async getProductList(offset: number = 0, limit: number = 10, orderBy: 'asc' | 'desc' = 'desc', keyword: string = ''): Promise<PaginatedResponseDto<SimpleProductDto>> {
-    const where: Prisma.ProductWhereInput = {};
-    if (keyword) {
-      where.OR = [
-        { name: { contains: keyword, mode: 'insensitive' } },
-        { description: { contains: keyword, mode: 'insensitive' } },
-      ]
-    }
-    const data = await prisma.product.findMany({
-      skip: offset,
-      take: limit,
-      orderBy: {
-        createdAt: orderBy,
-      },
-      where,
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        createdAt: true,
-      }
-    })
-    const total = await prisma.product.count({
-      where,
-    })
-    const pages = Math.ceil(total / limit);
-    return {
-      data,
-      meta: {
-        total,
-        pages,
-        offset,
-        limit,
-      }
-    }
-  },
+const getProduct = async (id: string): Promise<ProductDto> => {
+  return productRepository.getProduct(id);
+};
 
-  async getProduct(id: string): Promise<ProductDto> {
-    const data = await prisma.product.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        tags: true,
-        createdAt: true,
-        userId: true,
-      }
-    })
-    if (!data) {
-      throw new HttpError('존재하지 않는 상품입니다.', 404);
-    }
-    return data;
-  },
+const createProduct = async (data: CreateProductDto): Promise<ProductDto> => {
+  return productRepository.createProduct(data);
+};
 
-  async createProduct(data: CreateProductDto): Promise<ProductDto> {
-    return await prisma.product.create({
-      data: {
-        name: data.name,
-        description: data.description || null,
-        price: data.price,
-        tags: data.tags || [],
-        user: {
-          connect: { id: data.userId },
-        },
-      },
-    })
-  },
-
-  async patchProduct(id: string, data: PatchProductDto): Promise<ProductDto> {
-    return await prisma.product.update({
-      where: { id },
-      data: {
-        name: data.name,
-        description: data.description || null,
-        price: data.price,
-        tags: data.tags || [],
-      },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        tags: true,
-        createdAt: true,
-        userId: true,
-      }
-    })
-  },
-
-  async deleteProduct(id: string): Promise<boolean> {
-    await prisma.product.delete({ where: { id } });
-    return true;
-  },
-
-  async likeProduct(userId: string, productId: string): Promise<void> {
-    try {
-      await prisma.productLike.create({
-        data: {
-          userId,
-          productId,
-        },
-      })
-    } catch (error) {
-      if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
-        throw new HttpError('이미 좋아요한 상품입니다.', 409);
-      }
-    }
-  },
-
-  async unlikeProduct(userId: string, productId: string): Promise<void> {
-    await prisma.productLike.delete({
-      where: {
-        userId_productId: { userId, productId },
-      },
-    })
-  },
-
-  async getProductWithLike(userId: string, productId: string): Promise<ProductWithLikeDto> {
-    const data = await this.getProduct(productId);
-
-    if (!data) {
-      throw new HttpError('존재하지 않는 상품입니다.', 404);
-    }
-
-    const isLiked = await prisma.productLike.findUnique({
-      where: {
-        userId_productId: { userId, productId },
-      },
+const patchProduct = async (id: string, data: PatchProductDto): Promise<ProductDto> => {
+  const oldProduct = await getProduct(id);
+  const product = await productRepository.patchProduct(id, data);
+  if (product.price !== oldProduct.price) {
+    const userList = await getProductLikeUserList(id);
+    userList.forEach(async (user) => {
+      const notification = await NotificationService.createNotification({
+        userId: user.userId,
+        type: "LIKE",
+        message: `상품 ${oldProduct.name}의 가격이 ${oldProduct.price}에서 ${product.price}로 변경되었습니다.`,
+      });
+      eventBus.emit("newNotification", notification);
     });
-
-    return {
-      ...data,
-      isLiked: !!isLiked,
-    };
-  },
-
-  async getProductLikeUserList(productId: string): Promise<{ userId: string }[]> {
-    return await prisma.productLike.findMany({
-      where: { productId },
-      select: {
-        userId: true,
-      }
-    })
   }
-}
+  return product;
+};
 
+const deleteProduct = async (id: string): Promise<boolean> => {
+  return productRepository.deleteProduct(id);
+};
 
-export default ProductService;
+const likeProduct = async (
+  userId: string,
+  productId: string
+): Promise<void> => {
+  return productRepository.likeProduct(userId, productId);
+};
+
+const unlikeProduct = async (
+  userId: string,
+  productId: string
+): Promise<void> => {
+  return productRepository.unlikeProduct(userId, productId);
+};
+
+const getProductWithLike = async (
+  userId: string,
+  productId: string
+): Promise<ProductWithLikeDto> => {
+  return productRepository.getProductWithLike(userId, productId);
+};
+
+const getUserRegisteredProducts = async (
+  userId: string
+): Promise<ProductDto[]> => {
+  return productRepository.getUserRegisteredProducts(userId);
+};
+
+const getProductLikeUserList = async (
+  productId: string
+): Promise<{ userId: string }[]> => {
+  const likeUsers = await productRepository.getProductLikeUserList(productId);
+  return likeUsers;
+};
+
+export default {
+  getProductList,
+  getProduct,
+  createProduct,
+  patchProduct,
+  deleteProduct,
+  likeProduct,
+  unlikeProduct,
+  getProductWithLike,
+  getUserRegisteredProducts,
+  getProductLikeUserList,
+};

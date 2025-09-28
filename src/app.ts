@@ -24,7 +24,6 @@ import notificationRouter from './socket/notification.router';
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 //소켓 서버
 const server = http.createServer(app);
@@ -47,7 +46,4 @@ app.use('/notifications', notificationRouter);
 //에러 핸들러
 app.use(errorHandler);
 
-server.listen(PORT, () => {
-  console.log(`서버가 ${PORT} 포트에서 실행 중입니다.`);
-  console.log(`Socket.IO 서버도 ${PORT} 포트에서 실행 중입니다.`);
-});
+export default server;

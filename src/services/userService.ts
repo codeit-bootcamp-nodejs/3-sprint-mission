@@ -11,7 +11,7 @@ import productRepository from "../repositories/productRepository";
 import { hashPassword } from "../utils/passwordUtil";
 import { checkUser } from "../utils/checkUser";
 
-const filterSensitiveUserData = (user: UserDto): filterSensitiveUserData => {
+const filterUserData = (user: UserDto): filterSensitiveUserData => {
   const { password, refreshToken, updatedAt, ...rest } = user
   return rest
 }
@@ -24,18 +24,18 @@ const userCreate = async (user: CreateUserDto): Promise<filterSensitiveUserData>
   const hashedPassword = await hashPassword(user.password);
   user.password = hashedPassword;
   const createUser = await userRepository.createUser(user);
-  return filterSensitiveUserData(createUser);
+  return filterUserData(createUser);
 }
 
 const updateUser = async (data: PatchUserDto, userId?: string): Promise<filterSensitiveUserData> => {
   const user = await checkUser(userId);
   const updatedUser = await userRepository.updateUser(user.id, data)
-  return filterSensitiveUserData(updatedUser);
+  return filterUserData(updatedUser);
 }
 
 const getUser = async (userId?: string): Promise<filterSensitiveUserData> => {
   const user = await checkUser(userId);
-  return filterSensitiveUserData(user);
+  return filterUserData(user);
 }
 
 const getUserRegisteredProducts = async (userId?: string): Promise<{ userEmail: string; userNickname: string; products: ProductDto[] }> => {

@@ -109,19 +109,7 @@ const createProduct: RequestHandler = async (req, res, next) => {
 const patchProduct: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const oldProduct = await ProductService.getProduct(id);
     const product = await ProductService.patchProduct(id, req.body);
-    if (product.price !== oldProduct.price) {
-      const userList = await ProductService.getProductLikeUserList(id);
-      userList.forEach(async user => {
-        const notification = await NotificationService.createNotification({
-          userId: user.userId,
-          type: 'LIKE',
-          message: `상품 ${oldProduct.name}의 가격이 ${oldProduct.price}에서 ${product.price}로 변경되었습니다.`,
-        });
-        eventBus.emit('newNotification', notification);
-      });
-    }
     res.json(product);
   } catch (error) {
     next(new HttpError(PRODUCT_ERROR.PATCH_PRODUCT_ERROR, 500));

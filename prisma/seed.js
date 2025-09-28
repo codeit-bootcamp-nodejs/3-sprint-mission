@@ -1,77 +1,143 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, NotificationType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // 유저 생성
-  const user = await prisma.user.create({
-    data: {
-      email: 'test@example.com',
-      nickname: '테스트유저',
-      password: 'hashed-password',
-      image: 'https://example.com/avatar.png',
-    },
-  });
+  console.log("Start seeding...");
 
-  // 게시글 생성
-  const article = await prisma.article.create({
-    data: {
-      title: '첫 번째 글',
-      content: '이건 예시 글입니다.',
-      userId: user.id,
-    },
-  });
+  // ---------------------
+  // 1. Users
+  // ---------------------
+  const users = await Promise.all([
+    prisma.user.create({
+      data: { email: "alice@test.com", nickname: "Alice", password: "hashed1" },
+    }),
+    prisma.user.create({
+      data: { email: "bob@test.com", nickname: "Bob", password: "hashed2" },
+    }),
+    prisma.user.create({
+      data: { email: "carol@test.com", nickname: "Carol", password: "hashed3" },
+    }),
+  ]);
 
-  // 상품 생성
-  const product = await prisma.product.create({
-    data: {
-      name: '예시 상품',
-      description: '좋은 상품입니다.',
-      price: 10000,
-      tags: ['추천', '인기'],
-      userId: user.id,
-    },
-  });
+  const [alice, bob, carol] = users;
 
-  // 댓글 생성 (게시글용)
-  await prisma.comment.create({
-    data: {
-      content: '좋은 글이네요!',
-      userId: user.id,
-      articleId: article.id,
-    },
-  });
+  // ---------------------
+  // 2. Products
+  // ---------------------
+  const products = await Promise.all([
+    prisma.product.create({
+      data: {
+        name: "Laptop",
+        description: "High-end laptop",
+        price: 1500,
+        tags: ["electronics", "computer"],
+        userId: alice.id,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: "Book",
+        description: "Interesting book",
+        price: 20,
+        tags: ["book", "education"],
+        userId: bob.id,
+      },
+    }),
+  ]);
 
-  // 댓글 생성 (상품용)
-  await prisma.comment.create({
-    data: {
-      content: '이 상품 좋아요!',
-      userId: user.id,
-      productId: product.id,
-    },
-  });
+  const [laptop, book] = products;
 
-  // 좋아요 생성
-  await prisma.articleLike.create({
-    data: {
-      userId: user.id,
-      articleId: article.id,
-    },
-  });
+  // ---------------------
+  // 3. Articles
+  // ---------------------
+  const articles = await Promise.all([
+    prisma.article.create({
+      data: {
+        title: "First Article",
+        content: "This is the first article",
+        userId: alice.id,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Second Article",
+        content: "This is the second article",
+        userId: bob.id,
+      },
+    }),
+  ]);
 
-  await prisma.productLike.create({
-    data: {
-      userId: user.id,
-      productId: product.id,
-    },
-  });
+  const [article1, article2] = articles;
 
-  console.log('🌱 시드 데이터 생성 완료!');
+  // ---------------------
+  // 4. Comments
+  // ---------------------
+  await Promise.all([
+    prisma.comment.create({
+      data: { content: "Great product!", productId: laptop.id, userId: bob.id },
+    }),
+    prisma.comment.create({
+      data: { content: "I love this article", articleId: article1.id, userId: carol.id },
+    }),
+    prisma.comment.create({
+      data: { content: "Nice book", productId: book.id, userId: alice.id },
+    }),
+  ]);
+
+  // ---------------------
+  // 5. Product Likes
+  // ---------------------
+  await Promise.all([
+    prisma.productLike.create({ data: { productId: laptop.id, userId: bob.id } }),
+    prisma.productLike.create({ data: { productId: book.id, userId: carol.id } }),
+  ]);
+
+  // ---------------------
+  // 6. Article Likes
+  // ---------------------
+  await Promise.all([
+    prisma.articleLike.create({ data: { articleId: article1.id, userId: bob.id } }),
+    prisma.articleLike.create({ data: { articleId: article2.id, userId: carol.id } }),
+  ]);
+
+  // ---------------------
+  // 7. Notifications
+  // ---------------------
+  await Promise.all([
+    prisma.notification.create({
+      data: {
+        userId: alice.id,
+        type: NotificationType.LIKE,
+        message: "Bob liked your product",
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: bob.id,
+        type: NotificationType.COMMENT,
+        message: "Carol commented on your article",
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: carol.id,
+        type: NotificationType.LIKE,
+        message: "Alice liked your article",
+      },
+    }),
+  ]);
+
+  console.log("Seeding finished!");
 }
 
 main()
   .catch((e) => {
-    console.error('❌ 시드 실패:', e);
+    console.error(e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+
+export default main;
