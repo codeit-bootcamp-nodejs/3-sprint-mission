@@ -1,9 +1,14 @@
 node_modules/
-.env
+.env*
+!.env.example
+dist
+
+uploads
+
+coverage/*
+!coverage/badges.svg
 
 /src/generated/prisma
 
 # dev test files
-test
-uploads
-dist
+http

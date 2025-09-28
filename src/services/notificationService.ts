@@ -1,24 +1,17 @@
-import * as notificationRepository from "../repositories/notificationRepository";
-import { io } from "../server";
-import {
-  Notification,
-  CreateNotificationDto,
-} from "../types/notificationTypes";
+import * as notificationRepository from '../repositories/notificationRepository';
+import { io } from '../socket';
+import type { Notification, CreateNotificationDTO } from '../types/notificationTypes';
 
 // 알림 생성
-export const createNotification = async (
-  data: CreateNotificationDto
-): Promise<Notification> => {
+export const createNotification = async (data: CreateNotificationDTO): Promise<Notification> => {
   const notification = await notificationRepository.create(data);
 
-  io.to(notification.userId.toString()).emit("notification", notification);
+  io.to(notification.userId.toString()).emit('notification', notification);
   return notification;
 };
 
 // 알림 목록 조회
-export const getNotificationList = async (
-  userId: number
-): Promise<Notification[]> => {
+export const getNotificationList = async (userId: number): Promise<Notification[]> => {
   return notificationRepository.findByUserId(userId);
 };
 

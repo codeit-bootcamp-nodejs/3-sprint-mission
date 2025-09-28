@@ -1,12 +1,14 @@
 import * as ArticleService from '../services/articleService';
+import { assert } from 'superstruct';
+import { idParamsStruct } from '../utils/structs';
 import type { RequestHandler } from 'express';
-import type { CreateArticleDto, UpdateArticleDto } from '../types/articleTypes';
-import type { CreateCommentDto } from '../types/commentTypes';
+import type { CreateArticleDTO, UpdateArticleDTO } from '../types/articleTypes';
+import type { CreateCommentDTO } from '../types/commentTypes';
 import type { OffsetQueryDto, CursorQueryDto } from '../types/queryTypes';
 
 // 게시글 등록
 export const createArticle: RequestHandler = async (req, res) => {
-  const data: CreateArticleDto = {
+  const data: CreateArticleDTO = {
     ...req.body,
     userId: req.user!.id,
   };
@@ -17,6 +19,7 @@ export const createArticle: RequestHandler = async (req, res) => {
 
 // 게시글 조회
 export const getArticle: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const id = parseInt(req.params.id, 10);
   const userId = req.user?.id;
 
@@ -26,8 +29,9 @@ export const getArticle: RequestHandler = async (req, res) => {
 
 // 게시글 수정
 export const updateArticle: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const id = parseInt(req.params.id, 10);
-  const data: UpdateArticleDto = req.body;
+  const data: UpdateArticleDTO = req.body;
 
   const updatedArticle = await ArticleService.updateArticle(id, data);
   res.status(200).json(updatedArticle);
@@ -35,6 +39,7 @@ export const updateArticle: RequestHandler = async (req, res) => {
 
 // 게시글 삭제
 export const deleteArticle: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const id = parseInt(req.params.id, 10);
 
   await ArticleService.deleteArticle(id);
@@ -46,49 +51,40 @@ export const getArticleList: RequestHandler = async (req, res) => {
   const query = req.validatedQuery as OffsetQueryDto;
   const userId = req.user?.id;
 
-  const { articles, totalCount } = await ArticleService.getArticleList(
-    query,
-    userId
-  );
+  const { articles, totalCount } = await ArticleService.getArticleList(query, userId);
 
-  const nextOffset =
-    articles.length === query.limit ? query.offset + articles.length : null;
+  const nextOffset = articles.length === query.limit ? query.offset + articles.length : null;
 
-  res.status(200).json({ articles, totalCount, nextOffset });
+  res.status(200).json({ list: articles, totalCount, nextOffset });
 };
 
 // 댓글 등록
 export const createComment: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const articleId = parseInt(req.params.id, 10);
   const userId = req.user!.id;
-  const data: CreateCommentDto = req.body;
+  const data: CreateCommentDTO = req.body;
 
-  const createdComment = await ArticleService.createComment(
-    data,
-    articleId,
-    userId
-  );
+  const createdComment = await ArticleService.createComment(data, articleId, userId);
   res.status(201).json(createdComment);
 };
 
 // 댓글 목록 조회
 export const getCommentList: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const articleId = parseInt(req.params.id, 10);
   const query = req.validatedQuery as CursorQueryDto;
 
-  const { comments, totalCount } = await ArticleService.getCommentList(
-    articleId,
-    query
-  );
+  const { comments, totalCount } = await ArticleService.getCommentList(articleId, query);
 
-  const nextCursor =
-    comments.length === query.limit ? comments[comments.length - 1].id : null;
+  const nextCursor = comments.length === query.limit ? comments[comments.length - 1].id : null;
 
-  res.status(200).json({ comments, totalCount, nextCursor });
+  res.status(200).json({ list: comments, totalCount, nextCursor });
 };
 
 // 좋아요 등록
 export const createLike: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const articleId = parseInt(req.params.id, 10);
   const userId = req.user!.id;
 
@@ -98,6 +94,7 @@ export const createLike: RequestHandler = async (req, res) => {
 
 // 좋아요 삭제
 export const deleteLike: RequestHandler = async (req, res) => {
+  assert(req.params.id, idParamsStruct);
   const articleId = parseInt(req.params.id, 10);
   const userId = req.user!.id;
 
