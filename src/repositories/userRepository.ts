@@ -1,6 +1,6 @@
 import { Product, User } from '@prisma/client';
-import { prisma } from '../config/prismaClient.js';
-import { UpdateUserDto } from '../types/user.js';
+import { prisma } from '../config/prismaClient';
+import { UpdateUserDto } from '../types/user';
 
 class UserRepository {
     save = async (email: string, nickname: string, password: string, image: string[]): Promise<User> => {
@@ -15,8 +15,8 @@ class UserRepository {
         return user;
     };
 
-    findByEmail = async (email: string): Promise<User> => {
-        const user: User = await prisma.user.findUniqueOrThrow({
+    findByEmail = async (email: string): Promise<User | null> => {
+        const user: User | null = await prisma.user.findUnique({
             where: { email }
         })
 

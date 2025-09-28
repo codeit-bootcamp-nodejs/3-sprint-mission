@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
-import validations from '../middlewares/validations.js';
-import articleController from '../controllers/articleController.js';
-import auth from '../middlewares/auth.js'
+import validations from '../middlewares/validations';
+import articleController from '../controllers/articleController';
+import auth from '../middlewares/auth'
 
 const articleRouter: Router = express.Router()
 

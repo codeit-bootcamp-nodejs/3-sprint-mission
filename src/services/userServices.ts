@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
-import userRepository from '../repositories/userRepository.js';
-import { hashPassword, verifyPassword } from '../utils/passwordHash.js';
-import { ChangePasswordDto, CreateUserDto, filteredUser, UpdateUserDto } from '../types/user.js';
+import userRepository from '../repositories/userRepository';
+import { hashPassword, verifyPassword } from '../utils/passwordHash';
+import { ChangePasswordDto, CreateUserDto, filteredUser, UpdateUserDto } from '../types/user';
 import { Product, User } from '@prisma/client';
-import { Message } from '../types/express.js';
+import { Message } from '../types/express';
 import type { StringValue } from "ms"; // jwt 토큰 expireIn 타입용
 
 /**

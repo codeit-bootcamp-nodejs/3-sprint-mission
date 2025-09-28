@@ -3,11 +3,11 @@ import {
     findComments, createComment, updateComment, deleteComment,
     findProducts, createProduct, findProductById, updateProduct,
     deleteProduct, updateLikeProduct, findLikedProducts
-} from '../services/productServices.js';
+} from '../services/productServices';
 import {
     CreateProductDto, UpdateProductDto,
     CreateProductCommentDto, UpdateProductCommentDto
-} from '../types/product.js'
+} from '../types/product'
 
 const productController = {
     getComments: async (req: Request, res: Response, next: NextFunction) => {

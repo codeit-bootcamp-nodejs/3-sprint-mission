@@ -6,7 +6,7 @@ import {
     CreateCommentStruct, PatchCommentStruct,
     CreateUserStruct,
     GetUserStruct
-} from '../prisma/structs.js';
+} from '../prisma/structs';
 
 function validateWithStruct<T>(struct: Struct<T, any>) {
     return (req: Request, res: Response, next: NextFunction) => {

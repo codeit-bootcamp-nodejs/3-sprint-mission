@@ -1,6 +1,6 @@
 import { Notification } from '@prisma/client';
-import { prisma } from '../config/prismaClient.js';
-import { CreateNotificationDTO } from '../types/notification.js';
+import { prisma } from '../config/prismaClient';
+import { CreateNotificationDTO } from '../types/notification';
 
 class NotificationRepository {
     create = async (data: CreateNotificationDTO) => {
@@ -16,6 +16,16 @@ class NotificationRepository {
                 id,
             },
             data: { isChecked: true },
+        });
+        return readedNotification;
+    }
+
+    findUserIdById = async (id: number) => {
+        const readedNotification = await prisma.notification.findUnique({
+            where: {
+                id,
+            },
+            select: { userId: true },
         });
         return readedNotification;
     }

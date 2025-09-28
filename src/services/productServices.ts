@@ -1,11 +1,11 @@
 import { Product, ProductComment } from '@prisma/client';
-import productRepository from '../repositories/productRepository.js';
+import productRepository from '../repositories/productRepository';
 import {
     CreateProductDto, UpdateProductDto,
     CreateProductCommentDto, UpdateProductCommentDto,
     likedProduct
-} from '../types/product.js'
-import { createNotification } from './notificationService.js';
+} from '../types/product'
+import { createNotification } from './notificationService';
 
 async function findComments(limit: number, cursor: string) {
     const commentList = await productRepository.getCommentList(limit, cursor);

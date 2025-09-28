@@ -1,8 +1,8 @@
 import { expressjwt } from 'express-jwt'
 import { Request, Response, NextFunction } from 'express'
-import productRepository from '../repositories/productRepository.js'
-import articleRepository from '../repositories/articleRepository.js'
-import userRepository from '../repositories/userRepository.js'
+import productRepository from '../repositories/productRepository'
+import articleRepository from '../repositories/articleRepository'
+import userRepository from '../repositories/userRepository'
 
 const secret = process.env.JWT_SECRET
 if (!secret) {

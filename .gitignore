@@ -1,5 +1,12 @@
+#Package
 node_modules
+
+# Config
 .env
+.env.test
+
+# Output
 /generated/prisma
 uploads/
 .dest
+coverage

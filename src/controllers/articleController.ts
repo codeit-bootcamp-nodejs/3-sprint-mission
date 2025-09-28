@@ -1,7 +1,7 @@
 import { Article } from '@prisma/client';
-import { CreateArticleDto, UpdateArticleDto } from '../types/article.js';
-import { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatdArticle, deleteArticle, updateLikeArticle } from '../services/articleServices.js';
-import { Request, Response, NextFunction } from 'express';
+import { CreateArticleDto, UpdateArticleDto } from '../types/article';
+import { findComments, createComment, updateComment, deleteComment, findArticles, createArticle, findArticleById, updatedArticle, deleteArticle, updateLikeArticle } from '../services/articleServices';
+import { Request, Response } from 'express';
 
 const articleController = {
 
@@ -15,7 +15,7 @@ const articleController = {
             nextCursor = comments[comments.length - 1].id
         }
 
-        res.status(201).json({ data: comments, nextCursor })
+        res.status(200).json({ data: comments, nextCursor })
     },
 
     postComment: async (req: Request, res: Response): Promise<void> => {
@@ -74,7 +74,7 @@ const articleController = {
             title: req.body.title,
             content: req.body.content,
         }
-        const article = await updatdArticle(patchArticleDto, id);
+        const article = await updatedArticle(patchArticleDto, id);
         res.json(article)
     },
 

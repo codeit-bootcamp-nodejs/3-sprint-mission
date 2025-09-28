@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { readNotification, getNotificationList, getUnreadNotificationCount } from '../services/notificationService.js'
+import { Request, Response } from 'express';
+import { readNotification, getNotificationList, getUnreadNotificationCount } from '../services/notificationService'
 import { Notification } from '@prisma/client';
 
 const notificationController = {
@@ -11,8 +11,12 @@ const notificationController = {
         if (!id) {
             res.status(404).json({ message: 'Bad Request' })
         }
-        const notification: Notification = await readNotification(id, userId);
-        res.status(200).json(notification);
+        try {
+            const notification: Notification = await readNotification(id, userId);
+            res.status(200).json(notification);
+        } catch (error) {
+            throw error;
+        }
     },
 
     getUnreadCount: async (req: Request, res: Response): Promise<void> => {

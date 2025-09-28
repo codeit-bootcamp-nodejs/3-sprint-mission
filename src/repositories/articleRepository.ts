@@ -1,6 +1,6 @@
 import { Article, ArticleComment } from '@prisma/client';
-import { prisma } from '../config/prismaClient.js';
-import { CreateArticleCommentDto, CreateArticleDto, UpdateArticleCommentDto, UpdateArticleDto } from '../types/article.js';
+import { prisma } from '../config/prismaClient';
+import { CreateArticleCommentDto, CreateArticleDto, UpdateArticleCommentDto, UpdateArticleDto } from '../types/article';
 
 class articleRepository {
     create = async (ArticleDto: CreateArticleDto) => {
