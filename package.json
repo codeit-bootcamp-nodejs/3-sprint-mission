@@ -3,7 +3,8 @@
     "start": "node ./build/main.js",
     "build": "tsc",
     "dev": "nodemon ./src/main.ts --watch ./src",
-    "test": "set NODE_ENV=test && jest --coverage"
+    "test": "set NODE_ENV=test && jest --coverage",
+    "seed": "ts-node prisma/seed.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

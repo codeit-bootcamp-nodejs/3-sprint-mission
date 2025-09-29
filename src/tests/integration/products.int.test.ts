@@ -21,7 +21,7 @@ describe('Products API (Integration)', () => {
     test('인증 없이는 상품 등록이 실패한다', async () => {
       const res = await request(app)
         .post('/products')
-        .send({ name: '노트북', description: '삼성 갤럭시', price: 500 });
+        .send({ name: '노트북', description: '삼성 갤럭시', price: 500, tags: ['전자제품'], images: ['example.jpg'] });
       expect(res.status).toBe(401);
     });
 
@@ -33,12 +33,12 @@ describe('Products API (Integration)', () => {
 
       expect(loginRes.status).toBe(200);
 
-      const token = loginRes.body.token;
+      const cookies = loginRes.headers['set-cookie'];
 
       const res = await request(app)
         .post('/products')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: '노트북', description: '삼성 갤럭시', price: 500 });
+        .set('Cookie', cookies)
+        .send({ name: '노트북', description: '삼성 갤럭시', price: 500, tags: ['전자제품'], images: ['example.jpg'] });
 
       expect(res.status).toBe(201)
       expect(res.body).toHaveProperty('id')
@@ -62,28 +62,28 @@ describe('Articles API (Integration)', () => {
     test('인증 없이는 게시글 등록이 실패한다', async () => {
       const res = await request(app)
         .post('/articles')
-        .send({ name: '노트북', description: '삼성 갤럭시', price: 500 });
+        .send({ title: '제목', content: '내용' });
       expect(res.status).toBe(401);
     });
 
-//     test('인증 후 게시글을 등록할 수 있다.', async () => {
-//       //로그인해서 토큰 등록받기
-//       const loginRes = await request(app)
-//         .post('/login')
-//         .send({ email: 'test@example.com', password: 'password' });
+    test('인증 후 게시글을 등록할 수 있다.', async () => {
+      //로그인해서 토큰 등록받기
+      const loginRes = await request(app)
+        .post('/auth/login')
+        .send({ email: 'test@example.com', password: 'password' });
 
-//       expect(loginRes.status).toBe(200);
+      expect(loginRes.status).toBe(200);
 
-//       const token = loginRes.body.token;
+      const cookies = loginRes.headers['set-cookie'];
 
-//       const res = await request(app)
-//         .post('/products')
-//         .set('Authorization', `Bearer ${token}`)
-//         .send({ name: '노트북', description: '삼성 갤럭시', price: 500 });
+      const res = await request(app)
+        .post('/articles')
+        .set('Cookie', cookies)
+        .send({ title: '제목', content: '내용', image: 'example.jpg' });
 
-//       expect(res.status).toBe(201)
-//       expect(res.body).toHaveProperty('id')
-//       expect(res.body.name).toBe('노트북')
-//     });
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty('id')
+      expect(res.body.title).toBe('제목')
+    });
   });
 });

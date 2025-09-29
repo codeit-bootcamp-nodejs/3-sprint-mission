@@ -94,6 +94,7 @@ export async function authenticate(accessToken?: string) {
   }
 
   const { userId } = verifyAccessToken(accessToken);
+
   const user = await usersRepository.getUser(userId);
   if (!user) {
     throw new UnauthorizedError('Unauthorized');

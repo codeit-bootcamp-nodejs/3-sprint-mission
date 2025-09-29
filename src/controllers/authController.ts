@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { create } from 'superstruct';
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME, NODE_ENV } from '../lib/constants';
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME, NODE_ENV, JWT_ACCESS_TOKEN_SECRET } from '../lib/constants';
 import { LoginBodyStruct, RegisterBodyStruct } from '../structs/authStructs';
 import * as authService from '../services/authService';
 import userResponseDTO from '../dto/userResponseDTO';
+import jwt from 'jsonwebtoken';
 
 export async function register(req: Request, res: Response) {
   const data = create(req.body, RegisterBodyStruct);
@@ -12,6 +13,12 @@ export async function register(req: Request, res: Response) {
 }
 
 export async function login(req: Request, res: Response) {
+  const { email, password } = req.body
+    if (!email || !password) {
+        res.status(400).json({ message: '이메일과 비밀번호가 필요합니다.' })
+        return
+    }
+
   const data = create(req.body, LoginBodyStruct);
   const { accessToken, refreshToken } = await authService.login(data);
   setTokenCookies(res, accessToken, refreshToken);
