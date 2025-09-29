@@ -1,15 +1,17 @@
 import request from 'supertest';
 import app from '../../main';
 import { prismaClient } from '../../lib/prismaClient';
+import server from '../../main';
 
 afterAll(async () => {
   await prismaClient.$disconnect()
+  server.close()
 })
 
 describe('Products API (Integration)', () => {
   // 인증 필요 없는 API
   describe('GET /products', () => {
-    it('상품 목록을 반환한다.', async () => {
+    test('상품 목록을 반환한다.', async () => {
       const res = await request(app).get('/products');
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body.list)).toBe(true);
@@ -50,7 +52,7 @@ describe('Products API (Integration)', () => {
 describe('Articles API (Integration)', () => {
   // 인증 필요 없는 API
   describe('GET /articles', () => {
-    it('상품 목록을 반환한다.', async () => {
+    test('상품 목록을 반환한다.', async () => {
       const res = await request(app).get('/articles');
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body.list)).toBe(true);
@@ -86,4 +88,16 @@ describe('Articles API (Integration)', () => {
       expect(res.body.title).toBe('제목')
     });
   });
+
+  describe('회원가입 API', () => {
+    test('정상적으로 회원가입이 되면 201을 반환한다', async () => {
+      const res = await request(app)
+        .post('/auth/register')
+        .send({ email: 'test3@example.com', password: 'password2', image: 'example.jpg', nickname: '테스트2' })
+
+        console.log(res.body)
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty('id')
+    })
+  })
 });

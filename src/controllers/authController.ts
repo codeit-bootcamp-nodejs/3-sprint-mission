@@ -4,7 +4,6 @@ import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME, NODE_ENV, JWT_ACCE
 import { LoginBodyStruct, RegisterBodyStruct } from '../structs/authStructs';
 import * as authService from '../services/authService';
 import userResponseDTO from '../dto/userResponseDTO';
-import jwt from 'jsonwebtoken';
 
 export async function register(req: Request, res: Response) {
   const data = create(req.body, RegisterBodyStruct);
