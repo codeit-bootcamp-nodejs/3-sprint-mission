@@ -95,7 +95,6 @@ describe('Articles API (Integration)', () => {
         .post('/auth/register')
         .send({ email: 'test3@example.com', password: 'password2', image: 'example.jpg', nickname: '테스트2' })
 
-        console.log(res.body)
       expect(res.status).toBe(201)
       expect(res.body).toHaveProperty('id')
     })

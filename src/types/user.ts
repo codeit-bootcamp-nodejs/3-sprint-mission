@@ -1,4 +1,4 @@
-interface user {
+interface User {
   id: number;
   email: string;
   password: string;
@@ -7,3 +7,5 @@ interface user {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export default User
