@@ -8,4 +8,4 @@ interface User {
   updatedAt: Date;
 }
 
-export default User
+export default User;
