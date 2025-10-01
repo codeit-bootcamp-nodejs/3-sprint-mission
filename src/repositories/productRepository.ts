@@ -42,7 +42,13 @@ export const create = (data: CreateProductDto) => {
   return prisma.product.create({
     data: {
       ...rest,
-      user: { connect: { id: userId } },
+      userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      createdAt: true,
     },
   });
 };

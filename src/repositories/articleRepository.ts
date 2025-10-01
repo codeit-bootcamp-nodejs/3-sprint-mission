@@ -39,7 +39,7 @@ export const create = (data: CreateArticleDto) =>
     data: {
       title: data.title,
       content: data.content,
-      user: { connect: { id: data.userId } },
+      userId: data.userId,
     },
     select: {
       id: true,

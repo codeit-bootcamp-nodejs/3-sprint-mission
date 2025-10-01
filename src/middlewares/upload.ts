@@ -1,9 +1,5 @@
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // 확장자
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -13,7 +9,7 @@ const MAX_FILE_SIZE = 1 * 1024 * 1024;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
+    cb(null, path.resolve(process.cwd(), 'uploads'));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);

@@ -4,8 +4,16 @@ export const createForProduct = (productId: number, userId: number, content: str
   prisma.comment.create({
     data: {
       content,
-      user: { connect: { id: userId } },
-      product: { connect: { id: productId } },
+      userId,
+      productId,
+    },
+    select: {
+      id: true,
+      articleId: true,
+      productId: true,
+      userId: true,
+      content: true,
+      createdAt: true,
     },
   });
 
@@ -13,8 +21,8 @@ export const createForArticle = (articleId: number, userId: number, content: str
   prisma.comment.create({
     data: {
       content,
-      user: { connect: { id: userId } },
-      article: { connect: { id: articleId } },
+      userId,
+      articleId,
     },
     select: {
       id: true,

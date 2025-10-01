@@ -2,10 +2,10 @@ import type { RequestHandler } from 'express';
 import * as productService from '../services/productService.js';
 import { isTargetLiked } from '../services/likeService.js';
 import {
-  CreateProductDto,
   ListProductsQueryDto,
   UpdateProductDto,
 } from '../types/product.js';
+import { CustomError } from '../utils/CustomError.js';
 
 /**
  * @function createProducts
@@ -16,14 +16,19 @@ import {
  * 
  * @returns {201} 생성된 상품 반환
  */
-export const createProducts: RequestHandler = async (req, res) => {
-  const dto: CreateProductDto = {
-    ...req.body,
-    userId: req.user.id,
-  };
+export const createProducts: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = Number((req as any).user?.id);
+    if (!userId) return next(new CustomError('로그인이 필요합니다.', 401));
 
-  const product = await productService.createProduct(dto);
-  res.status(201).json(product);
+    const created = await productService.createProduct({
+      ...(req.body as any),
+      userId,
+    });
+    res.status(201).json(created);
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**
@@ -80,16 +85,17 @@ export const getProductById: RequestHandler = async (req, res) => {
  * @throws {403} 권한 없음
  * @throws {404} 상품을 찾을 수 없는 경우
  */
-export const updateProduct: RequestHandler = async (req, res) => {
-  const dto: UpdateProductDto = req.body;
+export const updateProduct: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const userId = Number((req as any).user?.id);
 
-  const updated = await productService.updateProduct(
-    Number(req.params.id),
-    req.user.id,
-    dto
-  );
-
-  res.status(200).json(updated);
+    const dto = req.body as UpdateProductDto;
+    const updated = await productService.updateProduct(id, userId, dto);
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**

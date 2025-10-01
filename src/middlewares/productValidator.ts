@@ -37,10 +37,11 @@ export const validateProductCreate: RequestHandler = (req, _res, next) => {
 };
 
 export const validateProductUpdate: RequestHandler = (req, _res, next) => {
-  const parsedBody = {
-    ...req.body,
-    price: req.body.price !== undefined ? Number(req.body.price) : undefined,
-  };
+  const parsedBody: any = { ...req.body };
+
+  if (req.body.price !== undefined) {
+    parsedBody.price = Number(req.body.price);
+  }
 
   try {
     productUpdateSchema.parse(parsedBody);

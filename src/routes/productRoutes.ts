@@ -17,8 +17,8 @@ router.route('/')
 
 router.route('/:id')
   .get(productController.getProductById)
-  .patch(authMiddleware, authorize('product'), validateProductUpdate, productController.updateProduct)
-  .delete(authMiddleware, authorize('product'), productController.deleteProduct);
+  .patch(authMiddleware, validateProductUpdate, productController.updateProduct)
+  .delete(authMiddleware, productController.deleteProduct);
 
 // Product comment
 router.route('/:productId/comments')

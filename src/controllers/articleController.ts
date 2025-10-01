@@ -2,10 +2,10 @@ import type { RequestHandler } from 'express';
 import * as articleService from '../services/articleService.js';
 import { isTargetLiked } from '../services/likeService.js';
 import {
-  CreateArticleDto,
   ListArticlesQueryDto,
   UpdateArticleDto
 } from '../types/article.js'
+import { CustomError } from '../utils/CustomError.js';
 
 /**
  * @function createArticle
@@ -16,14 +16,19 @@ import {
  * 
  * @returns {201} 생성된 게시글 객체 반환
  */
-export const createArticle: RequestHandler = async (req, res) => {
-  const dto: CreateArticleDto = {
-    ...req.body,
-    userId: req.user.id,
-  };
+export const createArticle: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = Number((req as any).user?.id);
+    if (!userId) return next(new CustomError('로그인이 필요합니다.', 401));
 
-  const article = await articleService.createArticle(dto);
-  res.status(201).json(article);
+    const created = await articleService.createArticle({
+      ...(req.body as any),
+      userId,
+    });
+    res.status(201).json(created);
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**
@@ -80,16 +85,17 @@ export const getArticleById: RequestHandler = async (req, res) => {
  * @throws {404} 게시글을 찾을 수 없는 경우
  * @throws {403} 수정 권한이 없는 경우
  */
-export const updateArticle: RequestHandler = async (req, res) => {
-  const dto: UpdateArticleDto = req.body;
+export const updateArticle: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const userId = Number((req as any).user?.id);
 
-  const updated = await articleService.updateArticle(
-    Number(req.params.id),
-    req.user.id,
-    dto
-  );
-
-  res.status(200).json(updated);
+    const dto = req.body as UpdateArticleDto;
+    const updated = await articleService.updateArticle(id, userId, dto);
+    res.status(200).json(updated);
+  } catch (err) {
+    next(err);
+  }
 };
 
 /**

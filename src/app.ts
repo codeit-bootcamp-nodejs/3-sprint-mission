@@ -2,15 +2,16 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import http from 'http';
 import { initWs } from './ws/index.js';
 
 import { errorHandler } from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
 
+/* 
 const __filename = fileURLToPath(new URL(import.meta.url));
 const __dirname = path.dirname(__filename);
+ */
 
 dotenv.config();
 const { PORT = 3000 } = process.env;
@@ -21,7 +22,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+//app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 app.use(routes);
 
 app.get('/', (req: Request, res: Response): void => {
@@ -30,10 +32,12 @@ app.get('/', (req: Request, res: Response): void => {
 
 app.use(errorHandler);
 
-const server = http.createServer(app);
-initWs(server);
+ if (process.env.NODE_ENV !== 'test') {
+   const server = http.createServer(app);
+   initWs(server);
+   server.listen(PORT, () => {
+     console.log(`Server listening at http://localhost:${PORT}`);
+   });
+ }
 
-// 서버 실행
-server.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
-});
+export { app };

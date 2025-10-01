@@ -9,8 +9,10 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
   if (!token) throw new CustomError('로그인이 필요합니다.', 401);
 
   const decoded = verifyAccessToken(token);
+  const id = Number((decoded as any).id);
 
-  req.user = { id: decoded.id };
+  if (!Number.isInteger(id) || id <= 0) throw new CustomError('토큰이 만료되었거나 유효하지 않습니다.', 403);
 
+  req.user = { id };
   next();
 };

@@ -20,7 +20,7 @@ interface CustomError extends Error {
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   const customErr = err as CustomError;
 
-  console.error('[ERROR]', err);
+  if (process.env.NODE_ENV !== 'test') console.error('[ERROR]', err);
 
   // multer 에러
   if (err instanceof multer.MulterError) {
