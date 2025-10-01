@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma';
-import { CreateArticleData, UpdateArticleData, } from '../../types/article';
+import { CreateArticleData, UpdateArticleData } from '../../types/article';
 import { PrismaFindManyArgs } from '../../types/pagenation';
 
 // 모든 게시글을 조회하는 레포지토리 함수
@@ -17,6 +17,9 @@ export const findAllArticlesRp = async (params: PrismaFindManyArgs) => {
           ArticleLike: true,
         },
       },
+    },
+    orderBy: {
+      createdAt: 'asc',
     },
   });
 };
@@ -127,10 +130,10 @@ export const deleteLikeRp = async (likeId: string) => {
 export const findLikedArticleRp = async (userId: string) => {
   return prisma.articleLike.findMany({
     where: {
-      userId: userId
+      userId: userId,
     },
     include: {
-      article: true
-    }
+      article: true,
+    },
   });
-}
+};
