@@ -1,34 +1,35 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import path from 'path';
 import cookieParser from 'cookie-parser';
-import productRouter from './routes/productRoute';
-import articleRouter from './routes/articleRoute';
-import { upload } from './middlewares/upload';
-import { errorHandler } from './handler/errorHandler';
-import userController from './controllers/userController';
+import { PUBLIC_PATH, STATIC_PATH } from './lib/constants';
+import articlesRouter from './routers/articlesRouter';
+import productsRouter from './routers/productsRouter';
+import commentsRouter from './routers/commentsRouter';
+import imagesRouter from './routers/imagesRouter';
+import authRouter from './routers/authRouter';
+import usersRouter from './routers/usersRouter';
+import { defaultNotFoundHandler, globalErrorHandler } from './controllers/errorController';
+import notificationsRouter from './routers/notificationsRouter';
+import dotenv from 'dotenv'
 
-dotenv.config() //env 파일에 정의된 환경변수를 불러와 사용할 수 있게 해주는 명령어
+dotenv.config({path: `.env${process.env.NODE_ENV || 'development'}`})
+const app = express();
 
-const app = express()
-
-app.use(cors()); // 모든 출처(origin)에서 오는 요청 허용
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use('/products', productRouter)
-app.use('/articles', articleRouter)
-app.use('/users', userController)
+app.use(STATIC_PATH, express.static(path.resolve(process.cwd(), PUBLIC_PATH)));
 
-app.use('/uploads', express.static('uploads'));
+app.use('/articles', articlesRouter);
+app.use('/products', productsRouter);
+app.use('/comments', commentsRouter);
+app.use('/images', imagesRouter);
+app.use('/auth', authRouter);
+app.use('/users', usersRouter);
+app.use('/notifications', notificationsRouter);
 
-app.post('/upload', upload.single('image'), (req, res) => {
-  res.status(201).json({ path: `/uploads/${req.file.filename}` });
-});
+app.use(defaultNotFoundHandler);
+app.use(globalErrorHandler);
 
-app.use((req, res) => {
-  res.status(404).json({ error: '잘못된 경로입니다.' });
-})
-
-app.use(errorHandler)
-
-app.listen(3000, () => console.log('Server is listening on port 3000'))
+export default app
