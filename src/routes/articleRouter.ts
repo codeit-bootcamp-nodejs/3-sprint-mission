@@ -32,7 +32,7 @@ articleRouter.route('/')
   )
   .post(
     verifyAccessToken,
-    uploadImage('article').single('image'),
+    uploadImage('article'),
     validate(createArticleSchema, 'body'),
     asyncHandler(createArticleController)
   );
@@ -53,7 +53,7 @@ articleRouter.route('/:articleId')
   )
   .patch(
     verifyAccessToken,
-    uploadImage('article').single('image'),
+    uploadImage('article'),
     validate(getArticleByIdSchema, 'params'),
     validate(updateArticleSchema, 'body'),
     asyncHandler(updateArticleController)

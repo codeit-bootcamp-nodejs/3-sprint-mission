@@ -26,7 +26,7 @@ productRouter
   .get(asyncHandler(getAllProducts))
   .post(
     verifyAccessToken,
-    uploadImage('products').single('image'),
+    uploadImage('products'),
     validate(createProductSchema, 'body'),
     asyncHandler(createProductController),
   );
@@ -44,7 +44,7 @@ productRouter
   )
   .patch(
     verifyAccessToken,
-    uploadImage('products').single('image'),
+    uploadImage('products'),
     validate(getProductByIdSchema, 'params'),
     validate(updateProductSchema, 'body'),
     asyncHandler(updateProductController),

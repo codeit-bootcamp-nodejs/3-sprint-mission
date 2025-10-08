@@ -20,7 +20,7 @@ export const registerUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
+  const imageUrl = req.file ? req.file.location : null;
   const { username, email, password, address } = req.body;
 
   const newUser = await createUser({ username, email, password, address, imageUrl });
@@ -114,7 +114,7 @@ export const updateMe = async (
   const updateData = req.body;
 
   if (req.file) {
-    updateData.imageUrl = req.file.path.replace(/\\/g, '/');
+    updateData.imageUrl = req.file.location;
   }
 
   const updatedUser = await updateUser(userId, updateData);

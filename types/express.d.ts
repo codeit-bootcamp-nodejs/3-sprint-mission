@@ -20,6 +20,12 @@ declare global {
       file?: File;
       files?: { [fieldname: string]: File[] } | File[];
     }
+
+    namespace Multer {
+      interface File {
+        location?: string;
+      }
+    }
   }
 }
 

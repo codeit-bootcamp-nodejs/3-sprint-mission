@@ -2,7 +2,6 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import morgan from 'morgan';
-import path from 'path';
 import productRouter from './routes/productRouter';
 import userRouter from './routes/userRouter';
 import articleRouter from './routes/articleRouter';
@@ -18,7 +17,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);

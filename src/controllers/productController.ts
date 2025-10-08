@@ -33,7 +33,7 @@ export const createProductController = async (
   req: Request<{}, {}, CreateProductData>,
   res: Response, next: NextFunction
 ) => {
-  const imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
+  const imageUrl = req.file ? req.file.location : null;
   const { userId } = req.user!;
   const { name, description, price, isSold, tags, stock } = req.body;
 
@@ -81,7 +81,7 @@ export const updateProductController = async (
   const updateData = req.body as UpdateProductData;
 
   if (req.file) {
-    updateData.imageUrl = req.file.path.replace(/\\/g, '/');
+    updateData.imageUrl = req.file.location;
   }
 
   const updatedProduct = await updateProduct(productId, userId, updateData);
