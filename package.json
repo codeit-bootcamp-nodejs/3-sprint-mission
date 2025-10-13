@@ -18,7 +18,8 @@
     "badge": "coverage-badges",
     "test:badge": "npm run test:coverage && npm run badge",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "license": "김준철",
   "dependencies": {
