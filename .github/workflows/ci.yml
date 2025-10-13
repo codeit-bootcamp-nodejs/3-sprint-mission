@@ -24,6 +24,8 @@ jobs:
     env:
       NODE_ENV: test
       DATABASE_URL: postgres://app:app@localhost:5432/panda_market_test
+      ACCESS_TOKEN_SECRET: test-access
+      REFRESH_TOKEN_SECRET: test-refresh
 
     steps:
       - uses: actions/checkout@v4
