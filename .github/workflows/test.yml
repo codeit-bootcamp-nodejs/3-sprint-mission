@@ -2,9 +2,9 @@ name: Test    # 워크플로우 이름
 
 on:
   push:
-    branches: [김준철-sprint11]
+    branches: [main]
   pull_request:
-    branches: [김준철-sprint11]
+    branches: [main]
 
 jobs:
   kimcode-test:
