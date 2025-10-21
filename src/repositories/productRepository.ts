@@ -1,4 +1,5 @@
-import prisma, { Prisma } from "../config/prisma";
+import prisma from "../config/prisma";
+import { Prisma } from "@prisma/client";
 import { HttpError } from "../types/error";
 import { PaginatedResponseDto } from "../types/common";
 import {

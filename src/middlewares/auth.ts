@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import { expressjwt } from 'express-jwt'
 import { RequestHandler } from 'express';
 import { GetResourceFn } from '../types/auth';
@@ -8,10 +6,17 @@ import ProductService from '../services/productService';
 import ArticleService from '../services/articleService';
 import CommentService from '../services/commentService';
 
-
+const getJWTSecret = () => {
+  const secret = process.env.JWT_ACCESS_SECRET;
+  console.log('Auth middleware JWT_ACCESS_SECRET:', secret);
+  if (!secret) {
+    throw new Error('JWT_ACCESS_SECRET이 설정되지 않았습니다.');
+  }
+  return secret;
+};
 
 const verifyAccessToken = expressjwt({
-  secret: (process.env.JWT_ACCESS_SECRET)!,
+  secret: getJWTSecret(),
   algorithms: ['HS256'],
   requestProperty: 'user',
 });

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+*.log
+
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env.*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Build artifacts
+dist
+build
+coverage
+
+# Docker
+.dockerignore

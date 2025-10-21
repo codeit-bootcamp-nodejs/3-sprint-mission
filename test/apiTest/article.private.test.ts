@@ -3,6 +3,7 @@ import request from "supertest";
 import app from "../../src/app";
 import prisma from "../../src/config/prisma";
 import { validate } from "uuid";
+import { createTestAccessToken, testUsers, createTestUsers } from "../utils/jwtTestHelper";
 
 describe("인증이 필요한 게시물 API", () => {
   let agent: any;
@@ -11,13 +12,10 @@ describe("인증이 필요한 게시물 API", () => {
 
   beforeAll(async () => {
     agent = request.agent(app);
-
-    const loginResponse = await agent.post("/auth/login").send({
-      email: "alice@test.com",
-      password: "password1",
-    });
-    expect(loginResponse.status).toBe(200);
-    accessToken = loginResponse.body.accessToken;
+    // 테스트 유저들을 데이터베이스에 생성  
+    await createTestUsers();
+    // 테스트용 JWT 토큰을 직접 생성
+    accessToken = createTestAccessToken(testUsers.alice);
   });
 
   test("1. 게시글 생성", async () => {
@@ -59,15 +57,16 @@ describe("인증이 필요한 게시물 API", () => {
   });
 
   test("3. 다른 사용자가 작성한 게시글 수정 시도", async () => {
-    const articleList = await prisma.article.findMany();
-    const firstArticleId = articleList[0].id;
+    // 다른 사용자(Bob)의 토큰 생성
+    const bobAccessToken = createTestAccessToken(testUsers.bob);
+    
     const updateData = {
       title: "비정상적인 수정 시도",
       content: "비정상적인 수정 시도 내용",
     };
     const response = await agent
-      .patch(`/articles/${firstArticleId}`)
-      .set("Authorization", `Bearer ${accessToken}`) 
+      .patch(`/articles/${articleId}`)
+      .set("Authorization", `Bearer ${bobAccessToken}`) 
       .send(updateData);
     expect(response.status).toBe(403);
     expect(response.body.message).toBe("게시글을(를) 등록한 유저가 아닙니다");

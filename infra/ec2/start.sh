@@ -27,13 +27,11 @@ fi
 
 echo "PM2로 앱 실행"
 mkdir -p logs
+npx pm2 start infra/ec2/ecosystem.config.js --env production
 
-# ecosystem.config.js 기반 실행 (중복 옵션 제거)
-pm2 start infra/ec2/ecosystem.config.js --env production
+# PM2 프로세스 저장 & 재부팅 자동 실행
+npx pm2 save
+npx pm2 startup -u ec2-user --hp /home/ec2-user
 
-echo "PM2 프로세스 저장 & 재부팅 자동 실행 등록"
-pm2 save
-pm2 startup -u ec2-user --hp /home/ec2-user
-
-echo "실행 상태 확인"
-pm2 list
+# 실행 상태 확인
+npx pm2 list

@@ -13,13 +13,17 @@ export default async function globalSetup() {
   
   await prisma.$connect();
   
-  await prisma.notification.deleteMany();
+  try{
   await prisma.articleLike.deleteMany();
   await prisma.productLike.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.article.deleteMany();
   await prisma.product.deleteMany();
   await prisma.user.deleteMany();
+  }catch (error) {
+    console.log("Global Setup: 데이터베이스 초기화 중 오류 발생", error);
+  }
+
 
   await seedDatabase();
   

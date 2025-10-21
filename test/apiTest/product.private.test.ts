@@ -2,6 +2,7 @@ import { beforeAll, describe, test, expect } from "@jest/globals";
 import request from "supertest";
 import app from "../../src/app";
 import { validate } from "uuid";
+import { createTestAccessToken, testUsers, createTestUsers } from "../utils/jwtTestHelper";
 
 describe("인증이 필요한 상품 API", () => {
   let agent: any;
@@ -10,14 +11,10 @@ describe("인증이 필요한 상품 API", () => {
 
   beforeAll(async () => {
     agent = request.agent(app);
-
-    const loginResponse = await agent.post("/auth/login").send({
-      email: "alice@test.com",
-      password: "password1",
-    });
-
-    expect(loginResponse.status).toBe(200);
-    accessToken = loginResponse.body.accessToken;
+    // 테스트 유저들을 데이터베이스에 생성
+    await createTestUsers();
+    // 테스트용 JWT 토큰을 직접 생성
+    accessToken = createTestAccessToken(testUsers.alice);
   });
 
   test("1. 상품 생성", async () => {

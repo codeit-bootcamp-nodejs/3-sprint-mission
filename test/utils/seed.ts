@@ -1,4 +1,4 @@
-import { PrismaClient, NotificationType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../../src/utils/passwordUtil";
 
 const prisma = new PrismaClient();
@@ -334,78 +334,6 @@ async function seedDatabase() {
   // ---------------------
   // 7. Notifications (더 많은 알림 추가)
   // ---------------------
-  await Promise.all([
-    prisma.notification.create({
-      data: {
-        userId: alice.id,
-        type: NotificationType.LIKE,
-        message: "Bob님이 회원님의 상품을 좋아합니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: alice.id,
-        type: NotificationType.COMMENT,
-        message: "Carol님이 회원님의 상품에 댓글을 남겼습니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: bob.id,
-        type: NotificationType.COMMENT,
-        message: "Alice님이 회원님의 상품에 댓글을 남겼습니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: bob.id,
-        type: NotificationType.LIKE,
-        message: "David님이 회원님의 글을 좋아합니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: carol.id,
-        type: NotificationType.LIKE,
-        message: "Eve님이 회원님의 상품을 좋아합니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: carol.id,
-        type: NotificationType.COMMENT,
-        message: "Frank님이 회원님의 글에 댓글을 남겼습니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: david.id,
-        type: NotificationType.LIKE,
-        message: "Alice님이 회원님의 상품을 좋아합니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: eve.id,
-        type: NotificationType.COMMENT,
-        message: "Bob님이 회원님의 상품에 댓글을 남겼습니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: frank.id,
-        type: NotificationType.LIKE,
-        message: "Carol님이 회원님의 상품을 좋아합니다.",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: alice.id,
-        type: NotificationType.LIKE,
-        message: "Frank님이 회원님의 글을 좋아합니다.",
-      },
-    }),
-  ]);
 
   console.log("Seeding finished!");
   
