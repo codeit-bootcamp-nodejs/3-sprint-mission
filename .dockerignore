@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+
+# Environment
+.env
+.env.test
+
+/generated/prisma
+uploads/
+.dest
+coverage
+
+# sprint sub
+infra
+http
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yaml

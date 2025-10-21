@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main, 천수]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:test_password@localhost:5432/test_db?schema=public
+      JWT_SECRET: test_secret
+      PORT: 3000
+      NODE_ENV: develop #production만 아니면 로직은 동일
+    
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v5
+    
+     - name: Setup Node.js
+       uses: actions/setup-node@v5
+       with:
+         node-version: 22
+
+     - name: Install dependencies       
+       run: npm ci
+
+     - name: Type Check
+       run: npx tsc --noEmit
+
+     - name: Prisma migrate
+       run: npm run prisma:migrate
+
+     - name: Run Tests
+       run: npm run jest:test

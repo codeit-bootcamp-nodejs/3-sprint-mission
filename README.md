@@ -309,3 +309,36 @@
 - AWS 프리티어 사용이 불가하여 제출을 최대한 늦게 하였습니다.
   - 요구사항 자체는 프리티어에서 사용 가능한 인스턴스 유형을 사용하였습니다
 - pm2의 ecosystem.config.js는 강의 시간에 다루지 않았던 내용이라 간단하게 찾아보고 적용을 해보았습니다. 적절하지 않은 설정이 있거나 보완할 수 있는 내용이 있는지 궁금합니다.
+
+---
+# 스프린트 미션 11
+
+## 미션 목표
+
+- Github Actions로 테스트, 배포 자동화
+- Docker 이미지 만들기
+
+## ✅ 요구사항
+
+### Github Actions 활용
+
+- [x] 브랜치에 pull request가 발생하면 테스트를 실행하는 액션을 구현해 주세요.
+- [x] main 브랜치에 push가 발생하면 AWS 배포를 진행하는 액션을 구현해 주세요.
+- [x] 개인 Github 리포지터리에서 Actions 동작을 확인해 보세요.
+
+### Docker 이미지 만들기
+
+다음을 만족하는 Dockerfile과 docker-compose.yaml을 작성해 주세요.
+- [x] Express 서버를 실행하는 Dockerfile을 작성해 주세요.
+- [x] Express 서버가 파일 업로드를 처리하는 폴더는 Docker의 Volume을 활용하도록 구현해 주세요.
+- [x] 데이터베이스는 Postgres 이미지를 사용해 연결하도록 구현해 주세요.
+- [x] 실행된 Express 서버 컨테이너는 호스트 머신에서 3000번 포트로 접근 가능하도록 구현해 주세요.
+
+---
+
+## 멘토에게
+- CI/CD에서 사용하는 환경 변수는 github의 enviroment secret기능을 활용하여 원하는 환경에 맞게 변수를 구분하였습니다.
+- CI에서 push시 테스트를 실행하는 액션에 대해 브랜치 조건이 없었기에 제 이름이 들어간 브랜치는 모두 수행되도록 작성하였습니다.
+- Docker-compose.yaml에서 depend_on과 service_healthy를 추가하여 postgres가 정상적으로 동작이 확인 되었을때 백엔드 서버가 실행되도록 구현하였습니다.
+- 학습을 위해 Docker-compose.yaml에서 env_file과 environment를 사용하는 방법을 구성해보았습니다. 보안을 위해서라면 env_file에 전부 넣는게 맞다는 생각이 드는데 이부분은 어떻게 생각하시는지 궁금합니다.
+- CD시 docker를 활용해서 배포하는 방법이 궁금합니다. (ec2에서 docker를 설정하는 등)

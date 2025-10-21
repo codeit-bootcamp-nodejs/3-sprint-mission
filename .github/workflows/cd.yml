@@ -1,0 +1,28 @@
+name: cd
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  AWS_deploy:
+    runs-on: ubuntu-latest
+    environment: AWS_Deploy
+    steps:
+      # EC2 배포
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/3-sprint-mission # EC2 인스턴스 내 프로젝트 경로로 진입
+            git pull origin main # 코드 최신화
+            npm install
+            npm run build # ts -> js 
+            npm run prisma:migrate # Prisma 마이그레이션
+            pm2 restart codeit-sprint10 # 이전 스프린트10때 프로세스 이름을 codeit-sprint10으로 설정했음
+            echo "✅ Deployment successful!"

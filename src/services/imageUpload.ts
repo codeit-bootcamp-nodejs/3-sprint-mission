@@ -8,7 +8,7 @@ import multerS3 from 'multer-s3'
 
 let storage
 
-if (process.env.ENV === 'production') { //배포 환경일 때는 AWS로
+if (process.env.NODE_ENV === 'production') { //배포 환경일 때는 AWS로
   const s3ClientParams = {
     region: process.env.AWS_S3_REGION ?? '',
     credentials: {
@@ -84,7 +84,7 @@ function uploadImage(req: Request, res: Response) { // 유효성 검사 실패�
   }
 
   console.log(file)
-  if (process.env.ENV === 'production' && 'location' in file) { // Express.MulterS3.File 타입에 있는 location이 있는지 확인
+  if (process.env.NODE_ENV === 'production' && 'location' in file) { // Express.MulterS3.File 타입에 있는 location이 있는지 확인
     res.json({ message: 'Finish Upload', path: file.location })
   } else {
     res.json({ message: 'Finish Upload', path: `/images/${file.filename}` })

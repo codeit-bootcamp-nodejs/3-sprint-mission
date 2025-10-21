@@ -1,0 +1,50 @@
+name: panda-market
+services:
+    panda-market-app:
+        image: seracine/panda-market-app:1.0.0
+        restart: always # 에러 발생시 재시작
+        build: 
+            tags:
+                - seracine/panda-market-app:1.0.0
+                - seracine/panda-market-app:latest
+            dockerfile: Dockerfile
+            pull: true
+            context: .
+        container_name: panda-market-app
+        ports: 
+            - "3000:3000"
+        networks:
+            - panda-network
+        volumes:
+            - panda-app-volume:/panda-market/uploads
+        env_file: # env 파일로 환경변수 주입
+            - .env
+        depends_on:
+            panda-market-postgres-db:
+                condition: service_healthy
+    panda-market-postgres-db:
+        image: postgres
+        restart: always # 에러 발생시 재시작
+        container_name: panda-market-postgres
+        volumes:
+            - panda-db-volume:/var/lib/postgresql/data
+        networks:
+            - panda-network
+        environment: # 환경변수 파라미터 직접 전달
+            - POSTGRES_PASSWORD=1234
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 1m30s
+            timeout: 30s
+            retries: 5
+            start_period: 30s
+
+networks:
+    panda-network:
+        name: panda-network
+
+volumes:
+    panda-app-volume:
+        name: panda-app-volume
+    panda-db-volume:
+        name: panda-db-volume
