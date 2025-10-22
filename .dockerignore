@@ -1,0 +1,50 @@
+# 의존성 모듈
+node_modules/
+
+# 환경 변수 파일
+.env
+.env.test
+
+
+# 운영체제 관련 파일
+Thumbs.db # Windows
+.vscode/ # VS Code 설정 (개인 선호에 따라 포함 가능)
+
+# 기타 캐시 및 임시 파일
+.npm/
+http/
+# dist/ ← 컨테이너 내부에서 빌드하므로 제외. 로컬 dist는 이미지에 포함 안 됨
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 프로젝트별 불필요 디렉토리
+sprint-mission-7/
+sprintMission1/
+sprintMission4/
+infra/
+
+# Git 관련
+.git
+.gitignore
+.github/
+
+# 테스트 및 개발 도구
+tests/
+jestconfig.ts
+jest.config.js
+.prettierrc
+.eslintrc*
+
+# 문서 파일
+README*.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# Docker 관련
+Dockerfile*
+docker-compose*.yml
+.dockerignore

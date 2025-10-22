@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:16-alpine
+    container_name: sprint-mission-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sprint_mission
+      # 한글 데이터 저장을 위한 UTF-8 인코딩
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --locale=C'
+    # 포트 매핑 제거: 같은 네트워크(sprint-network)의 app만 접근하면 됨
+    # 외부(localhost)에서 접속 필요 시 주석 해제
+    # ports:
+    #   - '5432:5432'
+    volumes:
+      # DB 데이터 전용 볼륨
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sprint-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js 애플리케이션
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION: 22.11.0
+    container_name: sprint-mission-app
+    restart: unless-stopped
+    ports:
+      - '4000:3000'
+    environment:
+      NODE_ENV: production
+      # DATABASE_URL: @postgres는 서비스명 (Docker DNS가 IP로 변환)
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sprint_mission?schema=public
+      PORT: 3000
+      # JWT Secret (프로덕션에서는 강력한 값으로 변경 필수!)
+      ACCESS_TOKEN_SECRET: your-super-secret-jwt-key-change-in-production
+      REFRESH_TOKEN_SECRET: your-super-secret-jwt-key-change-in-production
+      # AWS S3 설정 (필요한 경우 실제 값으로 변경)
+      AWS_REGION: ap-northeast-2
+      AWS_ACCESS_KEY_ID: your-access-key-id
+      AWS_SECRET_ACCESS_KEY: your-secret-access-key
+      AWS_S3_BUCKET_NAME: your-bucket-name
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sprint-network
+    volumes:
+      # 업로드 이미지 파일 전용 볼륨
+      - app_uploads:/docker-compose-app/public
+# 네트워크 정의
+networks:
+  sprint-network:
+    driver: bridge
+
+# 볼륨 정의
+volumes:
+  # PostgreSQL 데이터 저장
+  postgres_data:
+    driver: local
+
+  # 애플리케이션 업로드 이미지 저장
+  app_uploads:
+    driver: local
