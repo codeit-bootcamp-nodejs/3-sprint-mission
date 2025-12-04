@@ -1,7 +1,10 @@
-// @ts-nocheck
-
-// 선택 정렬 (Selection sort)
-// 숫자형 배열을 파라미터로 받고, 해당 배열을 수정하도록 구현합니다.
+/**
+ * 선택 정렬(Selection Sort)
+ * @description 배열에서 최솟값을 찾아 앞으로 이동시키며 정렬합니다.
+ *
+ * @param {number[]} arr - 정렬할 배열
+ * @returns {number[]} 정렬된 배열(원본 수정)
+ */
 const SelectionSort = (arr) => {
   // 1. 배열의 처음부터 끝까지 순회
   for (let i = 0; i < arr.length; i++) {
@@ -23,8 +26,13 @@ const SelectionSort = (arr) => {
 const arr = [3, 6, 7, 2, 1, 9];
 console.log(SelectionSort(arr));
 
-// 삽입 정렬 (Insertion sort)
-// 숫자형 배열을 파라미터로 받고, 해당 배열을 수정하도록 구현합니다.
+/**
+ * 삽입 정렬(Insertion Sort)
+ * @description 정렬된 부분에 새 요소를 적절한 위치에 삽입하며 정렬합니다.
+ *
+ * @param {number[]} arr - 정렬할 배열
+ * @returns {number[]} 정렬된 배열(원본 수정)
+ */
 const InsertionSort = (arr) => {
   // 1. 두 번째 요소부터 순회 (첫 번째는 이미 정렬된 상태로 간주)
   for (let i = 1; i < arr.length; i++) {
@@ -44,8 +52,13 @@ const InsertionSort = (arr) => {
 const arr2 = [5, 4, 3, 2, 1];
 console.log(InsertionSort(arr2));
 
-// 병합 정렬 (Merge sort)
-// 숫자형 배열을 파라미터로 받고, 정렬된 새로운 배열을 리턴하도록 구현합니다.
+/**
+ * 병합 정렬(Merge Sort)
+ * @description 배열을 분할 후 병합하며 정렬합니다. (분할 정복)
+ *
+ * @param {number[]} arr - 정렬할 배열
+ * @returns {number[]} 정렬된 새 배열
+ */
 const MergeSort = (arr) => {
   // 1. 기저 조건: 배열 길이가 1 이하면 그대로 반환
   if (arr.length <= 1) {
@@ -81,8 +94,15 @@ const MergeSort = (arr) => {
 const arr3 = [15, 14, 13, 12, 1];
 console.log(MergeSort(arr3));
 
-// 퀵 정렬 (Quick sort)
-// 숫자형 배열을 파라미터로 받고, 해당 배열을 수정하도록 구현합니다.
+/**
+ * 퀵 정렬(Quick Sort)
+ * @description 피벗을 기준으로 분할하여 정렬합니다. (분할 정복)
+ *
+ * @param {number[]} arr - 정렬할 배열
+ * @param {number} start - 시작 인덱스
+ * @param {number|null} end - 끝 인덱스
+ * @returns {number[]} 정렬된 배열(원본 수정)
+ */
 const QuickSort = (arr, start = 0, end = null) => {
   // 1. 초기 호출 시 end를 배열의 마지막 인덱스로 설정
   if (end === null) {
