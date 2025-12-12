@@ -195,3 +195,55 @@ export const treeSort = (arr) => {
   inorderTraversal(root, res);
   return res;
 };
+
+/**
+ * 힙 부모-자식 관계를 유지하는 헬퍼 함수
+ * 
+ * @param {number[]} arr - 힙 구성 배열
+ * @param {number} length - 힙의 현재 유효 길이
+ * @param {number} i - 부모 노드 인덱스
+ */
+const heapify = (arr, length, i) => {
+  let largest = i;
+  const left = i * 2 + 1;
+  const right = i * 2 + 2;;
+
+  // 왼쪽 자식이 부모보다 큰 경우
+  if (left < length && arr[left] > arr[largest]) largest = left;
+
+  //오른쪽 자식이 최대값보다 큰 경우
+  if (right < length && arr[right] > arr[largest]) largest = right;
+
+  // 부모가 최대값이 아니면 교환 → 재귀 호출
+  if (largest !== i) {
+    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+    heapify(arr, length, largest);
+  }
+}
+
+/**
+ * 힙 정렬 (Heap Sort)
+ * 배열을 최대 힙으로 구성한 뒤 하나씩 꺼내며 정렬합니다.
+ * 원본 배열을 수정합니다.
+ * 
+ * @param {number[]} arr - 정렬할 배열 
+ * @returns {number[]} 정렬된 배열(원본 수정)
+ */
+export const heapSort = (arr) => {
+  const length = arr.length;
+
+  // 최대 힙 구성
+  for (let i = Math.floor(length / 2) - 1; i >= 0; i--) {
+    heapify(arr, length, i);
+  }
+
+  // 루트를 끝으로 보내고 → 힙 크기 줄여가며 재정렬
+  for (let i = length - 1; i > 0; i--) {
+    [arr[0], arr[i]] = [arr[i], arr[0]];
+
+    // 줄어든 것만 heapify
+    heapify(arr, i, 0);
+  }
+
+  return arr;
+}

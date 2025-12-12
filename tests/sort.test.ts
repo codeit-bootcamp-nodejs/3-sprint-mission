@@ -5,6 +5,7 @@ import {
   mergeSort,
   quickSort,
   treeSort,
+  heapSort,
 } from "../algorithm/sorts";
 
 // 기본
@@ -77,10 +78,33 @@ describe("정렬 알고리즘 테스트", () => {
   // 스트레스 테스트 (편향/정렬)
   // ---------------------
   it("퀵 정렬 (이미 정렬된 배열)", () => {
-  expect(quickSort([...sorted])).toEqual(sorted);
+    expect(quickSort([...sorted])).toEqual(sorted);
   });
 
   it("트리 정렬 (편향 케이스)", () => {
-  expect(treeSort(sorted)).toEqual(sorted);
+    expect(treeSort(sorted)).toEqual(sorted);
+  });
+});
+
+/**
+ * HeapSort
+ */
+describe("HeapSort 테스트", () => {
+  it("기본 정렬", () => {
+    const arr = [...unsorted];
+    heapSort(arr);
+    expect(arr).toEqual(sorted);
+  });
+
+  it("중복 포함 정렬", () => {
+    const arr = [...duplicates];
+    heapSort(arr);
+    expect(arr).toEqual(duplicatesSorted);
+  });
+
+  it("큰 배열 정렬", () => {
+    const arr = [...bigArray];
+    heapSort(arr);
+    expect(arr).toEqual(bigSorted);
   });
 });
