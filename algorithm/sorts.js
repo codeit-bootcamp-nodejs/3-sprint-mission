@@ -135,3 +135,66 @@ const QuickSort = (arr, start = 0, end = null) => {
 };
 const arr4 = [25, 44, 33, 12, 1];
 console.log(QuickSort(arr4));
+
+/**
+ * Heapify (힙 속성 유지)
+ * @description 특정 노드를 기준으로 max heap 속성을 유지합니다.
+ *
+ * @param {number[]} arr - 배열
+ * @param {number} n - 힙의 크기
+ * @param {number} i - heapify할 노드의 인덱스
+ */
+const heapify = (arr, n, i) => {
+  // 1. 현재 노드를 가장 큰 값으로 가정
+  let largest = i;
+  // 2. 왼쪽 자식 인덱스 (2*i + 1)
+  const left = 2 * i + 1;
+  // 3. 오른쪽 자식 인덱스 (2*i + 2)
+  const right = 2 * i + 2;
+
+  // 4. 왼쪽 자식이 현재보다 크면 largest 업데이트
+  if (left < n && arr[left] > arr[largest]) {
+    largest = left;
+  }
+  // 5. 오른쪽 자식이 현재 largest보다 크면 업데이트
+  if (right < n && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  // 6. largest가 바뀌었으면 교환 후 재귀 호출
+  if (largest !== i) {
+    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+    // 7. 교환된 자식 노드에서 다시 heapify (힙 속성 유지)
+    heapify(arr, n, largest);
+  }
+};
+
+/**
+ * 힙 정렬(Heap Sort)
+ * @description max heap을 구성한 후, root를 뒤로 보내며 정렬합니다.
+ *
+ * @param {number[]} arr - 정렬할 배열
+ * @returns {number[]} 정렬된 배열(원본 수정)
+ */
+const heapsort = (arr) => {
+  const n = arr.length;
+
+  // 1. Build max heap (마지막 부모 노드부터 역순으로 heapify)
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    heapify(arr, n, i);
+  }
+
+  // 2. Extract (하나씩 힙에서 꺼내기)
+  for (let i = n - 1; i > 0; i--) {
+    // 3. root(최대값)와 마지막 요소 교환
+    [arr[0], arr[i]] = [arr[i], arr[0]];
+    // 4. 힙 크기를 줄이고 root에서 heapify
+    heapify(arr, i, 0);
+  }
+
+  return arr;
+};
+
+// 테스트
+const arr5 = [35, 54, 43, 22, 11];
+console.log("heapsort:", heapsort(arr5));
