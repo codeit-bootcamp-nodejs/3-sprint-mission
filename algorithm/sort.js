@@ -83,3 +83,35 @@ const quickSort = (list) => {
 
   return quickSort(left).concat(middle, quickSort(right));
 };
+
+//힙 정렬
+const heapSort = (list) => {
+  const n = list.length;
+
+  const heapify = (arr, length, i) => {
+    let largest = i;
+    const left = 2 * i + 1;
+    const right = 2 * i + 2;
+
+    if (left < length && arr[left] > arr[largest]) {
+      largest = left;
+    }
+    if (right < length && arr[right] > arr[largest]) {
+      largest = right;
+    }
+
+    if (largest !== i) {
+      [arr[i], arr[largest]] = [arr[largest], arr[i]];
+      heapify(arr, length, largest);
+    }
+  };
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    heapify(list, n, i);
+  }
+  for (let i = n - 1; i > 0; i--) {
+    [list[0], list[i]] = [list[i], list[0]];
+    heapify(list, i, 0);
+  }
+
+  return list;
+};
