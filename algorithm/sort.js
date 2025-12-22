@@ -16,7 +16,7 @@ const selectionSort = (arr) => {
       }
     }
     // 현재 위치의 값과 최소 위치의 값 변경
-    temp = arr[j];
+    const temp = arr[j];
     arr[j] = min_value;
     arr[min_index] = temp;
   }
@@ -56,7 +56,7 @@ const insertionSort = (arr) => {
 const insert_nums = [3, 1, 2, 6, 5];
 console.log('insertion sort 전 : ', insert_nums); // [3, 1, 2, 6, 5]
 
-selectionSort(insert_nums);
+insertionSort(insert_nums);
 console.log('insertion sort 후 : ', insert_nums); // [1, 2, 3, 5, 6]
 console.log('');
 
@@ -122,7 +122,7 @@ const quickSort = (arr, start, end) => { // end는 배열의 마지막 인덱스
 
   // Divide
   const pivot = arr[end]; // 가장 마지막을 피벗으로 설정
-  small_partition_index = start -1;
+  let small_partition_index = start -1;
   
   for (let i = start; i < end; i++){
     const element = arr[i];
@@ -147,3 +147,61 @@ const quick_nums = [3, 1, 2, 5, 6, 0];
 console.log('quick sort 전 : ', quick_nums); // [3, 1, 2, 6, 5];
 quickSort(quick_nums, 0, quick_nums.length - 1);
 console.log('quick sort 후 : ', quick_nums); // [1, 2, 3, 6, 5];
+console.log('');
+
+// ============================================================
+/**
+ * 힙 정렬 (Heap sort) 
+ * 숫자형 배열을 받아서 받은 배열을 정렬된 상태로 수정
+ */
+
+// 특정 노드를 기준으로 해당 서브트리를 최대 힙으로 구성하는 함수
+const heapify = (arr, i, n) => {
+  let largest = i; // 현재 노드를 가장 큰 값으로 초기화
+  const left = 2 * i + 1; // 왼쪽 자식
+  const right = 2 * i + 2; // 오른쪽 자식
+
+  // 왼쪽 자식이 존재하고, 현재 가장 큰 값보다 크면 largest 업데이트
+  if (left < n && arr[left] > arr[largest]) {
+    largest = left;
+  }
+
+  // 오른쪽 자식이 존재하고, 현재 가장 큰 값보다 크면 largest 업데이트
+  if (right < n && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  // largest가 현재 노드가 아니라면 (자식 중 더 큰 값이 있다면)
+  if (largest !== i) {
+    // 두 노드의 값을 교환
+    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+
+    // 교환된 노드를 기준으로 다시 heapify를 재귀적으로 호출
+    heapify(arr,largest, n);
+  }
+}
+
+const heapSort = (arr) => {
+  const n = arr.length;
+
+  // 1. 배열을 최대 힙으로 구성 (Max-Heap)
+  // leaf 노드를 제외한 노드부터 시작하여 루트까지 진행 (leaf 노드는 하나밖에 없으므로 할 필요 x)
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    heapify(arr, i, n);
+  }
+
+  // 2. 힙 정렬 실행 (Sort)
+  // 힙의 루트(최대값)를 배열의 끝으로 이동시키고, 힙 크기를 줄여가며 반복
+  for (let i = n - 1; i > 0; i--) {
+    // 현재 루트(최대값)와 배열의 마지막 요소를 교환
+    [arr[0], arr[i]] = [arr[i], arr[0]];
+
+    // 크기가 줄어든 힙에 대해 heapify를 호출하여 최대 힙 속성 유지
+    heapify(arr, 0, i);
+  }
+}
+
+const heap_nums = [12, 11, 13, 5, 6, 7];
+console.log("heap sort 전:", heap_nums); // 결과: [12, 11, 13, 5, 6, 7]
+heapSort(heap_nums);
+console.log("heap sort 후:", heap_nums); // 결과: [5, 6, 7, 11, 12, 13]
